@@ -115,7 +115,6 @@ select_language() {
              ;; 
         "3") source /aif-dev-master/russian.trans
              CURR_LOCALE="ru_RU.UTF-8"
-             setfont  LatKaCyrHeb-14.psfu # Desperately need a better font
              ;;
         
                
@@ -157,6 +156,7 @@ select_language() {
     sed -i "s/#${CURR_LOCALE}/${CURR_LOCALE}/" /etc/locale.gen
     locale-gen >/dev/null 2>&1
     export LANG=${CURR_LOCALE}
+    setfont LatKaCyrHeb-14.psfu
 
 }
 
