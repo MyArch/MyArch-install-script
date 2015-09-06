@@ -107,13 +107,13 @@ select_language() {
 # 	"11" $"Portugese" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
-        "1") source /aif-master/english.trans
+        "1") source /aif-dev-master/english.trans
              CURR_LOCALE="en_US.UTF-8"
              ;;
-        "2") source /aif-master/italian.trans
+        "2") source /aif-dev-master/italian.trans
              CURR_LOCALE="it_IT.UTF-8"
              ;; 
-        "3") source /aif-master/russian.trans
+        "3") source /aif-dev-master/russian.trans
              CURR_LOCALE="ru_RU.UTF-8"
              setfont  LatKaCyrHeb-14.psfu # Desperately need a better font
              ;;
