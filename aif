@@ -77,6 +77,7 @@ MOUNT_TYPE=""           	# "/dev/" for standard partitions, "/dev/mapper" for LV
 
 # Language Support
 CURR_LOCALE="en_US.UTF-8"   # Default Locale
+FONT=""                     # Change font if necessary
 
 # Edit Files
 FILE=""                     # Which file is to be opened?
@@ -94,7 +95,8 @@ select_language() {
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 4 \
  	"1" $"English" \
  	"2" $"Italiano" \
- 	"3" $"Russian" 2>${ANSWER}
+ 	"3" $"Russian" \
+ 	"4" $"Turkish" 2>${ANSWER}
 # 	"2" $"Deutsch" \
 # 	"3" $"Nederlands" \
 # 	"4" $"Eλληνικά" \
@@ -115,8 +117,12 @@ select_language() {
              ;; 
         "3") source /aif-dev-master/russian.trans
              CURR_LOCALE="ru_RU.UTF-8"
+             FONT="LatKaCyrHeb-14.psfu"
              ;;
-        
+        "4") source /aif-dev-master/turkish.trans
+             CURR_LOCALE="tr_TR.UTF-8"
+             #FONT="LatKaCyrHeb-14.psfu"
+             ;;       
                
 #             source /aif-master/german.trans
 #             CURR_LOCALE="de_DE.UTF-8" 
@@ -156,7 +162,7 @@ select_language() {
     sed -i "s/#${CURR_LOCALE}/${CURR_LOCALE}/" /etc/locale.gen
     locale-gen >/dev/null 2>&1
     export LANG=${CURR_LOCALE}
-    setfont LatKaCyrHeb-14.psfu
+    [[ $FONT != "" ]] && setfont $FONT
 
 }
 
