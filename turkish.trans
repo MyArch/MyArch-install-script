@@ -23,8 +23,7 @@ _ErrNoBase="\nİlk önce Arch tabanı yüklenmelidir.\n\n"
 
 # Vbox Installations
 _VBoxInstTitle=" VirtualBox Yüklemesi "
-_VBoxInstBody="\nVirtualBox guest eklentisi yüklenmezse bazı sorunlar meydana gelebilir (düşük çözünürlük gibi), bu komut bunları çözecektir:\n\n$ su\n# depmod -a\n# modprobe -a 
-vboxvideo vboxguest vboxsf\n# reboot"
+_VBoxInstBody="\nVirtualBox guest eklentisi yüklenmezse bazı sorunlar meydana gelebilir (düşük çözünürlük gibi), bu komut bunları çözecektir:\n\n$ su\n# depmod -a\n# modprobe -a vboxvideo vboxguest vboxsf\n# reboot"
 
 # Select Wireless Firmware Driver(s)
 _InstWirelessFirm="Kablosuz donanım sürücüsünü yükle "
@@ -50,9 +49,7 @@ _PrepPacKey="Pacman anahtarlığını yenile"
 _PrepLVM="Mantıksal Bölüm Yönetimi (isteğe bağlı)"
 
 _LvmDetTitle=" LVM Tespit Edildi "
-_LvmDetBody1="\nMantıksal Bölüm Yönetimi (LVM) tespit edildi. Bölümler LVM tarafından kullanıldığından seçilemiyor. Varolan LVM'yi devre dışı bırakmak istiyor musunuz?\n\nSelect 'Evet' varolan LVM'yi devredışı 
-bırak.\n'Hayır' 
-olduğu gibi kalsın.\n"
+_LvmDetBody1="\nMantıksal Bölüm Yönetimi (LVM) tespit edildi. Bölümler LVM tarafından kullanıldığından seçilemiyor. Varolan LVM'yi devre dışı bırakmak istiyor musunuz?\n\nSelect 'Evet' varolan LVM'yi devredışı bırak.\n'Hayır' olduğu gibi kalsın.\n"
 _LvmRmTitle=" LVM Devredışı bırakılıyor... "
 _LvmDetBody2="\nVarolan bir Mantıksal Bölüm Yönetimi (LVM) tespit edildi. Aktifleştiriliyor. Lütfen Bekleyiniz...\n\n"
 _LvmRmBody="\nTüm varolan Fiziksel Bölümler (PV), Bölüm Grupları (VG), ve Mantıksal Bölümler (LV) devre dışı bırakılıyor.\n\nLütfen Bekleyiniz...\n\n"
@@ -95,7 +92,7 @@ _LvmLvNameBody1="\nYaratılacak Mantıksal Hacim (LV) adı girin.\n\nBir bölüm
 _LvmLvNameBody2="\nNOT: Bu LV Hacim Grubunda kalan tüm alanı kullanacak."
 
 _LvmLvNameErrTitle=" LVM - LV Adlandırma Hatası "
-_LvmLvNameErrBody="\nDüzgün olmayan ad girildi. Mantıksal Hacim (LV) harfler ve sayılardan oluşmalı ve sonunda "/" olmamalı.\n\n"
+_LvmLvNameErrBody="\nDüzgün olmayan ad girildi. Mantıksal Hacim (LV) harfler ve sayılardan oluşmalı ve sonunda '/' olmamalı.\n\n"
 
 _LvmLvSizeTitle=" LVM - LV Boyutu Ayarla "
 _LvmLvSizeBody1="kalan"
@@ -179,8 +176,7 @@ _HwLocal="Yerel Zaman"
 
 # Generate FSTAB
 _FstabTitle=" FSTAB Oluştur "
-_FstabBody="\nFSTAB dosyası (File System TABle) kullanılmak üzere depolama alanlarını belirler. \n\nUUID/PARTUUID (Universally Unique IDentifier) tavsiye edilir.\n\nEğer daha önceden etiketlenmediyse, aygıt isimleri 
-etiketlenecektir."
+_FstabBody="\nFSTAB dosyası (File System TABle) kullanılmak üzere depolama alanlarını belirler. \n\nUUID/PARTUUID (Universally Unique IDentifier) tavsiye edilir.\n\nEğer daha önceden etiketlenmediyse, aygıt isimleri etiketlenecektir."
 _FstabDev="Dev (partition kodu)"
 _FstabLabel="Etiket (kullanıcı belirler)"
 _FstabUUID="UUID/PARTUUID (benzersiz kod)"
@@ -191,8 +187,7 @@ _FstabChkBody="\nLütfen FSTAB dosyasını kontrol ediniz, ardından pencereyi k
 
 # Set Hostname
 _HostNameTitle=" Makine Adı Oluştur "
-_HostNameBody="\nMakine adı bağlı oldunuz ağda makinenizin kimliğini belirler.\n\nIt is restricted to alphanumeric characters, can contain a hyphen (-) - but not at the start or end - and must be no longer than 63 
-characters.\n"
+_HostNameBody="\nMakine adı bağlı oldunuz ağda makinenizin kimliğini belirler.\n"
 
 # Set Root Password
 _PassRtTitle=" Root Şifresi Oluştur "
@@ -283,7 +278,7 @@ _MntUefiBody="\nrEFInd /boot/efi'e gerek duyar."
 
 # Extra Partitions
 _ExtPartTitle=" Ek Bölüm Seçin "
-_ExtPartBody="\nHerhangi bir sırayla ek bölümleri seçin veya bitirmek için "Tamamlandı"ya tıklayın."
+_ExtPartBody="\nHerhangi bir sırayla ek bölümleri seçin veya bitirmek için 'Tamamlandı' ya tıklayın."
 
 # Name Extra Partitions
 _ExtNameTitle=" Ek Bölümleri Adlandır:"
@@ -313,7 +308,7 @@ _InstBiosBtBody="\nGrub2 yeni başlayanlar için önerilir. Kurulum aygıtı da 
 # Grub Installation
 _InstGrubDevTitle=" Grub Aygıtı Seçin "
 _InstGrubDevBody="\nGrub'u ROot ile aynı aygıta/hard diske kur"
-_InstGrubDevBody2="\n\nSadece bir aygıta kuruyorsanız "evet"e basın."
+_InstGrubDevBody2="\n\nSadece bir aygıta kuruyorsanız 'evet' e basın."
 
 # Syslinux Installation
 _InstSysTitle=" Syslinux Yapılandırma Denetimi "
@@ -325,8 +320,8 @@ _InstUefiBtBody="\nrEFInd /boot/efi gerektirir.\n\nNOT: rEFInd ve LVM desteklenm
 
 # Set UEFI Grub as default
 _SetGrubDefTitle=" Grub'u Öntanımlı Önyükleyici Yap? "
-_SetGrubDefBody="\nBazı üretici yazılımları Grub öntanımlı değilse algılayamayabilir, bazı durumlarda bunun sonucu olarak da sistem açılamayabilir.\n\nGrub'u öntanımlı yapmak ister misiniz?\n\n"Evet"i seçmeniz önerilir, özellikle yeni kullanıcıysanız. Bu, grubx64.efi'yi "
-_SetGrubDefBody2="'e kopyalayacak ve adını bootx64.efi yapacak.\n\nÖzellikle başka bir önyükleyici varsa ve/veya birden çok önyükleyici kullanacaksanız "hayır"ı seçin."
+_SetGrubDefBody="\nBazı üretici yazılımları Grub öntanımlı değilse algılayamayabilir, bazı durumlarda bunun sonucu olarak da sistem açılamayabilir.\n\nGrub'u öntanımlı yapmak ister misiniz?\n\n'Evet' i seçmeniz önerilir, özellikle yeni kullanıcıysanız. Bu, grubx64.efi'yi "
+_SetGrubDefBody2="'e kopyalayacak ve adını bootx64.efi yapacak.\n\nÖzellikle başka bir önyükleyici varsa ve/veya birden çok önyükleyici kullanacaksanız 'hayır' ı seçin."
 
 # Gummiboot Configuration Check
 _ChkGumTitle=" Gummiboot Yapılandırma Kontrolü "
@@ -334,8 +329,8 @@ _ChkGumBody="\nLütfen kapatıp devam etmeden önce arch ve loader yapılandırm
 
 # Set rEFInd as default
 _SetRefiDefTitle=" rEFInd'i Öntanımlı Önyükleyici yap? "
-_SetRefiDefBody="\nBazı üretici yazılımları rEFInd öntanımlı değilse algılayamayabilir, bazı durumlarda bunun sonucu olarak da sistem açılamayabilir.\n\nrEFInd'i öntanımlı yapmak ister misiniz?\n\n"Evet"i seçmeniz önerilir, özellikle yeni kullanıcıysanız. Bu, bootx64.efi'yi "
-_SetRefiDefBody2="'e kopyalayacak ve adını bootx64.efi yapacak.\n\nÖzellikle başka bir önyükleyici varsa ve/veya birden çok önyükleyici kullanacaksanız "hayır"ı seçin."
+_SetRefiDefBody="\nBazı üretici yazılımları rEFInd öntanımlı değilse algılayamayabilir, bazı durumlarda bunun sonucu olarak da sistem açılamayabilir.\n\nrEFInd'i öntanımlı yapmak ister misiniz?\n\n'Evet'i seçmeniz önerilir, özellikle yeni kullanıcıysanız. Bu, bootx64.efi'yi "
+_SetRefiDefBody2="'e kopyalayacak ve adını bootx64.efi yapacak.\n\nÖzellikle başka bir önyükleyici varsa ve/veya birden çok önyükleyici kullanacaksanız 'hayır'ı seçin."
 
 
 # efi file set for Grub or Refind
@@ -352,7 +347,7 @@ _AXIBody="\nGrafik kartı veya masaüstü ortamı kurulumundan önce şu paketle
 
 # Graphics Card Menu
 _GCtitle=" Grafik Kart Menüsü "
-_GCBody="Eski NVIDIA kartları için Nouveau'yu seçin. Kartınız listede yoksa "Bilinmeyen / Genel"i seçin.\n"
+_GCBody="Eski NVIDIA kartları için Nouveau'yu seçin. Kartınız listede yoksa Bilinmeyen / Genel i seçin.\n"
 _GCUnknOpt="Unknown / Generic"
 
 # NVIDIA Configruation Check
@@ -460,7 +455,7 @@ _InstDEMenuDM="Görüntü Yöneticisi / Giriş Ekranı Kur"
 
 # Main Menu
 _MMTitle=" Ana Menü "
-_MMBody="\nHer aşama SIRAYLA çalıştırılmalıdır.Bitince kurulumu düzgünce sonuçlandırmak için "Tamamlandı"yı seçin.\n"
+_MMBody="\nHer aşama SIRAYLA çalıştırılmalıdır. Bitince kurulumu düzgünce sonuçlandırmak için 'Tamamlandı' yı seçin.\n"
 _MMPrep="Kurulumu Hazırla"
 _MMInstBse="Taban Sistemi Kur"
 _MMConfBse="Taban Sistemi Ayarla"
