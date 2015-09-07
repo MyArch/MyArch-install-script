@@ -121,7 +121,7 @@ select_language() {
              ;;
         "4") source /aif-dev-master/turkish.trans
              CURR_LOCALE="tr_TR.UTF-8"
-             #FONT="LatKaCyrHeb-14.psfu"
+             FONT="LatKaCyrHeb-14.psfu"
              ;;       
                
 #             source /aif-master/german.trans
