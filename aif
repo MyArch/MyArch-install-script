@@ -112,6 +112,7 @@ select_language() {
              ;;
         "2") source /aif-dev-master/greek.trans
              CURR_LOCALE="el_GR.UTF-8"
+             FONT="greek-polytonic.psfu"
              ;; 
                    
 #             source /aif-master/german.trans
