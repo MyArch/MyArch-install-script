@@ -794,7 +794,7 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" \
     case $(cat ${ANSWER}) in
         "1") FILESYSTEM="skip"
              ;;
-        "2") FILESYSTEM="mkfs.btrfs -F"
+        "2") FILESYSTEM="mkfs.btrfs -f"
              modprobe btrfs
              BTRFS=1
              ;;
