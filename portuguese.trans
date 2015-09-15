@@ -5,7 +5,7 @@
 #Autoparticionamento
 _AutoPartBody1="Warning: ALL data on"
 _AutoPartUEFIBody2="será destruído.\n\nUma única partição usando todo o espaço disponível será criada. Se a intenção é usar SWAP, selecione a opção 'File Swap' durante a montagem..\n\nDeseja continuar? "
-_AutoPartUEFIBody2 = "Será destruído.\n\nUma partição de boot de 512MB UEFI  será criada primeiro, seguida de  uma segunda partição do sistema usando todo o espaço restante. Se a intenção é usar SWAP, selecione a opção 'File Swap' durante a montagem.\n\nDeseja continuar? "
+_AutoPartUEFIBody2="Será destruído.\n\nUma partição de boot de 512MB UEFI  será criada primeiro, seguida de  uma segunda partição do sistema usando todo o espaço restante. Se a intenção é usar SWAP, selecione a opção 'File Swap' durante a montagem.\n\nDeseja continuar? "
 
 _PlsWaitBody="\nPor favor aguarde ...\n\n"
 
@@ -42,9 +42,9 @@ _PrepPacKey="Atualizar as chaves do Pacman"
 _PrepLVM="Logical Volume Management (opcional)"
 
 _LvmDetTitle=" Detectado LVM "
-LvmDetBody1="\nDetectado  Logical Volume Management existente (LVM). Partições já utilizadas pela LVM não podem ser selecionadas. Deseja desativar LVM existente ?\n\nSelecione 'Sim' para desativar LVM existente.\nSelecione 'Não' para mantê-la.\n"
+_LvmDetBody1="\nDetectado  Logical Volume Management existente (LVM). Partições já utilizadas pela LVM não podem ser selecionadas. Deseja desativar LVM existente ?\n\nSelecione 'Sim' para desativar LVM existente.\nSelecione 'Não' para mantê-la.\n"
 _LvmRmTitle=" Desativando LVM "
-LvmDetBody2="\n Detectada Logical Volume Management existente (LVM). Activando. Por Favor aguarde ...\n\n"
+_LvmDetBody2="\n Detectada Logical Volume Management existente (LVM). Activando. Por Favor aguarde ...\n\n"
 _LvmRmBody="\nDesativando todos os Volumes Fisicos (Physical Volumes (PV)), Grupos de Volumes (Volume Groups (VG)), e Volumes Lógicos (Logical Volumes (LV)).\n\nPor Favor Espere ...\n\n"
 
 _LvmPartErrTitle=" Erro na Partição LVM "
@@ -128,9 +128,9 @@ _MirrorEdit="Editar Manualmente mirrorlist"
 _MirrorRank="Ordenar mirrorlist por velocidade dos servidores"
 _MirrorRestore="Restaurar mirrorlist original"
 _MirrorRankTitle=" Executando RankServidores"
-_MirrorRankBody ="\nProcurando os servidores mais rápidos do mirrorlist. Por favor, aguarde ...\n\n"
-_MirrorRankDone = "\ NDone! O mirrorlist foi classificado pelos servidores mais rápidos.\n\n"
-_MirrorRestDone = "\ NDone! A mirrorlist original foi restaurada.\n\n"
+_MirrorRankBody="\nProcurando os servidores mais rápidos do mirrorlist. Por favor, aguarde ...\n\n"
+_MirrorRankDone="\ NDone! O mirrorlist foi classificado pelos servidores mais rápidos.\n\n"
+_MirrorRestDone="\ NDone! A mirrorlist original foi restaurada.\n\n"
 _MirrorNoneTitle=" Mirrorlist Erro "
 _MirrorNoneBody="\nUma  copia do mirrorlist original não foi encontrada.\n\n"
 
@@ -304,7 +304,7 @@ _InstGrubDevBody2="\n\nEscolha 'Yes' se você só estiver instalando num único 
 
 # Syslinux Installation
 _InstSysTitle=" Verificação de configuração do Syslinux "
-InstSysBody="\nPor favor, verifique o arquivo de configuração do syslinux.\n\nDeve conter o comando:\n"
+_InstSysBody="\nPor favor, verifique o arquivo de configuração do syslinux.\n\nDeve conter o comando:\n"
 
 # Install UEFI Bootloader - Translate
 _InstUefiBtTitle=" Instalar UEFI Bootloader "
@@ -388,7 +388,7 @@ _InstNMErrBody="\nO gerente de rede (Network Manager) já foi instalado e ativad
 
 # Welcome - Translate
 _WelTitle=" Bem-vindo a"
-WelBody="\nSeleccione opções pressionando os números ou usando as teclas up/down (setas) antes de pressionar [enter] para confirmar.\n\nEscolha entre os botões usando [Tab] ou as teclas left/right (setas) antes de pressionar [enter] para confirmar.\n\nO mouse/touchpad também pode ser usado.\n"
+_WelBody="\nSeleccione opções pressionando os números ou usando as teclas up/down (setas) antes de pressionar [enter] para confirmar.\n\nEscolha entre os botões usando [Tab] ou as teclas left/right (setas) antes de pressionar [enter] para confirmar.\n\nO mouse/touchpad também pode ser usado.\n"
 
 # Preparation Menu
 _PrepTitle=" Preparar Instalação "
