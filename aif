@@ -94,7 +94,7 @@ select_language() {
     
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 4 \
  	"1" $"English" \
- 	"2" $"Greek" 2>${ANSWER}
+ 	"2" $"Portuguese (Brazil)" 2>${ANSWER}
 # 	"2" $"Deutsch" \
 # 	"3" $"Nederlands" \
 # 	"4" $"Eλληνικά" \
@@ -110,9 +110,8 @@ select_language() {
         "1") source /aif-dev-master/english.trans
              CURR_LOCALE="en_US.UTF-8"
              ;;
-        "2") source /aif-dev-master/greek.trans
-             CURR_LOCALE="el_GR.UTF-8"
-             FONT="iso07u-16.psfu"
+        "2") source /aif-dev-master/portuguese.trans
+             CURR_LOCALE="pt_BR.UTF-8"
              ;; 
                    
 #             source /aif-master/german.trans
