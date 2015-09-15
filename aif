@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.0 - 02-Sept-2015)
+# Architect Installation Framework (version 1.3.1 - 12-Sept-2015)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.0"
+VERSION="Architect Installation Framework 1.3.1"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -74,10 +74,12 @@ VG_SIZE_TYPE=""         	# Is VG in Gigabytes or Megabytes?
 # Installation
 MOUNTPOINT="/mnt"       	# Installation
 MOUNT_TYPE=""           	# "/dev/" for standard partitions, "/dev/mapper" for LVM
+F2FS=0                      # F2FS FS used?
+BTRFS=0                     # BTRFS used?
 
 # Language Support
 CURR_LOCALE="en_US.UTF-8"   # Default Locale
-FONT=""                     # Change font if necessary
+FONT=""                     # Set new font if necessary
 
 # Edit Files
 FILE=""                     # Which file is to be opened?
@@ -92,9 +94,16 @@ FILE2=""					# Which second file is to be opened?
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 4 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 9 \
  	"1" $"English" \
- 	"2" $"Portuguese (Brazil)" 2>${ANSWER}
+ 	"2" $"Italiano" \
+ 	"3" $"Russian" \
+ 	"4" $"Turkish" \
+ 	"5" $"Dutch" \
+ 	"6" $"Greek" \
+ 	"7" $"Danish" \
+ 	"8" $"Hungarian" \
+ 	"9" $"Portuguese (Brazil)" 2>${ANSWER}
 # 	"2" $"Deutsch" \
 # 	"3" $"Nederlands" \
 # 	"4" $"Eλληνικά" \
@@ -107,39 +116,42 @@ select_language() {
 # 	"11" $"Portugese" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
-        "1") source /aif-dev-master/english.trans
+        "1") source /aif-master/english.trans
              CURR_LOCALE="en_US.UTF-8"
              ;;
-        "2") source /aif-dev-master/portuguese.trans
-             CURR_LOCALE="pt_BR.UTF-8"
+        "2") source /aif-master/italian.trans
+             CURR_LOCALE="it_IT.UTF-8"
              ;; 
-                   
-#             source /aif-master/german.trans
-#             CURR_LOCALE="de_DE.UTF-8" 
-#             ;;
-#        "") source /aif-master/dutch.trans
-#             CURR_LOCALE="nl_NL.UTF-8"
-#             ;;
-#        "") source /aif-master/greek.trans
-#             CURR_LOCALE="el_GR.UTF-8"
-#             ;;
+        "3") source /aif-master/russian.trans
+             CURR_LOCALE="ru_RU.UTF-8"
+             FONT="LatKaCyrHeb-14.psfu"
+             ;;
+        "4") source /aif-master/turkish.trans
+             CURR_LOCALE="tr_TR.UTF-8"
+             FONT="LatKaCyrHeb-14.psfu"
+             ;;
+        "5") source /aif-master/dutch.trans
+             CURR_LOCALE="nl_NL.UTF-8"
+             ;;             
+        "6") source /aif-master/greek.trans
+             CURR_LOCALE="el_GR.UTF-8"
+             FONT="iso07u-16.psfu"       
+             ;;
+        "7") source /aif-master/danish.trans
+             CURR_LOCALE="da_DK.UTF-8"
+             ;;   
+        "8") source /aif-master/hungarian.trans
+             CURR_LOCALE="hu_HU.UTF-8"
+             FONT="lat2-16.psfu"
+             ;;
+        "9") source /aif-master/portuguese.trans
+             CURR_LOCALE="pt_BR.UTF-8"    
+             ;;      
 #        "") source /aif-master/norwegian.trans
 #             CURR_LOCALE="nl_NL.UTF-8"
 #             ;;
-#        "") source /aif-master/italian.trans
-#             CURR_LOCALE="it_IT.UTF-8"
-#             ;;
 #        "") source /aif-master/spanish.trans
 #             CURR_LOCALE="es_ES.UTF-8"
-#             ;;
-#        "") source /aif-master/russian.trans
-#             CURR_LOCALE="ru_RU.UTF-8"
-#             ;;
-#        "") source /aif-master/polish.trans
-#             CURR_LOCALE="pl_PL.UTF-8"
-#             ;;
-#       "") source /aif-master/hungarian.trans
-#             CURR_LOCALE="hu_HU.UTF-8"  
 #             ;;
 #       "") source /aif-master/portuguese.trans
 #             CURR_LOCALE="pt_PT.UTF-8"
@@ -153,7 +165,6 @@ select_language() {
     locale-gen >/dev/null 2>&1
     export LANG=${CURR_LOCALE}
     [[ $FONT != "" ]] && setfont $FONT
-
 }
 
 
@@ -349,10 +360,11 @@ set_keymap() {
     done
     
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_KeymapTitle" \
-    --menu "$_KeymapBody" 20 40 16 ${KEYMAPS} 2>${ANSWER} || config_base_menu
+    --menu "$_KeymapBody" 20 40 16 ${KEYMAPS} 2>${ANSWER} || prep_menu 
     KEYMAP=$(cat ${ANSWER})
-    echo "KEYMAP=$KEYMAP" > ${MOUNTPOINT}/etc/vconsole.conf 2>/tmp/.errlog
+    loadkeys $KEYMAP 2>/tmp/.errlog
     check_for_error
+    echo "KEYMAP=$KEYMAP" > /tmp/vconsole.conf
   }
 
 # Set keymap for X11
@@ -365,11 +377,9 @@ set_keymap() {
         XKBMAP_LIST="${XKBMAP_LIST} ${i} -"
     done
 	
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_XkbmapTitle" --menu "$_XkbmapBody" 0 0 16 ${XKBMAP_LIST} 2>${ANSWER} || prep_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_XkbmapTitle" --menu "$_XkbmapBody" 0 0 16 ${XKBMAP_LIST} 2>${ANSWER} || config_base_menu
     XKBMAP=$(cat ${ANSWER} |sed 's/_.*//')
     echo -e "Section "\"InputClass"\"\nIdentifier "\"system-keyboard"\"\nMatchIsKeyboard "\"on"\"\nOption "\"XkbLayout"\" "\"${XKBMAP}"\"\nEndSection" > /tmp/00-keyboard.conf
-    setxkbmap $XKBMAP 2>/tmp/.errlog
-    check_for_error
  
 }
 
@@ -509,7 +519,7 @@ create_new_user() {
         USER=$(cat ${ANSWER})
         
         # Loop while user name is blank, has spaces, or has capital letters in it.
-         while [[ ${#USER} -eq 0 ]] || [[ $USER =~ \ |\' ]] || [[ $(echo $USER | sed "s/[[:lower:]]//g") != "" ]]; do
+         while [[ ${#USER} -eq 0 ]] || [[ $USER =~ \ |\' ]] || [[ $USER =~ [^a-z0-9\ ] ]]; do
               dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_NUsrTitle" --inputbox "$_NUsrErrBody" 0 0 "" 2>${ANSWER} || config_user_menu
               USER=$(cat ${ANSWER})
         done
@@ -762,43 +772,53 @@ find_partitions() {
 # partially because some don't seem to be viable.
 select_filesystem(){
 
+# Clear special FS type flags
+F2FS=0
+BTRFS=0
+
 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" \
-    --menu "$_FSBody" 0 0 11 \
+    --menu "$_FSBody" 0 0 12 \
  	"1" "$_FSSkip" \
-	"2" $"ext2" \
- 	"3" $"ext3" \
-	"4" $"ext4" \
-	"5" $"f2fs" \
-	"6" $"jfs" \
- 	"7" $"nilfs2" \
-	"8" $"ntfs" \
-	"9" $"reiserfs" \
- 	"10" $"vfat" \
-	"11" $"xfs" 2>${ANSWER}	
+ 	"2" $"btrfs" \
+	"3" $"ext2" \
+ 	"4" $"ext3" \
+	"5" $"ext4" \
+	"6" $"f2fs" \
+	"7" $"jfs" \
+ 	"8" $"nilfs2" \
+	"9" $"ntfs" \
+	"10" $"reiserfs" \
+ 	"11" $"vfat" \
+	"12" $"xfs" 2>${ANSWER}	
 
     case $(cat ${ANSWER}) in
         "1") FILESYSTEM="skip"
              ;;
-        "2") FILESYSTEM="mkfs.ext2 -F"
+        "2") FILESYSTEM="mkfs.btrfs -F"
+             modprobe btrfs
+             BTRFS=1
              ;;
-        "3") FILESYSTEM="mkfs.ext3 -F"
+        "3") FILESYSTEM="mkfs.ext2 -F"
+             ;;
+        "4") FILESYSTEM="mkfs.ext3 -F"
              ;;            
-        "4") FILESYSTEM="mkfs.ext4 -F"
+        "5") FILESYSTEM="mkfs.ext4 -F"
              ;;
-        "5") FILESYSTEM="mkfs.f2fs"
+        "6") FILESYSTEM="mkfs.f2fs"
              modprobe f2fs
+             F2FS=1
              ;;
-        "6") FILESYSTEM="mkfs.jfs -q"
+        "7") FILESYSTEM="mkfs.jfs -q"
              ;;
-        "7") FILESYSTEM="mkfs.nilfs2 -f"
+        "8") FILESYSTEM="mkfs.nilfs2 -f"
              ;;  
-        "8") FILESYSTEM="mkfs.ntfs -q"
+        "9") FILESYSTEM="mkfs.ntfs -q"
              ;;  
-        "9") FILESYSTEM="mkfs.reiserfs -f -f"
+        "10") FILESYSTEM="mkfs.reiserfs -f -f"
              ;;  
-       "10") FILESYSTEM="mkfs.vfat -F32"
+       "11") FILESYSTEM="mkfs.vfat -F32"
              ;;  
-       "11") FILESYSTEM="mkfs.xfs -f"
+       "12") FILESYSTEM="mkfs.xfs -f"
              ;;      
           *) prep_menu
              ;;
@@ -816,6 +836,60 @@ set_mount_type() {
 	
 }
 
+# This function allows for btrfs-specific mounting options to be applied. Written as a seperate function
+# for neatness.
+btrfs_mount_opts() {
+    
+    BTRFS_OPTS="/tmp/.btrfs_opts"
+	echo "" > ${BTRFS_OPTS}
+
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs mount options " --checklist "section test" 0 0 16 \
+	"1" "autodefrag" off \
+	"2" "compress=zlib" off \
+	"3" "compress=lzo" off \
+	"4" "compress=no" off \
+	"5" "compress-force=zlib" off \
+	"6" "compress-force=lzo" off \
+	"7" "discard" off \
+	"8" "noacl" off \
+    "9" "noatime" off \
+   "10" "nodatasum" off \
+   "11" "nospace_cache" off \
+   "12" "recovery" off \
+   "13" "skip_balance" off \
+   "14" "space_cache" off  \
+   "15" "ssd" off \
+   "16" "ssd_spread" off 2>${BTRFS_OPTS}
+ 
+   # Double-digits first       
+   sed -i 's/10/nodatasum,/' ${BTRFS_OPTS}
+   sed -i 's/11/nospace_cache,/' ${BTRFS_OPTS}
+   sed -i 's/12/recovery,/' ${BTRFS_OPTS}
+   sed -i 's/13/skip_balance,/' ${BTRFS_OPTS}
+   sed -i 's/14/space_cache,/' ${BTRFS_OPTS}
+   sed -i 's/15/ssd,/' ${BTRFS_OPTS}
+   sed -i 's/16/ssd_spread,/' ${BTRFS_OPTS}
+   # then single digits
+   sed -i 's/1/autodefrag,/' ${BTRFS_OPTS}
+   sed -i 's/2/compress=zlib,/' ${BTRFS_OPTS}
+   sed -i 's/3/compress=lzo,/' ${BTRFS_OPTS}
+   sed -i 's/4/compress=no,/' ${BTRFS_OPTS}
+   sed -i 's/5/compress-force=zlib,/' ${BTRFS_OPTS}
+   sed -i 's/6/compress-force=lzo,/' ${BTRFS_OPTS}
+   sed -i 's/7/noatime,/' ${BTRFS_OPTS}
+   sed -i 's/8/noacl,/' ${BTRFS_OPTS}
+   sed -i 's/9/noatime,/' ${BTRFS_OPTS}
+   # Now clean up the file
+   sed -i 's/ //g' ${BTRFS_OPTS}
+   sed -i '$s/,$//' ${BTRFS_OPTS}
+
+   
+   if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
+	  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Confirm btrfs Mount Options " --yesno "Confirm that the following mount options are to be used:\n\n$(cat ${BTRFS_OPTS})\n" 0 0 
+	  [[ $? -eq 1 ]] && btrfs_mount_opts
+   fi  
+
+}
     # LVM Detection. If detected, activate.
     detect_lvm
     if [[ $LVM -eq 1 ]]; then
@@ -849,8 +923,17 @@ set_mount_type() {
 	[[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
 	check_for_error
 	
-	mkdir -p ${MOUNTPOINT} 2>/tmp/.errlog
-	mount ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
+	mkdir -p ${MOUNTPOINT} 2>/tmp/.errlog	
+	[[ $BTRFS -eq 1 ]] && btrfs_mount_opts
+	
+	# If btrfs has been selected AND at least one btrfs mount option has also been selected, then
+	# mount with options. Otherwise, basic mount.
+	if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
+	   mount -o $(cat ${BTRFS_OPTS}) ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
+	else
+	   mount ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog	
+	fi
+	   
 	check_for_error
     confirm_mount ${MOUNTPOINT}
 	
@@ -1263,8 +1346,12 @@ install_base() {
              ;;
     esac  	
     
-    check_for_error
+    # If F2FS FS used, install the tools
+    [[ F2FS -eq 1 ]] && pacstrap ${MOUNTPOINT} f2fs-tools 2>>/tmp/.errlog
     
+    # If the virtual console has been set, then copy config file to installation
+    [[ -e /tmp/vconsole.conf ]] && cp /tmp/vconsole.conf ${MOUNTPOINT}/etc/vconsole.conf 2>>/tmp/.errlog
+    check_for_error
 
   #check for a wireless device
   if [[ $(lspci | grep -i "Network Controller") != "" ]]; then
@@ -1378,7 +1465,7 @@ uefi_bootloader() {
              arch_chroot "mkdir ${UEFI_MOUNT}/EFI/boot" 2>/tmp/.errlog
              arch_chroot "cp -r ${UEFI_MOUNT}/EFI/arch_grub/grubx64.efi ${UEFI_MOUNT}/EFI/boot/bootx64.efi" 2>>/tmp/.errlog
              check_for_error
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "_SetDefDoneTitle" --infobox "\nGrub $_SetDefDoneBody" 0 0
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SetDefDoneTitle" --infobox "\nGrub $_SetDefDoneBody" 0 0
              sleep 2
           fi
           
@@ -1602,7 +1689,7 @@ gc_driver_menu() {
              ;;            
         "8") GC_DETECTED="VirtualBox"
              ;;
-        "9") GC_DETECTED="VMware"
+        "9") GC_DETECTED="VMWare"
              ;;
         "10") GC_DETECTED="Generic"
              ;;
@@ -1624,7 +1711,7 @@ detect_graphics_card() {
     elif [[ $(echo ${GRAPHIC_CARD} | grep -i 'virtualbox') != "" ]]; then
          GC_DETECTED="VirtualBox"
     elif [[ $(echo ${GRAPHIC_CARD} | grep -i 'vmware') != "" ]]; then
-         GC_DETECTED="VMware"
+         GC_DETECTED="VMWare"
     elif [[ $(echo ${GRAPHIC_CARD} | grep -i 'via') != "" ]]; then
          GC_DETECTED="Via"
     else
@@ -1671,13 +1758,13 @@ install_gc() {
       "Intel") pacstrap ${MOUNTPOINT} xf86-video-intel libva-intel-driver intel-ucode 2>/tmp/.errlog
                sed -i 's/MODULES=""/MODULES="i915"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
                
-               # Intel microcode (Syslinux and Gummiboot).
+               # Intel microcode (Syslinux and systemd-boot).
                # Grub automatically deals with this. rEFInd is yet to be added.
                case $BOOTLADER in
 				    "Syslinux") sed -i 's/INITRD /INITRD/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
                                 sed -i 's/INITRD/INITRD ..\/intel-ucode.img,/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
                                 ;;
-                   "Gummiboot") sed -i '/linux \//a initrd \/intel-ucode.img' ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
+                "systemd-boot") sed -i '/linux \//a initrd \/intel-ucode.img' ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
                                 ;;
                esac
                ;;
@@ -1850,7 +1937,7 @@ install_de_wm() {
              ;;
         "15") #Fluxbox
               clear 
-              pacstrap ${MOUNTPOINT} fluxbox fbnews fluxter polkit-gnome xterm 2>/tmp/.errlog
+              pacstrap ${MOUNTPOINT} fluxbox fbnews polkit-gnome xterm 2>/tmp/.errlog
              ;; 
         "16") #i3
               clear
@@ -1984,8 +2071,8 @@ install_dm() {
 # Function to save repetition
 dm_menu(){
 
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChoiceTitle" \
-               --menu "$_DmChoiceBody" 0 0 4 \
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" \
+               --menu "$_DmChBody" 0 0 4 \
  	           "1" $"LXDM" \
 	           "2" $"LightDM" \
 	           "3" $"SDDM" \
@@ -2064,7 +2151,7 @@ dm_menu(){
 	        DM="SDDM"
             
          # LXDM, without KDE or Gnome 
-         elif [[ $LXDM_INSTALLED -eq 1 ]] && [[ $KDE_INSTALLED -eq 0 ]] && [[ $GNOME_INSTALLED -eq 0 ]]; then 
+         elif [[ $LXDE_INSTALLED -eq 1 ]] && [[ $KDE_INSTALLED -eq 0 ]] && [[ $GNOME_INSTALLED -eq 0 ]]; then 
             arch_chroot "systemctl enable lxdm.service" >/dev/null 2>/tmp/.errlog
             DM="LXDM"
 
@@ -2165,7 +2252,7 @@ prep_menu() {
 	
    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepTitle" \
     --menu "$_PrepBody" 0 0 7 \
- 	"1" "$_PrepKBLayout" \
+ 	"1" "$_ConfBseVirtCon" \
 	"2" "$_PrepMirror" \
 	"3" "$_DevShowOpt" \
 	"4" "$_PrepPartDisk" \
@@ -2175,7 +2262,7 @@ prep_menu() {
 
     HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
-        "1") set_xkbmap 
+        "1") set_keymap 
              ;;
         "2") configure_mirrorlist
              ;;
@@ -2261,7 +2348,7 @@ config_base_menu() {
 	"3" "$_ConfBseTime" \
 	"4" "$_ConfBseHWC" \
 	"5" "$_ConfBseSysLoc" \
-	"6" "$_ConfBseVirtCon" \
+	"6" "$_PrepKBLayout" \
 	"7" "$_Back" 2>${ANSWER}	
 	
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
@@ -2276,7 +2363,7 @@ config_base_menu() {
              ;;            
         "5") set_locale
              ;;
-        "6") set_keymap
+        "6") set_xkbmap
              ;;            
           *) main_menu_online
              ;;
