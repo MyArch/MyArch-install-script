@@ -106,7 +106,7 @@ _DevShowOpt="Lista de Dispositivos (opcional)"
 
 # Check Requirements and Identify System Type - Translate
 _ChkTitle=" Verificando Requisitos "
-_ChkEvoBody="\nVerificando se o instalador foi executado como root e se existe uma conexão ativa de internet. Por Favor aguarde...\n\n"
+_ChkBody="\nVerificando se o instalador foi executado como root e se existe uma conexão ativa de internet. Por Favor aguarde...\n\n"
 
 _RtFailTitle=" Falha Root "
 _RtFailBody="\nO instalador deve ser executado como root."
@@ -387,7 +387,7 @@ _InstNMDoneBody="\nO gerente de rede (Network Manager) já foi instalado e ativa
 _InstNMErrBody="\nO gerente de rede (Network Manager) já foi instalado e ativado."
 
 # Welcome - Translate
-_WelTitle=" Bem-vindo a"
+_WelTitle=" Bem-vindo a "
 _WelBody="\nSeleccione opções pressionando os números ou usando as teclas up/down (setas) antes de pressionar [enter] para confirmar.\n\nEscolha entre os botões usando [Tab] ou as teclas left/right (setas) antes de pressionar [enter] para confirmar.\n\nO mouse/touchpad também pode ser usado.\n"
 
 # Preparation Menu
