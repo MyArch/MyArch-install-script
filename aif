@@ -930,6 +930,7 @@ btrfs_mount_opts() {
 	# mount with options. Otherwise, basic mount.
 	if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
 	   mount -o $(cat ${BTRFS_OPTS}) ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
+	   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Confirmed btrfs Mount Success " --msgbox "mount ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}\n" 0 0 
 	else
 	   mount ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog	
 	fi
