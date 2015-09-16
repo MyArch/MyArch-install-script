@@ -865,7 +865,7 @@ btrfs_subvols() {
  # Get any mount options and mount
  btrfs_mount_opts
  if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || ount -o $(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  else
     [[ ${MOUNT} == "" ]] &&	mount -o $"subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $"subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  fi
@@ -889,9 +889,11 @@ btrfs_subvols() {
        BTRFS_OSUB_VOL=$(cat ${ANSWER})
     done
  
-    btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog 
-    check_for_error
-    $BTRFS_OSUB_NUM=$(( BTRFS_OSUB_NUM + 1 ))
+    #btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog 
+    #check_for_error
+    btrfs subvolume create ${BTRFS_OSUB_VOL} > /tmp/.subvols
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --textbox /tmp/.subvols 0 0 
+    BTRFS_OSUB_NUM=$(( BTRFS_OSUB_NUM + 1 ))
  done
  
  # Show the subvolumes created
