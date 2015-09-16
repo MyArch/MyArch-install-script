@@ -897,7 +897,7 @@ btrfs_subvols() {
  done
  
  # Show the subvolumes created
- btrfs subvolume list -p > /tmp/.subvols
+ btrfs-subvolume list -p > /tmp/.subvols
  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --textbox /tmp/.subvols 0 0  
  
  # try this method, too
