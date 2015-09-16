@@ -74,8 +74,8 @@ VG_SIZE_TYPE=""         	# Is VG in Gigabytes or Megabytes?
 # Installation
 MOUNTPOINT="/mnt"       	# Installation
 MOUNT_TYPE=""           	# "/dev/" for standard partitions, "/dev/mapper" for LVM
-F2FS=0                      # F2FS FS used?
-BTRFS=0                     # BTRFS used?
+BTRFS=0                     # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
+BTRFS_OPTS="/tmp/.btrfs_opts" #BTRFS Mount options
 
 # Language Support
 CURR_LOCALE="en_US.UTF-8"   # Default Locale
@@ -773,7 +773,6 @@ find_partitions() {
 select_filesystem(){
 
 # Clear special FS type flags
-F2FS=0
 BTRFS=0
 
 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" \
@@ -796,17 +795,23 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" \
              ;;
         "2") FILESYSTEM="mkfs.btrfs -f"
              modprobe btrfs
-             BTRFS=1
+             
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --yesno "Create subvolumes?\n\nAn initial subvolume will be created to mount, followed by any other subvolumes within once mounted.\n" 0 0
+             if [[ $? -eq 0 ]];then
+				BTRFS=2
+		     else
+                BTRFS=1
+             fi
+             
              ;;
-        "3") FILESYSTEM="mkfs.ext2 -F"
+        "4") FILESYSTEM="mkfs.ext2 -F"
              ;;
-        "4") FILESYSTEM="mkfs.ext3 -F"
+        "5") FILESYSTEM="mkfs.ext3 -F"
              ;;            
         "5") FILESYSTEM="mkfs.ext4 -F"
              ;;
         "6") FILESYSTEM="mkfs.f2fs"
              modprobe f2fs
-             F2FS=1
              ;;
         "7") FILESYSTEM="mkfs.jfs -q"
              ;;
@@ -836,11 +841,73 @@ set_mount_type() {
 	
 }
 
+btrfs_subvols() {
+ BTRFS_MSUB_VOL=""
+ BTRFS_OSUB_VOL=""
+ BTRFS_OSUB_NUM=1
+ 
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume to Mount " --inputbox "Enter the name of the initial subvolume to mount (e.g. ROOT). Other subvolumes will come from this." 0 0 "" 2>${ANSWER} || select_filesystem
+ BTRFS_MSUB_VOL=$(cat ${ANSWER})	
+
+ # Loop while subvolume is blank or has spaces.
+ while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error " --inputbox "Blanks or spaces are not permitted. Please try again." 0 0 "" 2>${ANSWER} || select_filesystem
+       BTRFS_MSUB_VOL=$(cat ${ANSWER})
+ done
+ 
+ # change dir depending on whether root partition or not
+ [[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+ btrfs subvolume create ${BTRFS_MSUB_VOL} 2>>/tmp/.errlog
+ cd
+ umount ${MOUNT_TYPE}${PARTITION} 2>>/tmp/.errlog
+ check_for_error
+ 
+ # Get any mount options and mount
+ btrfs_mount_opts
+ if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
+	[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || ount -o $(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+ else
+    [[ ${MOUNT} == "" ]] &&	mount -o $"subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $"subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+ fi
+ 
+ # Check for error and confirm successful mount
+ check_for_error  
+ [[ ${MOUNT} == "" ]] && confirm_mount ${MOUNTPOINT} || confirm_mount ${MOUNTPOINT}${MOUNT}
+ 
+ # Now create the subvolumes   
+ [[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+ check_for_error
+ 
+ # Loop while the termination character has not been entered
+ while [[ $BTRFS_OSUB_VOL != "*" ]]; do
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name ($BTRFS_MSUB_VOL) " --inputbox "Enter the name of subvolume $BTRFS_OSUB_NUM to create within $BTRFS_MSUB_VOL.\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name." 0 0 "" 2>${ANSWER} || select_filesystem
+	BTRFS_OSUB_VOL=$(cat ${ANSWER})	
+
+    # Loop while subvolume is blank or has spaces.
+    while [[ ${#BTRFS_OSUB_VOL} -eq 0 ]] || [[ $BTRFS_SUB_VOL =~ \ |\' ]]; do
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error ($BTRFS_MSUB_VOL) " --inputbox "Blanks or spaces are not permitted. Please try again (subvolume $BTRFS_OSUB_NUM)." 0 0 "" 2>${ANSWER} || select_filesystem
+       BTRFS_OSUB_VOL=$(cat ${ANSWER})
+    done
+ 
+    btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog 
+    check_for_error
+    $BTRFS_OSUB_NUM=$(( BTRFS_OSUB_NUM + 1 ))
+ done
+ 
+ # Show the subvolumes created
+ btrfs subvolume list -p > /tmp/.subvols
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --textbox /tmp/.subvols 0 0  
+ 
+ # try this method, too
+ ls  > /tmp/.subvols
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --textbox /tmp/.subvols 0 0
+ cd
+}
+
 # This function allows for btrfs-specific mounting options to be applied. Written as a seperate function
 # for neatness.
 btrfs_mount_opts() {
-    
-    BTRFS_OPTS="/tmp/.btrfs_opts"
+
 	echo "" > ${BTRFS_OPTS}
 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs mount options " --checklist "section test" 0 0 16 \
@@ -923,20 +990,24 @@ btrfs_mount_opts() {
 	[[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
 	check_for_error
 	
-	mkdir -p ${MOUNTPOINT} 2>/tmp/.errlog	
-	[[ $BTRFS -eq 1 ]] && btrfs_mount_opts
-	
-	# If btrfs has been selected AND at least one btrfs mount option has also been selected, then
+	# Make the appropriate directory and mount partition to it
+	mkdir -p ${MOUNTPOINT} 2>/tmp/.errlog
+
+    # If btrfs without subvolumes has been selected, get the mount options
+    [[ $BTRFS -eq 1 ]] && btrfs_mount_opts
+    
+    # If btrfs has been selected without subvolumes - and at least one btrfs mount option selected - then
 	# mount with options. Otherwise, basic mount.
 	if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
 	   mount -o $(cat ${BTRFS_OPTS}) ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
-	   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Confirmed btrfs Mount Success " --msgbox "mount -o $(cat ${BTRFS_OPTS}) ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}\n" 0 0 
 	else
-	   mount ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog	
-	fi
-	   
+	   mount ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
+    fi
+	  
+	# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
 	check_for_error
     confirm_mount ${MOUNTPOINT}
+    [[ $BTRFS -eq 2 ]] && btrfs_subvols
 	
 	# Identify and create swap, if applicable
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelSwpTitle" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
@@ -1327,29 +1398,26 @@ install_base() {
     case $(cat ${ANSWER}) in
         "1") # Latest Kernel
              clear
-             pacstrap ${MOUNTPOINT} base btrfs-progs ntp sudo 2>/tmp/.errlog
+             pacstrap ${MOUNTPOINT} base f2fs-tools btrfs-progs ntp sudo 2>/tmp/.errlog
              ;;
         "2") # Latest Kernel and base-devel
              clear
-             pacstrap ${MOUNTPOINT} base base-devel btrfs-progs ntp sudo 2>/tmp/.errlog
+             pacstrap ${MOUNTPOINT} base base-devel f2fs-tools btrfs-progs ntp sudo 2>/tmp/.errlog
              ;;
         "3") # LTS Kernel
              clear
-             pacstrap ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd diffutils e2fsprogs file filesystem findutils gawk gcc-libs gettext glibc grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which xfsprogs btrfs-progs ntp sudo 2>/tmp/.errlog
+             pacstrap ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd diffutils e2fsprogs file filesystem findutils f2fs-tools gawk gcc-libs gettext glibc grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which xfsprogs btrfs-progs ntp sudo 2>/tmp/.errlog
              [[ $? -eq 0 ]] && LTS=1
              ;;
         "4") # LTS Kernel and base-devel
              clear
-             pacstrap ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd diffutils e2fsprogs file filesystem findutils gawk gcc-libs gettext glibc grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which xfsprogs base-devel btrfs-progs ntp sudo 2>/tmp/.errlog
+             pacstrap ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd diffutils e2fsprogs file filesystem findutils f2fs-tools gawk gcc-libs gettext glibc grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which xfsprogs base-devel btrfs-progs ntp sudo 2>/tmp/.errlog
              [[ $? -eq 0 ]] && LTS=1
              ;;
           *) install_base_menu
              ;;
     esac  	
-    
-    # If F2FS FS used, install the tools
-    [[ F2FS -eq 1 ]] && pacstrap ${MOUNTPOINT} f2fs-tools 2>>/tmp/.errlog
-    
+     
     # If the virtual console has been set, then copy config file to installation
     [[ -e /tmp/vconsole.conf ]] && cp /tmp/vconsole.conf ${MOUNTPOINT}/etc/vconsole.conf 2>>/tmp/.errlog
     check_for_error
