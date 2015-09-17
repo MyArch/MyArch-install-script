@@ -609,6 +609,18 @@ confirm_mount() {
     fi
 }
 
+# btrfs specific for subvolumes
+confirm_mount_btrfs() {
+    if [[ $(mount | grep $1) ]]; then
+      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc\n\n$(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL}" 0 0
+      sleep 2
+    else
+      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusFail" 0 0
+      sleep 2
+      prep_menu
+    fi
+}
+
 # Adapted from AIS. However, this does not assume that the formatted device is the Root
 # installation device; more than one device may be formatted. This is now set in the
 # mount_partitions function, when the Root is chosen.
@@ -842,8 +854,11 @@ set_mount_type() {
 }
 
 btrfs_subvols() {
+	
+# Check mount subtracts no of partitions - need to fix this!
  BTRFS_MSUB_VOL=""
  BTRFS_OSUB_VOL=""
+ BTRFS_VOL_LIST="/tmp/.vols"
  BTRFS_OSUB_NUM=1
  
  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume to Mount " --inputbox "Enter the name of the initial subvolume to mount (e.g. ROOT). Other subvolumes will come from this." 0 0 "" 2>${ANSWER} || select_filesystem
@@ -872,7 +887,7 @@ btrfs_subvols() {
  
  # Check for error and confirm successful mount
  check_for_error  
- [[ ${MOUNT} == "" ]] && confirm_mount ${MOUNTPOINT} || confirm_mount ${MOUNTPOINT}${MOUNT}
+ [[ ${MOUNT} == "" ]] && confirm_mount_btrfs ${MOUNTPOINT} || confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
  
  # Now create the subvolumes   
  [[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
@@ -880,7 +895,7 @@ btrfs_subvols() {
  
  # Loop while the termination character has not been entered
  while [[ $BTRFS_OSUB_VOL != "*" ]]; do
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name ($BTRFS_MSUB_VOL) " --inputbox "Enter the name of subvolume $BTRFS_OSUB_NUM to create within $BTRFS_MSUB_VOL.\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name." 0 0 "" 2>${ANSWER} || select_filesystem
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name ($BTRFS_MSUB_VOL) " --inputbox "Enter the name of subvolume $BTRFS_OSUB_NUM to create within $BTRFS_MSUB_VOL.\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name.\n\nCreated Subvols: $(cat ${BTRFS_VOL_LIST})" 0 0 "" 2>${ANSWER} || select_filesystem
 	BTRFS_OSUB_VOL=$(cat ${ANSWER})	
 
     # Loop while subvolume is blank or has spaces.
@@ -889,18 +904,13 @@ btrfs_subvols() {
        BTRFS_OSUB_VOL=$(cat ${ANSWER})
     done
  
-    #btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog 
-    #check_for_error
-    btrfs subvolume create ${BTRFS_OSUB_VOL} > /tmp/.subvols
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --textbox /tmp/.subvols 0 0 
+    btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog 
+    check_for_error
     BTRFS_OSUB_NUM=$(( BTRFS_OSUB_NUM + 1 ))
+    echo $(cat $BTRFS_OSUB_VOL)" " >> ${BTRFS_VOL_LIST}
  done
  
  # Show the subvolumes created
- btrfs-subvolume list -p > /tmp/.subvols
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --textbox /tmp/.subvols 0 0  
- 
- # try this method, too
  ls  > /tmp/.subvols
  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --textbox /tmp/.subvols 0 0
  cd
@@ -1050,7 +1060,7 @@ btrfs_mount_opts() {
        check_for_error
        
        # Inform users of the mountpoint options and consequences
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_OptUefiTitle" --msgbox "$_OptUefiBody" 0 0
+       #dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_OptUefiTitle" --msgbox "$_OptUefiBody" 0 0
        
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntUefiTitle" --menu "$_MntUefiBody"  0 0 2 \
  	   "1" $"/boot" \
