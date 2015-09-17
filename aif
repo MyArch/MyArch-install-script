@@ -1098,6 +1098,8 @@ btrfs_mount_opts() {
                 [[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
 	            check_for_error
 	            
+	            dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --msgbox "created fs and checked for error"
+	            
                 # Don't give /boot as an example for UEFI systems!
                 if [[ $UEFI -eq 1 ]]; then
                    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --inputbox "$_ExtNameBodyUefi" 0 0 "/" 2>${ANSWER} || config_base_menu
