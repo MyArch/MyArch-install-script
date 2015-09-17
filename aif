@@ -816,9 +816,9 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" \
              fi
              
              ;;
-        "4") FILESYSTEM="mkfs.ext2 -F"
+        "3") FILESYSTEM="mkfs.ext2 -F"
              ;;
-        "5") FILESYSTEM="mkfs.ext3 -F"
+        "4") FILESYSTEM="mkfs.ext3 -F"
              ;;            
         "5") FILESYSTEM="mkfs.ext4 -F"
              ;;
@@ -1092,15 +1092,11 @@ btrfs_mount_opts() {
              if [[ $PARTITION == ${_Done} ]]; then
                 break;
              else
-                MOUNT=""
-                
+                MOUNT=""    
                 select_filesystem
-                dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --msgbox "selected fs"
+                
                 [[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
-                dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --msgbox "created fs"
 	            check_for_error
-	            
-	            dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --msgbox "created fs and checked for error"
 	            
                 # Don't give /boot as an example for UEFI systems!
                 if [[ $UEFI -eq 1 ]]; then
