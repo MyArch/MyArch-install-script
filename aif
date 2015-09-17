@@ -859,6 +859,7 @@ btrfs_subvols() {
  BTRFS_MSUB_VOL=""
  BTRFS_OSUB_VOL=""
  BTRFS_VOL_LIST="/tmp/.vols"
+ echo "" > ${BTRFS_VOL_LIST}
  BTRFS_OSUB_NUM=1
  
  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume to Mount " --inputbox "Enter the name of the initial subvolume to mount (e.g. ROOT). Other subvolumes will come from this." 0 0 "" 2>${ANSWER} || select_filesystem
