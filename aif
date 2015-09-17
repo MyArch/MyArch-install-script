@@ -1094,8 +1094,10 @@ btrfs_mount_opts() {
              else
                 MOUNT=""
                 
-                select_filesystem 
+                select_filesystem
+                dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --msgbox "selected fs"
                 [[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
+                dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --msgbox "created fs"
 	            check_for_error
 	            
 	            dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --msgbox "created fs and checked for error"
