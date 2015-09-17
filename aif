@@ -907,7 +907,7 @@ btrfs_subvols() {
     btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog 
     check_for_error
     BTRFS_OSUB_NUM=$(( BTRFS_OSUB_NUM + 1 ))
-    echo $(cat $BTRFS_OSUB_VOL)" " >> ${BTRFS_VOL_LIST}
+    echo $BTRFS_OSUB_VOL" " >> ${BTRFS_VOL_LIST}
  done
  
  # Show the subvolumes created
