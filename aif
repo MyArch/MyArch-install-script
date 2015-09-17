@@ -612,7 +612,7 @@ confirm_mount() {
 # btrfs specific for subvolumes
 confirm_mount_btrfs() {
     if [[ $(mount | grep $1) ]]; then
-      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc\n\n$(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL}" 0 0
+      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc\n\n$(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL}" 0 0
       sleep 2
     else
       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusFail" 0 0
