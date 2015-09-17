@@ -880,9 +880,9 @@ btrfs_subvols() {
  # Get any mount options and mount
  btrfs_mount_opts
  if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS})$",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  else
-    [[ ${MOUNT} == "" ]] &&	mount -o $"subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $"subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+    [[ ${MOUNT} == "" ]] &&	mount -o "subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o "subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  fi
  
  # Check for error and confirm successful mount
@@ -964,7 +964,7 @@ btrfs_mount_opts() {
 
    
    if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Confirm btrfs Mount Options " --yesno "Confirm that the following mount options are to be used:\n\n$(cat ${BTRFS_OPTS})\n" 0 0 
+	  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Confirm btrfs Mount Options " --yesno "Confirm that the following mount options are to be used:\n\n$(cat $BTRFS_OPTS)\n" 0 0 
 	  [[ $? -eq 1 ]] && btrfs_mount_opts
    fi  
 
@@ -985,7 +985,7 @@ btrfs_mount_opts() {
 	find_partitions
 	
 	# Identify and mount root
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelRootTitle" --menu "$_SelRootBody$" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelRootTitle" --menu "$_SelRootBody parts: $NUMBER_PARTITIONS" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
 	PARTITION=$(cat ${ANSWER})
     ROOT_PART=${PARTITION}
     set_mount_type
@@ -1022,7 +1022,7 @@ btrfs_mount_opts() {
     [[ $BTRFS -eq 2 ]] && btrfs_subvols
 	
 	# Identify and create swap, if applicable
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelSwpTitle" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelSwpTitle" --menu "$_SelSwpBody parts: $NUMBER_PARTITIONS" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
     if [[ $(cat ${ANSWER}) != "$_SelSwpNone" ]]; then    
        PARTITION=$(cat ${ANSWER})
        
@@ -1084,7 +1084,7 @@ btrfs_mount_opts() {
     
     # All other partitions
        while [[ $NUMBER_PARTITIONS > 0 ]]; do 
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtPartTitle" --menu "$_ExtPartBody" 0 0 4 "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || config_base_menu 
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtPartTitle" --menu "$_ExtPartBody parts: $NUMBER_PARTITIONS" 0 0 4 "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || config_base_menu 
              PARTITION=$(cat ${ANSWER})
              set_mount_type
              
