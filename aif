@@ -985,7 +985,7 @@ btrfs_mount_opts() {
 	find_partitions
 	
 	# Identify and mount root
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelRootTitle" --menu "$_SelRootBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelRootTitle" --menu "$_SelRootBody$" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
 	PARTITION=$(cat ${ANSWER})
     ROOT_PART=${PARTITION}
     set_mount_type
