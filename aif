@@ -992,7 +992,7 @@ btrfs_mount_opts() {
 	find_partitions
 	
 	# Identify and mount root
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelRootTitle" --menu "$_SelRootBody parts: $NUMBER_PARTITIONS" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelRootTitle" --menu "$_SelRootBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
 	PARTITION=$(cat ${ANSWER})
     ROOT_PART=${PARTITION}
     set_mount_type
@@ -1029,7 +1029,7 @@ btrfs_mount_opts() {
     [[ $BTRFS -eq 2 ]] && btrfs_subvols
 	
 	# Identify and create swap, if applicable
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelSwpTitle" --menu "$_SelSwpBody parts: $NUMBER_PARTITIONS" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelSwpTitle" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
     if [[ $(cat ${ANSWER}) != "$_SelSwpNone" ]]; then    
        PARTITION=$(cat ${ANSWER})
        
@@ -1091,7 +1091,7 @@ btrfs_mount_opts() {
     
     # All other partitions
        while [[ $NUMBER_PARTITIONS > 0 ]]; do 
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtPartTitle" --menu "$_ExtPartBody parts: $NUMBER_PARTITIONS" 0 0 4 "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || config_base_menu 
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtPartTitle" --menu "$_ExtPartBody" 0 0 4 "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || config_base_menu 
              PARTITION=$(cat ${ANSWER})
              set_mount_type
              
@@ -1127,9 +1127,22 @@ btrfs_mount_opts() {
 
                 # Create directory and mount. This step will only be reached where the loop has been skipped or broken.
                 mkdir -p ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
-                mount  ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
-                check_for_error
-                confirm_mount ${MOUNTPOINT}${MOUNT}
+                
+                # If btrfs without subvolumes has been selected, get the mount options
+                [[ $BTRFS -eq 1 ]] && btrfs_mount_opts
+    
+                # If btrfs has been selected without subvolumes - and at least one btrfs mount option selected - then
+	            # mount with options. Otherwise, basic mount.
+	            if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
+					mount -o $(cat ${BTRFS_OPTS}) ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+				else
+					mount ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+				fi
+	  
+				# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
+				check_for_error
+				confirm_mount ${MOUNTPOINT}${MOUNT}
+				[[ $BTRFS -eq 2 ]] && btrfs_subvols
                 
                 # Determine if a seperate /boot is used, and if it is LVM or not
                 LVM_SEP_BOOT=0
