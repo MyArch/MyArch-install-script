@@ -76,6 +76,7 @@ MOUNTPOINT="/mnt"       	# Installation
 MOUNT_TYPE=""           	# "/dev/" for standard partitions, "/dev/mapper" for LVM
 BTRFS=0                     # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
 BTRFS_OPTS="/tmp/.btrfs_opts" #BTRFS Mount options
+BTRFS_MNT=""                # used for syslinux where /mnt is a btrfs subvolume
 
 # Language Support
 CURR_LOCALE="en_US.UTF-8"   # Default Locale
@@ -858,6 +859,7 @@ btrfs_subvols() {
 # Check mount subtracts no of partitions - need to fix this!
  BTRFS_MSUB_VOL=""
  BTRFS_OSUB_VOL=""
+ BTRFS_MNT=""
  BTRFS_VOL_LIST="/tmp/.vols"
  echo "" > ${BTRFS_VOL_LIST}
  BTRFS_OSUB_NUM=1
@@ -869,6 +871,8 @@ btrfs_subvols() {
  while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error " --inputbox "Blanks or spaces are not permitted. Please try again." 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_MSUB_VOL=$(cat ${ANSWER})
+       # if root, then create flag for syslinux
+       [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
  done
  
  # change dir depending on whether root partition or not
@@ -1494,21 +1498,22 @@ bios_bootloader() {
              arch_chroot "syslinux-install_update -iam" 2>>/tmp/.errlog
              check_for_error
              
-             # Append configuration file depending on whether lvm used or not for root.
+             # Amend configuration file depending on whether lvm used or not for root.
              if [[ $LVM_ROOT -eq 0 ]]; then
                 sed -i "s/sda[0-9]/${ROOT_PART}/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
              else
                 sed -i "s/APPEND.*/APPEND root=\/dev\/mapper\/${ROOT_PART} rw/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
              fi
              
-             # If the LTS kernel has been installed amend the config file accordingly
+             # Amend configuration file for LTS kernel and/or btrfs subvolume as root
              [[ $LTS -eq 1 ]] && sed -i 's/linux/linux-lts/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+             [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT"
              
-             if [[ $LVM_ROOT -eq 0 ]]; then
-                dialog --title "$_InstSysTitle" --msgbox "$_InstSysBody APPEND root=/dev/$ROOT_PART rw\n" 0 0
-             else
-                dialog --title "$_InstSysTitle" --msgbox "$_InstSysBody APPEND root=/dev/mapper/$ROOT_PART rw\n" 0 0
-             fi
+             #if [[ $LVM_ROOT -eq 0 ]]; then
+             #   dialog --title "$_InstSysTitle" --msgbox "$_InstSysBody APPEND root=/dev/$ROOT_PART rw\n" 0 0
+             #else
+             #   dialog --title "$_InstSysTitle" --msgbox "$_InstSysBody APPEND root=/dev/mapper/$ROOT_PART rw\n" 0 0
+             #fi
              
              BOOTLOADER="Syslinux"
              ;;
