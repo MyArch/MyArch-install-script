@@ -872,7 +872,7 @@ btrfs_subvols() {
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error " --inputbox "Blanks or spaces are not permitted. Please try again." 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_MSUB_VOL=$(cat ${ANSWER})
        # if root, then create flag for syslinux
-       [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
+       [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol=$BTRFS_MSUB_VOL"
  done
  
  # change dir depending on whether root partition or not
