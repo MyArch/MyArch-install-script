@@ -873,7 +873,7 @@ btrfs_subvols() {
        BTRFS_MSUB_VOL=$(cat ${ANSWER})
        # if root, then create flag for syslinux
        [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol=$BTRFS_MSUB_VOL"
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error " --msgbox"it's: $BTRFS_MNT"
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error " --msgbox"it's: $BTRFS_MNT" 0 0
  done
  
  # change dir depending on whether root partition or not
