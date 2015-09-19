@@ -865,15 +865,16 @@ btrfs_subvols() {
  BTRFS_OSUB_NUM=1
  
  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume to Mount " --inputbox "Enter the name of the initial subvolume to mount (e.g. ROOT). Other subvolumes will come from this." 0 0 "" 2>${ANSWER} || select_filesystem
- BTRFS_MSUB_VOL=$(cat ${ANSWER})	
+ BTRFS_MSUB_VOL=$(cat ${ANSWER})
+ # if root, then create flag for syslinux	
+ [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
 
  # Loop while subvolume is blank or has spaces.
  while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error " --inputbox "Blanks or spaces are not permitted. Please try again." 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_MSUB_VOL=$(cat ${ANSWER})
        # if root, then create flag for syslinux
-       [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol=$BTRFS_MSUB_VOL"
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error " --msgbox"it's: $BTRFS_MNT" 0 0
+       [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
  done
  
  # change dir depending on whether root partition or not
