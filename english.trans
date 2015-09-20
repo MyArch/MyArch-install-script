@@ -248,7 +248,7 @@ _DevSelGrubTitle=" Select Grub Device "
 
 # Partitioning Tool - Translate
 _PartToolTitle=" Partitioning Tool "
-_PartToolBody="\nAn Auto-Partition option is available for beginners.\n\nOtherwise, DO NOT select a UEFI/GPT-only partitioning tool for a BIOS/MBR system as this could cause serious problems, including an unbootable installation."
+_PartToolBody="\nAn Auto-Partition option is available for beginners. CFDisk is recomended for BIOS, Parted for UEFI.\n\nDO NOT select a UEFI/GPT-only partitioning tool for a BIOS/MBR system as this could cause serious problems, including an unbootable installation."
 
 # UEFI Partitioning Error
 _UefiPartErrTitle=" UEFI Partitioning Error " 
