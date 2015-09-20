@@ -809,7 +809,7 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" \
         "2") FILESYSTEM="mkfs.btrfs -f"
              modprobe btrfs
              
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --yesno "Create subvolumes?\n\nAn initial subvolume will be created to mount, followed by any other subvolumes within once mounted.\n" 0 0
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --yesno "$_btrfsSVBody" 0 0
              if [[ $? -eq 0 ]];then
 				BTRFS=2
 		     else
@@ -855,8 +855,7 @@ set_mount_type() {
 }
 
 btrfs_subvols() {
-	
-# Check mount subtracts no of partitions - need to fix this!
+
  BTRFS_MSUB_VOL=""
  BTRFS_OSUB_VOL=""
  BTRFS_MNT=""
@@ -864,14 +863,14 @@ btrfs_subvols() {
  echo "" > ${BTRFS_VOL_LIST}
  BTRFS_OSUB_NUM=1
  
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume to Mount " --inputbox "Enter the name of the initial subvolume to mount (e.g. ROOT). Other subvolumes will come from this." 0 0 "" 2>${ANSWER} || select_filesystem
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --inputbox "$_btrfsMSubBody1 ${MOUNTPOINT}${MOUNT} $_btrfsMSubBody2" 0 0 "" 2>${ANSWER} || select_filesystem
  BTRFS_MSUB_VOL=$(cat ${ANSWER})
  # if root, then create flag for syslinux	
  [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
 
  # Loop while subvolume is blank or has spaces.
  while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error " --inputbox "Blanks or spaces are not permitted. Please try again." 0 0 "" 2>${ANSWER} || select_filesystem
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVErrTitle" --inputbox "$_btrfsSVErrBody" 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_MSUB_VOL=$(cat ${ANSWER})
        # if root, then create flag for syslinux
        [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
@@ -902,12 +901,12 @@ btrfs_subvols() {
  
  # Loop while the termination character has not been entered
  while [[ $BTRFS_OSUB_VOL != "*" ]]; do
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name ($BTRFS_MSUB_VOL) " --inputbox "Enter the name of subvolume $BTRFS_OSUB_NUM to create within $BTRFS_MSUB_VOL.\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name.\n\nCreated Subvols: $(cat ${BTRFS_VOL_LIST})" 0 0 "" 2>${ANSWER} || select_filesystem
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVBody1 $BTRFS_OSUB_NUM $_btrfsSVBody2 $BTRFS_MSUB_VOL.$_btrfsSVBody3 $(cat ${BTRFS_VOL_LIST})" 0 0 "" 2>${ANSWER} || select_filesystem
 	BTRFS_OSUB_VOL=$(cat ${ANSWER})	
 
     # Loop while subvolume is blank or has spaces.
     while [[ ${#BTRFS_OSUB_VOL} -eq 0 ]] || [[ $BTRFS_SUB_VOL =~ \ |\' ]]; do
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Subvolume Name Error ($BTRFS_MSUB_VOL) " --inputbox "Blanks or spaces are not permitted. Please try again (subvolume $BTRFS_OSUB_NUM)." 0 0 "" 2>${ANSWER} || select_filesystem
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVErrTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVErrBody ($BTRFS_OSUB_NUM)." 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_OSUB_VOL=$(cat ${ANSWER})
     done
  
@@ -919,7 +918,7 @@ btrfs_subvols() {
  
  # Show the subvolumes created
  ls  > /tmp/.subvols
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs Subvolumes " --textbox /tmp/.subvols 0 0
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --textbox /tmp/.subvols 0 0
  cd
 }
 
@@ -929,7 +928,7 @@ btrfs_mount_opts() {
 
 	echo "" > ${BTRFS_OPTS}
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " btrfs mount options " --checklist "section test" 0 0 16 \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsMntTitle" --checklist "$_btrfsMntBody" 0 0 16 \
 	"1" "autodefrag" off \
 	"2" "compress=zlib" off \
 	"3" "compress=lzo" off \
@@ -971,7 +970,7 @@ btrfs_mount_opts() {
 
    
    if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Confirm btrfs Mount Options " --yesno "Confirm that the following mount options are to be used:\n\n$(cat $BTRFS_OPTS)\n" 0 0 
+	  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsMntTitle" --yesno "$_btrfsMntConfBody $(cat $BTRFS_OPTS)\n" 0 0 
 	  [[ $? -eq 1 ]] && btrfs_mount_opts
    fi  
 
