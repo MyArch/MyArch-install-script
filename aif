@@ -267,7 +267,7 @@ check_base() {
 
 # Simple code to show devices / partitions.
 show_devices() {
-     lsblk -o NAME,MODEL,TYPE,TRAN,FSTYPE,SIZE | grep -v "loop" | grep -v "rom" | grep -v "arch_airootfs" > /tmp/.devlist
+     lsblk -o NAME,MODEL,TYPE,TRAN,FSTYPE,SIZE,MOUNTPOINT | grep -v "loop" | grep -v "rom" | grep -v "arch_airootfs" > /tmp/.devlist
      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevShowTitle" --textbox /tmp/.devlist 0 0
 }
 
