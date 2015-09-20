@@ -267,7 +267,7 @@ check_base() {
 
 # Simple code to show devices / partitions.
 show_devices() {
-     lsblk -o NAME,MODEL,TYPE,TRAN,FSTYPE,SIZE,MOUNTPOINT | grep -v "loop" | grep -v "rom" | grep -v "arch_airootfs" > /tmp/.devlist
+     lsblk -o NAME,MODEL,TYPE,FSTYPE,SIZE,MOUNTPOINT | grep -v "loop" | grep -v "rom" | grep -v "arch_airootfs" > /tmp/.devlist
      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevShowTitle" --textbox /tmp/.devlist 0 0
 }
 
@@ -613,7 +613,7 @@ confirm_mount() {
 # btrfs specific for subvolumes
 confirm_mount_btrfs() {
     if [[ $(mount | grep $1) ]]; then
-      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc\n\n$(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL}" 0 0
+      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc\n\n$(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL}\n\n" 0 0
       sleep 2
     else
       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusFail" 0 0
@@ -1592,10 +1592,13 @@ uefi_bootloader() {
               
               check_for_error
               
-              # Now generate config file to pass kernel parameters. Default read only (ro) changed to read-write (rw)    
+              # Now generate config file to pass kernel parameters. Default read only (ro) changed to read-write (rw),
+              # and amend where using btfs subvol root    
               arch_chroot "refind-mkrlconf" 2>/tmp/.errlog
               check_for_error
               sed -i 's/ro /rw /g' ${MOUNTPOINT}/boot/refind_linux.conf
+              [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/refind_linux.conf
+              
               BOOTLOADER="rEFInd"
            else 
               dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_RefiErrTitle" --msgbox "$_RefiErrBody" 0 0
@@ -1623,44 +1626,15 @@ uefi_bootloader() {
             echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux\ninitrd\t/initramfs-linux.img\noptions\troot=PARTUUID=${sysdb_root} rw" > ${MOUNTPOINT}/boot/loader/entries/arch.conf
           fi
           
-          # Fix LVM Root installations
+          # Fix LVM Root installations, and deal with btrfs root subvolume mounting
           [[ $LVM_ROOT -eq 1 ]] && sed -i "s/PARTUUID=//g" ${MOUNTPOINT}/boot/loader/entries/arch.conf
-          
+          [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/loader/entries/arch.conf
+       
           BOOTLOADER="systemd-boot"
           # Set the loader file  
           echo -e "default  arch\ntimeout  5" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf 2>/tmp/.errlog
           check_for_error
           ;;
-          
-      "3") # rEFInd
-           # Ensure that UEFI partition has been mounted to /boot/efi due to bug in script. Could "fix" it for installation, but
-           # This could result in unknown consequences should the script be updated at some point.
-           if [[ $UEFI_MOUNT == "/boot/efi" ]]; then      
-              clear
-              pacstrap ${MOUNTPOINT} refind-efi efibootmgr dosfstools 2>/tmp/.errlog
-              check_for_error   
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SetRefiDefTitle" --yesno "$_SetRefiDefBody ${UEFI_MOUNT}/EFI/boot $_SetRefiDefBody2" 0 0
-              
-              if [[ $? -eq 0 ]]; then
-                 clear
-                 arch_chroot "refind-install --usedefault ${UEFI_PART} --alldrivers" 2>/tmp/.errlog
-              else   
-                 clear
-                 arch_chroot "refind-install" 2>/tmp/.errlog
-              fi   
-              
-              check_for_error
-              
-              # Now generate config file to pass kernel parameters. Default read only (ro) changed to read-write (rw)    
-              arch_chroot "refind-mkrlconf" 2>/tmp/.errlog
-              check_for_error
-              sed -i 's/ro /rw /g' ${MOUNTPOINT}/boot/refind_linux.conf
-              BOOTLOADER="rEFInd"
-           else 
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_RefiErrTitle" --msgbox "$_RefiErrBody" 0 0
-              uefi_bootloader
-           fi
-           ;;
       
       *) install_base_menu
          ;;
