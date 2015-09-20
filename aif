@@ -95,7 +95,7 @@ FILE2=""					# Which second file is to be opened?
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI) $GRAPHIC_CARD" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 9 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)\n$GRAPHIC_CARD" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 9 \
  	"1" $"English" \
  	"2" $"Italiano" \
  	"3" $"Russian" \
