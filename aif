@@ -95,7 +95,7 @@ FILE2=""					# Which second file is to be opened?
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 9 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI) $GRAPHIC_CARD" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 9 \
  	"1" $"English" \
  	"2" $"Italiano" \
  	"3" $"Russian" \
@@ -613,7 +613,7 @@ confirm_mount() {
 # btrfs specific for subvolumes
 confirm_mount_btrfs() {
     if [[ $(mount | grep $1) ]]; then
-      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc\n\n$(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL}\n\n" 0 0
+      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc\n$(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL}\n\n" 0 0
       sleep 2
     else
       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusFail" 0 0
@@ -1008,7 +1008,7 @@ btrfs_mount_opts() {
 	[[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
 	check_for_error
 	
-	# Make the appropriate directory and mount partition to it
+	# Make the root directory
 	mkdir -p ${MOUNTPOINT} 2>/tmp/.errlog
 
     # If btrfs without subvolumes has been selected, get the mount options
