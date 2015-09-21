@@ -2755,7 +2755,7 @@ main_menu_online() {
              ;;
         "8") edit_configs
              ;;    
-        "9") arch-chroot $MOUNTPOINT /bin/bash -c
+        "9") arch-chroot $MOUNTPOINT /bin/bash
              ;;              
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
           
