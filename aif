@@ -2757,8 +2757,11 @@ main_menu_online() {
              ;;    
         "9") ANS=""
              while [[ $ANS != "exit\|Exit" ]]; do
+             echo "" > /tmp/.crt
              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "Arch-Chroot" --inputbox "input your command" 0 0 "" 2>${ANSWER}
-             [[ $(cat $ANSWER) != "exit\|Exit" ]] && arch-chroot $MOUNTPOINT /bin/bash -c "$(cat $ANSWER)"
+             [[ $(cat $ANSWER) != "exit\|Exit" ]] && arch-chroot $MOUNTPOINT /bin/bash -c "$(cat $ANSWER)" > /tmp/.crt
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "Results" --textbox /tmp/.devlist 0 0
+             
              done
              ;;              
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
