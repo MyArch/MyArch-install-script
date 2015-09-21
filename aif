@@ -2755,8 +2755,8 @@ main_menu_online() {
              ;;
         "8") edit_configs
              ;;    
-        "9") ANS=""
-             while [[ $ANS != "exit\|Exit" ]]; do
+        "9") 
+             while [[ $(cat $ANSWER) != "exit\|Exit" ]]; do
              echo "" > /tmp/.crt
              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "Arch-Chroot" --inputbox "input your command" 0 0 "" 2>${ANSWER}
              [[ $(cat $ANSWER) != "exit\|Exit" ]] && arch-chroot $MOUNTPOINT /bin/bash -c "$(cat $ANSWER)" > /tmp/.crt
