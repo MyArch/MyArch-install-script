@@ -2759,7 +2759,7 @@ main_menu_online() {
              while [[ $(cat $ANSWER) != "exit\|Exit" ]]; do
              echo "" > /tmp/.crt
              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "Arch-Chroot" --inputbox "input your command" 0 0 "" 2>${ANSWER} || main_menu_online
-             [[ $(cat $ANSWER) != "exit" ]] && arch-chroot $MOUNTPOINT /bin/bash -c "$(cat $ANSWER)" 2&1> /tmp/.crt
+             [[ $(cat $ANSWER) != "exit" ]] && arch-chroot $MOUNTPOINT /bin/bash -c "$(cat $ANSWER)" > /tmp/.crt
              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "Results" --textbox /tmp/.crt 0 0
              
              done
