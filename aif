@@ -2758,6 +2758,7 @@ main_menu_online() {
         "9") clear
              echo -e "\nEnter 'exit' to return to the installer\n"
              arch-chroot $MOUNTPOINT
+             break
              ;;              
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
           
