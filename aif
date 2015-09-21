@@ -2733,7 +2733,7 @@ main_menu_online() {
        check_mount
     fi
 
-    if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 7 ]]; then
+    if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 9 ]]; then
        check_mount
        check_base
     fi
@@ -2755,7 +2755,9 @@ main_menu_online() {
              ;;
         "8") edit_configs
              ;;    
-        "9") arch-chroot $MOUNTPOINT /bin/bash
+        "9") clear
+             echo -e "\nEnter 'quit' to return to the installer\n"
+             arch-chroot $MOUNTPOINT /bin/bash
              ;;              
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
           
