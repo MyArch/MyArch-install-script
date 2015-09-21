@@ -2756,8 +2756,8 @@ main_menu_online() {
         "8") edit_configs
              ;;    
         "9") clear
-             echo -e "\nEnter 'exit' to return to the installer\n"
-             arch-chroot $MOUNTPOINT && /initialise
+             arch-chroot $MOUNTPOINT /bin/bash -c "ls /etc"
+             read
              ;;              
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
           
