@@ -2714,7 +2714,7 @@ main_menu_online() {
 	fi
 	
     dialog --default-item ${HIGHLIGHT} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MMTitle" \
-    --menu "$_MMBody" 0 0 9 \
+    --menu "$_MMBody" 0 0 10 \
  	"1" "$_MMPrep" \
 	"2" "$_MMInstBse" \
 	"3" "$_MMConfBse" \
@@ -2723,7 +2723,8 @@ main_menu_online() {
 	"6" "Install Accessibility Packages" \
     "7" "$_MMRunMkinit" \
     "8" "$_SeeConfOpt" \
-	"9" "$_Done" 2>${ANSWER}
+    "9" "Chroot" \
+	"10" "$_Done" 2>${ANSWER}
 
     HIGHLIGHT=$(cat ${ANSWER})
     
@@ -2752,7 +2753,9 @@ main_menu_online() {
              ;;
         "7") run_mkinitcpio
              ;;
-        "8") edit_configs
+        "8") arch-chroot $MOUNTPOINT /bin/bash -c
+             ;;    
+        "9") edit_configs
              ;;            
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
           
