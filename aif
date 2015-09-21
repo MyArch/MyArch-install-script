@@ -2753,10 +2753,10 @@ main_menu_online() {
              ;;
         "7") run_mkinitcpio
              ;;
-        "8") arch-chroot $MOUNTPOINT /bin/bash -c
+        "8") edit_configs
              ;;    
-        "9") edit_configs
-             ;;            
+        "9") arch-chroot $MOUNTPOINT /bin/bash -c
+             ;;              
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
           
              if [[ $? -eq 0 ]]; then
