@@ -3,7 +3,7 @@
 ## English Translation File		
 ##								
 ##
-## Written by Carl Duff (20-Sep-2015)
+## Written by Carl Duff (01-Oct-2015)
 ##
 ##
 
@@ -171,12 +171,12 @@ _MirrorGenQ="Use generated mirrorlist for installer?"
 _MirrorGenDone="\nDone! Original Mirrorlist has been saved as:\n\n/etc/pacman.d/mirrorlist.orig\n\n"
 
 # Set Keymap (vconsole)
-_KeymapTitle=" Select Keymap "
-_KeymapBody="\nUse the [pg up] and [pg dwn] keys for navigation, or press the first letter of the keymap if known."
+_KeymapTitle=" Virtual Console "
+_KeymapBody="\nSelect Virtual Console Keymap."
 
 # Set Xkbmap (environment)
-_XkbmapTitle=" Select xkbmap "
-_XkbmapBody="Select Keyboard Layout"
+_XkbmapTitle=" X11 Desktop Environment "
+_XkbmapBody="\nSelect Desktop Environment Keymap."
 
 # Set Locale
 _LocateTitle=" Select locale "
@@ -374,7 +374,7 @@ _GCDetBody2="-Select 'Yes' to install its OPEN-SOURCE driver.\n\n-Select 'No' to
 _DEInfoTitle=" Install Desktop Environments "
 _DEInfoBody="\nThis option can be repeated to install multiple environments.\n\nGnome, KDE (full), and LXDE come with a display manager.\n\nCinnamon, Gnome and KDE come with a Network Manager.\n\n"
 
-# Install DE Menu - Translate
+# Install DE Menu
 _InstDETitle=" Install Desktop Environments "
 _InstDEBody="\nDesktop Environments are listed first, and may have multiple download options."
 
@@ -432,7 +432,7 @@ _ConfBseHost="Set Hostname"
 _ConfBseTime="Set Timezone"
 _ConfBseHWC="Set Hardware Clock"
 _ConfBseSysLoc="Set System Locale"
-_ConfBseVirtCon="Set Virtual Console"
+_ConfBseVirtCon="Set Keyboard Keymaps"
 
 # User Menu
 _ConfUsrTitle=" Configure User(s)"

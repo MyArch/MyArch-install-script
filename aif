@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.4 - 20-Sept-2015)
+# Architect Installation Framework (version 1.5 - 01-Oct-2015)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.4"
+VERSION="Architect Installation Framework 1.5"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -357,15 +357,17 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" \
 set_keymap() { 
 	
 	KEYMAPS=""
-    for i in $(localectl --no-pager list-keymaps); do
+    for i in $(ls -R /usr/share/kbd/keymaps | grep "map.gz" | sed 's/\.map.gz//g' | sort); do
         KEYMAPS="${KEYMAPS} ${i} -"
     done
     
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_KeymapTitle" \
     --menu "$_KeymapBody" 20 40 16 ${KEYMAPS} 2>${ANSWER} || prep_menu 
     KEYMAP=$(cat ${ANSWER})
-    loadkeys $KEYMAP 2>/tmp/.errlog
-    check_for_error
+    if [[ ! -d /etc/X11/xorg.conf.d/ ]]; then
+	   loadkeys $KEYMAP 2>/tmp/.errlog &&
+       check_for_error
+    fi
     echo "KEYMAP=$KEYMAP" > /tmp/vconsole.conf
   }
 
@@ -381,6 +383,10 @@ set_keymap() {
 	
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_XkbmapTitle" --menu "$_XkbmapBody" 0 0 16 ${XKBMAP_LIST} 2>${ANSWER} || config_base_menu
     XKBMAP=$(cat ${ANSWER} |sed 's/_.*//')
+    if [[ -d /etc/X11/xorg.conf.d/ ]]; then
+	   setxkbmap $KEYMAP 2>/tmp/.errlog &&
+       check_for_error
+    fi
     echo -e "Section "\"InputClass"\"\nIdentifier "\"system-keyboard"\"\nMatchIsKeyboard "\"on"\"\nOption "\"XkbLayout"\" "\"${XKBMAP}"\"\nEndSection" > /tmp/00-keyboard.conf
  
 }
@@ -2330,7 +2336,8 @@ prep_menu() {
 
     HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
-        "1") set_keymap 
+        "1") set_keymap
+             set_xkbmap 
              ;;
         "2") configure_mirrorlist
              ;;
@@ -2405,19 +2412,18 @@ config_base_menu() {
 	   SUB_MENU="config_base_menu"
 	   HIGHLIGHT_SUB=1
 	else
-	   if [[ $HIGHLIGHT_SUB != 7 ]]; then
+	   if [[ $HIGHLIGHT_SUB != 6 ]]; then
 	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
 	   fi
 	fi
 
-    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTitle" --menu "$_ConfBseBody" 0 0 7 \
+    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTitle" --menu "$_ConfBseBody" 0 0 6 \
  	"1" "$_ConfBseFstab" \
 	"2" "$_ConfBseHost" \
 	"3" "$_ConfBseTime" \
 	"4" "$_ConfBseHWC" \
 	"5" "$_ConfBseSysLoc" \
-	"6" "$_PrepKBLayout" \
-	"7" "$_Back" 2>${ANSWER}	
+	"6" "$_Back" 2>${ANSWER}	
 	
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
@@ -2430,8 +2436,6 @@ config_base_menu() {
         "4") set_hw_clock
              ;;            
         "5") set_locale
-             ;;
-        "6") set_xkbmap
              ;;            
           *) main_menu_online
              ;;
