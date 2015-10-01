@@ -6,6 +6,29 @@
 ##
 ##
 
+# Accessibility
+_InstAccOpt="Accessibility Packages (optional)"
+_InstAccTitle=" Install Accessibility Packages "
+_InstAccBody="Select desired accessibility packages."
+
+# btrfs
+_btrfsSVTitle=" btrfs Subvolumes "
+_btrfsSVBody="Create btrfs subvolumes?\n\nAn initial subvolume will be created and then mounted. Other subvolumes branching from this may then be created.\n\nOtherwise you can skip directly to the mounting options.\n"
+_btrfsSVTitle=" btrfs Subvolume Name "
+_btrfsMSubBody1="Enter the name of the initial subvolume to mount (e.g. ROOT). Mounting options may then be selected. Once mounted, all other subvolumes created for "
+_btrfsMSubBody2="will branch from it."
+_btrfsSVErrTitle=" btrfs Subvolume Name Error "
+_btrfsSVErrBody="Blanks or spaces are not permitted. Please try again.\n"
+_btrfsSVBody1="Enter the name of subvolume"
+_btrfsSVBody2="to create within"
+_btrfsSVBody3="\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name.\n\nCreated Subvols:"
+_btrfsMntTitle=" btrfs Mount Options "
+_btrfsMntBody="Use [Space] to de/select the desired mount options and review carefully. Please do not select multiple versions of the same option."
+_btrfsMntConfBody="Confirm the following mount options:\n\n"
+
+# Done!
+_DoneMsg="\nDone!\n\n"
+
 # Autopartition
 _AutoPartBIOSBody1="Attenzione : Tutti i dati su"
 _AutoPartBIOSBody2="saranno distrutti.\n\nVerrà creata una singola partizione che utilizza tutto lo spazio disponibile . Se l'intenzione di utilizzare SWAP , selezionare l'opzione ' File di Swap ' durante il montaggio.\n\nVuoi continuare?"
@@ -272,7 +295,7 @@ _OptUefiBody="\nI bootloader che possono essere installati successivamente dipen
 
 # UEFI Mountpoint
 _MntUefiTitle="Selezionare UEFI Mountpoint"
-_MntUefiBody="\nrEFInd richiede /boot/efi."
+_MntUefiBody="\nrEFInd richiede il montaggio in /boot/efi. systemd-boot richiede il montaggio in /boot. Grub2 va bene con entrambi."
 
 # Extra Partitions
 _ExtPartTitle=" Seleziona le partizioni addizionali "
@@ -314,7 +337,7 @@ _InstSysBody="\nPrima di chiudere il file di configurazione di Syslinux si prega
 
 # Install UEFI Bootloader
 _InstUefiBtTitle=" Installa UEFI Bootloader "
-_InstUefiBtBody="\n- Grub2 & systemd-bootnon ha preferenze di mount\n- rEFInd richiede il montaggio in /boot/efi.\n\nNOTA: EFI con LVM non è supportato."
+_InstUefiBtBody="\nrEFInd richiede il montaggio in /boot/efi. systemd-boot richiede il montaggio in /boot. Grub2 va bene con entrambi.\n\nNOTA: EFI con LVM non è supportato."
 
 # Set UEFI Grub as default
 _SetGrubDefTitle=" Vuoi Configurare Grub come Bootloader predefinito? "

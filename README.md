@@ -1,2 +1,2 @@
-# aif-dev
-Development version of the aif
+# aif
+Architect Installation Framework

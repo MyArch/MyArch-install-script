@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.3.1 - 12-Sept-2015)
+# Architect Installation Framework (version 1.4 - 20-Sept-2015)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.3.1"
+VERSION="Architect Installation Framework 1.4"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -95,7 +95,7 @@ FILE2=""					# Which second file is to be opened?
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 9 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 10 \
  	"1" $"English" \
  	"2" $"Italiano" \
  	"3" $"Russian" \
@@ -104,7 +104,8 @@ select_language() {
  	"6" $"Greek" \
  	"7" $"Danish" \
  	"8" $"Hungarian" \
- 	"9" $"Portuguese (Brazil)" 2>${ANSWER}
+ 	"9" $"Portuguese (Brazil)" \
+   "10" $"German/Deutsche" 2>${ANSWER}
 # 	"2" $"Deutsch" \
 # 	"3" $"Nederlands" \
 # 	"4" $"Eλληνικά" \
@@ -117,40 +118,40 @@ select_language() {
 # 	"11" $"Portugese" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
-        "1") source /aif-dev-master/english.trans
+        "1") source /aif-master/english.trans
              CURR_LOCALE="en_US.UTF-8"
              ;;
-        "2") source /aif-master/italian.trans
+        "2") source /aif-dev-master/italian.trans
              CURR_LOCALE="it_IT.UTF-8"
              ;; 
-        "3") source /aif-master/russian.trans
+        "3") source /aif-dev-master/russian.trans
              CURR_LOCALE="ru_RU.UTF-8"
              FONT="LatKaCyrHeb-14.psfu"
              ;;
-        "4") source /aif-master/turkish.trans
+        "4") source /aif-dev-master/turkish.trans
              CURR_LOCALE="tr_TR.UTF-8"
              FONT="LatKaCyrHeb-14.psfu"
              ;;
-        "5") source /aif-master/dutch.trans
+        "5") source /aif-dev-master/dutch.trans
              CURR_LOCALE="nl_NL.UTF-8"
              ;;             
         "6") source /aif-master/greek.trans
              CURR_LOCALE="el_GR.UTF-8"
              FONT="iso07u-16.psfu"       
              ;;
-        "7") source /aif-master/danish.trans
+        "7") source /aif-dev-master/danish.trans
              CURR_LOCALE="da_DK.UTF-8"
              ;;   
-        "8") source /aif-master/hungarian.trans
+        "8") source /aif-dev-master/hungarian.trans
              CURR_LOCALE="hu_HU.UTF-8"
              FONT="lat2-16.psfu"
              ;;
-        "9") source /aif-master/portuguese.trans
+        "9") source /aif-dev-master/portuguese.trans
              CURR_LOCALE="pt_BR.UTF-8"    
              ;;      
-#        "") source /aif-master/norwegian.trans
-#             CURR_LOCALE="nl_NL.UTF-8"
-#             ;;
+       "10") source /aif-dev-master/german.trans
+             CURR_LOCALE="de_DE.UTF-8"
+             ;;
 #        "") source /aif-master/spanish.trans
 #             CURR_LOCALE="es_ES.UTF-8"
 #             ;;
@@ -248,7 +249,7 @@ check_for_error() {
 # Ensure that a partition is mounted
 check_mount() {
 
-    if [[ $(ls ${MOUNTPOINT}) == "" ]]; then
+    if [[ $(lsblk -o MOUNTPOINT | grep ${MOUNTPOINT}) == "" ]]; then
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_ErrNoMount" 0 0
        main_menu_online
     fi
@@ -311,7 +312,8 @@ mirror_by_country() {
     mv -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.orig
     mv -f ${MIRROR_TEMP} /etc/pacman.d/mirrorlist
     chmod +r /etc/pacman.d/mirrorlist
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --msgbox "$_MirrorGenDone" 0 0
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --infobox "$_DoneMsg" 0 0
+	sleep 2
  else
     prep_menu
  fi
@@ -334,13 +336,12 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" \
              cp -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
              rankmirrors -n 10 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist 2>/tmp/.errlog
              check_for_error
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --msgbox "$_MirrorRankDone" 0 0
-             nano /etc/pacman.d/mirrorlist
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --infobox "$_DoneMsg" 0 0
+			 sleep 2
              ;;
          "4") if [[ -e /etc/pacman.d/mirrorlist.orig ]]; then       
 				 mv -f /etc/pacman.d/mirrorlist.orig /etc/pacman.d/mirrorlist
 				 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --msgbox "$_MirrorRestDone" 0 0
-				 nano /etc/pacman.d/mirrorlist
 		      else
 		         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorNoneTitle" --msgbox "$_MirrorNoneBody" 0 0
 		      fi
@@ -488,8 +489,7 @@ set_hostname() {
 
    echo "$HOST_NAME" > ${MOUNTPOINT}/etc/hostname 2>/tmp/.errlog
    check_for_error
-   sed -i "/127.0.0.1/s/$/ ${HOST_NAME}/" ${MOUNTPOINT}/etc/hosts
-   sed -i "/::1/s/$/ ${HOST_NAME}/" ${MOUNTPOINT}/etc/hosts
+   echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t${HOST_NAME}\n::1\tlocalhost.localdomain\tlocalhost\t${HOST_NAME}" > ${MOUNTPOINT}/etc/hosts
 }
 
 # Adapted and simplified from the Manjaro 0.8 and Antergos 2.0 installers
@@ -598,7 +598,7 @@ umount_partitions(){
 
 # Adapted from AIS
 confirm_mount() {
-    if [[ $(mount | grep $1) ]]; then
+    if [[ $(mount | grep $1) ]]; then   
       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc" 0 0
       sleep 2
       PARTITIONS="$(echo $PARTITIONS | sed s/${PARTITION}$' -'//)"
@@ -865,14 +865,14 @@ btrfs_subvols() {
  
  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --inputbox "$_btrfsMSubBody1 ${MOUNTPOINT}${MOUNT} $_btrfsMSubBody2" 0 0 "" 2>${ANSWER} || select_filesystem
  BTRFS_MSUB_VOL=$(cat ${ANSWER})
- # if root, then create flag for syslinux	
+ # if root, then create boot flag for syslinux, systemd-boot and rEFInd bootloaders	
  [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
 
  # Loop while subvolume is blank or has spaces.
  while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVErrTitle" --inputbox "$_btrfsSVErrBody" 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_MSUB_VOL=$(cat ${ANSWER})
-       # if root, then create flag for syslinux
+       # if root, then create flag for syslinux, systemd-boot and rEFInd bootloaders
        [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
  done
  
@@ -917,8 +917,9 @@ btrfs_subvols() {
  done
  
  # Show the subvolumes created
- ls  > /tmp/.subvols
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --textbox /tmp/.subvols 0 0
+ echo -e "btrfs subvols:\n" > /tmp/.subvols
+ ls  >> /tmp/.subvols
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --textbox /tmp/.subvols 0 0
  cd
 }
 
@@ -975,6 +976,7 @@ btrfs_mount_opts() {
    fi  
 
 }
+
     # LVM Detection. If detected, activate.
     detect_lvm
     if [[ $LVM -eq 1 ]]; then
@@ -1065,9 +1067,7 @@ btrfs_mount_opts() {
        fi
        check_for_error
        
-       # Inform users of the mountpoint options and consequences
-       #dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_OptUefiTitle" --msgbox "$_OptUefiBody" 0 0
-       
+       # Inform users of the mountpoint options and consequences       
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntUefiTitle" --menu "$_MntUefiBody"  0 0 2 \
  	   "1" $"/boot" \
 	   "2" $"/boot/efi" 2>${ANSWER}
@@ -1097,9 +1097,9 @@ btrfs_mount_opts() {
              if [[ $PARTITION == ${_Done} ]]; then
                 break;
              else
-                MOUNT=""    
-                select_filesystem
+                MOUNT=""
                 
+                select_filesystem 
                 [[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
 	            check_for_error
 	            
@@ -1147,8 +1147,7 @@ btrfs_mount_opts() {
                 LVM_SEP_BOOT=0
                 if [[ $MOUNT == "/boot" ]]; then
                    [[ $MOUNT_TYPE == "/dev/" ]] && LVM_SEP_BOOT=1 || LVM_SEP_BOOT=2
-                fi
-                                  
+                fi                   
              fi
        done
 }	
@@ -1429,20 +1428,20 @@ install_base() {
     case $(cat ${ANSWER}) in
         "1") # Latest Kernel
              clear
-             pacstrap ${MOUNTPOINT} base f2fs-tools btrfs-progs ntp sudo 2>/tmp/.errlog
+             pacstrap ${MOUNTPOINT} base btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
              ;;
         "2") # Latest Kernel and base-devel
              clear
-             pacstrap ${MOUNTPOINT} base base-devel f2fs-tools btrfs-progs ntp sudo 2>/tmp/.errlog
+             pacstrap ${MOUNTPOINT} base base-devel btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
              ;;
         "3") # LTS Kernel
              clear
-             pacstrap ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd diffutils e2fsprogs file filesystem findutils f2fs-tools gawk gcc-libs gettext glibc grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which xfsprogs btrfs-progs ntp sudo 2>/tmp/.errlog
+             pacstrap ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd diffutils e2fsprogs file filesystem findutils gawk gcc-libs gettext glibc grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which xfsprogs btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
              [[ $? -eq 0 ]] && LTS=1
              ;;
         "4") # LTS Kernel and base-devel
              clear
-             pacstrap ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd diffutils e2fsprogs file filesystem findutils f2fs-tools gawk gcc-libs gettext glibc grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which xfsprogs base-devel btrfs-progs ntp sudo 2>/tmp/.errlog
+             pacstrap ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd diffutils e2fsprogs file filesystem findutils gawk gcc-libs gettext glibc grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which xfsprogs base-devel btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
              [[ $? -eq 0 ]] && LTS=1
              ;;
           *) install_base_menu
@@ -1523,12 +1522,6 @@ bios_bootloader() {
              [[ $LTS -eq 1 ]] && sed -i 's/linux/linux-lts/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
              [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
              
-             #if [[ $LVM_ROOT -eq 0 ]]; then
-             #   dialog --title "$_InstSysTitle" --msgbox "$_InstSysBody APPEND root=/dev/$ROOT_PART rw\n" 0 0
-             #else
-             #   dialog --title "$_InstSysTitle" --msgbox "$_InstSysBody APPEND root=/dev/mapper/$ROOT_PART rw\n" 0 0
-             #fi
-             
              BOOTLOADER="Syslinux"
              ;;
           *) install_base_menu
@@ -1593,7 +1586,7 @@ uefi_bootloader() {
               check_for_error
               
               # Now generate config file to pass kernel parameters. Default read only (ro) changed to read-write (rw),
-              # and amend where using btfs subvol root    
+              # and amend where using btfs subvol root       
               arch_chroot "refind-mkrlconf" 2>/tmp/.errlog
               check_for_error
               sed -i 's/ro /rw /g' ${MOUNTPOINT}/boot/refind_linux.conf
@@ -1621,21 +1614,21 @@ uefi_bootloader() {
            
           # Deal with LTS Kernel
           if [[ $LTS -eq 1 ]]; then
-            echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=PARTUUID=${sysdb_root} rw" > ${MOUNTPOINT}/boot/loader/entries/arch.conf
+            echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=PARTUUID=${sysdb_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
           else
-            echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux\ninitrd\t/initramfs-linux.img\noptions\troot=PARTUUID=${sysdb_root} rw" > ${MOUNTPOINT}/boot/loader/entries/arch.conf
+            echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux\ninitrd\t/initramfs-linux.img\noptions\troot=PARTUUID=${sysdb_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
           fi
           
           # Fix LVM Root installations, and deal with btrfs root subvolume mounting
           [[ $LVM_ROOT -eq 1 ]] && sed -i "s/PARTUUID=//g" ${MOUNTPOINT}/boot/loader/entries/arch.conf
           [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/loader/entries/arch.conf
-       
+          
           BOOTLOADER="systemd-boot"
           # Set the loader file  
           echo -e "default  arch\ntimeout  5" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf 2>/tmp/.errlog
           check_for_error
           ;;
-      
+          
       *) install_base_menu
          ;;
       esac 
@@ -1891,7 +1884,7 @@ install_gc() {
     if [[ $GC_DETECTED == "Unknown" ]]; then
        gc_driver_menu
     else
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $GC_DETECTED $_GCDetTitle " --yesno "${GRAPHIC_CARD}\n $_GCDetBody $GC_DETECTED?\n\n $_GCDetBody2" 0 0 && install_gc || gc_driver_menu
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $GC_DETECTED $_GCDetTitle " --yesno "${GRAPHIC_CARD}\n$_GCDetBody $GC_DETECTED?\n\n$_GCDetBody2" 0 0 && install_gc || gc_driver_menu
     fi
 
 }
@@ -2183,7 +2176,7 @@ dm_menu(){
                    user_list=$(ls ${MOUNTPOINT}/home/ | sed "s/lost+found//")
 				   for i in ${user_list[@]}; do
                        if [[ -n ${MOUNTPOINT}/home/$i/.xinitrc ]]; then
-                          cp -f ${MOUNTPOINT}/etc/skel/.xinitrc ${MOUNTPOINT}/home/$i
+                          cp -f ${MOUNTPOINT}/etc/X11/xinit/xinitrc ${MOUNTPOINT}/home/$i/.xinitrc
 	                      arch_chroot "chown -R ${i}:users /home/${i}"
 	                   fi
                        echo 'exec $1' >> ${MOUNTPOINT}/home/$i/.xinitrc
@@ -2527,7 +2520,7 @@ install_desktop_menu() {
 		fi
 	fi
 
-	dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "Accessibility Options" --menu "Select any or all accessibility options." 0 0 17 \
+	dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstAccTitle" --menu "$_InstAccBody" 0 0 17 \
 	"1" $"accerciser" \
 	"2" $"at-spi2-atk" \
 	"3" $"at-spi2-core" \
@@ -2543,7 +2536,7 @@ install_desktop_menu() {
 	"13" $"orca" \
 	"14" $"qt-at-spi" \
 	"15" $"speech-dispatcher" \
-	"16" $"install all" \
+	"16" "$_All" \
 	"17" "$_Back" 2>${ANSWER}
 
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
@@ -2714,17 +2707,16 @@ main_menu_online() {
 	fi
 	
     dialog --default-item ${HIGHLIGHT} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MMTitle" \
-    --menu "$_MMBody" 0 0 10 \
+    --menu "$_MMBody" 0 0 9 \
  	"1" "$_MMPrep" \
 	"2" "$_MMInstBse" \
 	"3" "$_MMConfBse" \
 	"4" "$_MMConfUsr" \
 	"5" "$_MMInstDE" \
-	"6" "Install Accessibility Packages" \
+	"6" "$_InstAccOpt" \
     "7" "$_MMRunMkinit" \
     "8" "$_SeeConfOpt" \
-    "9" "Chroot" \
-	"10" "$_Done" 2>${ANSWER}
+	"9" "$_Done" 2>${ANSWER}
 
     HIGHLIGHT=$(cat ${ANSWER})
     
@@ -2733,7 +2725,7 @@ main_menu_online() {
        check_mount
     fi
 
-    if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 9 ]]; then
+    if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 7 ]]; then
        check_mount
        check_base
     fi
@@ -2754,16 +2746,7 @@ main_menu_online() {
         "7") run_mkinitcpio
              ;;
         "8") edit_configs
-             ;;    
-        "9") 
-             while [[ $(cat $ANSWER) != "exit\|Exit" ]]; do
-             echo "" > /tmp/.crt
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "Arch-Chroot" --inputbox "input your command" 0 0 "" 2>${ANSWER} || main_menu_online
-             [[ $(cat $ANSWER) != "exit" ]] && arch-chroot $MOUNTPOINT /bin/bash -c "$(cat $ANSWER)" > /tmp/.crt
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "Results" --textbox /tmp/.crt 0 0
-             
-             done
-             ;;              
+             ;;            
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
           
              if [[ $? -eq 0 ]]; then

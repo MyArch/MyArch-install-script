@@ -3,9 +3,14 @@
 ## English Translation File		
 ##								
 ##
-## Written by Carl Duff for Evo/Lution Linux (13th December 2014)
+## Written by Carl Duff (20-Sep-2015)
 ##
 ##
+
+# Accessibility
+_InstAccOpt="Accessibility Packages (optional)"
+_InstAccTitle=" Install Accessibility Packages "
+_InstAccBody="Select desired accessibility packages."
 
 # btrfs
 _btrfsSVTitle=" btrfs Subvolumes "
@@ -20,7 +25,10 @@ _btrfsSVBody2="to create within"
 _btrfsSVBody3="\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name.\n\nCreated Subvols:"
 _btrfsMntTitle=" btrfs Mount Options "
 _btrfsMntBody="Use [Space] to de/select the desired mount options and review carefully. Please do not select multiple versions of the same option."
-_btrfsMntConfBody="Confirm the following mount options:\n"
+_btrfsMntConfBody="Confirm the following mount options:\n\n"
+
+# Done!
+_DoneMsg="\nDone!\n\n"
 
 # Autopartition
 _AutoPartBody1="Warning: ALL data on"
@@ -45,7 +53,7 @@ _WirelssFirmTitle=" Select Wireless Device Firmware "
 _WirelssFirmBody="\nSome wireless devices require additional firmware to be installed in order to work.\n\nWhere unsure if additional firmware is required - or which to select - then all of them can be installed."
 _SeeWirelessDev="Display Wireless Device (optional)"
 _WirelessShowTitle=" Wireless Device "
-_WirelessErrBody="\nNone Detected."
+_WirelessErrBody="\nNone Detected.\n"
 _All="All"
 
 # Select Config Files
@@ -76,7 +84,6 @@ _LvmNameVgBody="\nEnter the name of the Volume Group (VG) to create.\n\nThe VG i
 
 _LvmNameVgErrTitle=" LVM - VG Name Error "
 _LvmNameVgErr="\nInvalid Name Entered. The Volume Group name may be alpha-numeric, but may not contain spaces, start with a '/', or already be in use.\n\n"
-
 
 _LvmPvSelTitle=" LVM - Select Partitions "
 _LvmPvSelBody="\nSelect the partition(s) to use for the Physical Volume (PV).\n"
@@ -136,7 +143,7 @@ _ConFailTitle=" Connection Failure "
 _ConFailBody="\nInternet connection test failed. Exiting.\n\n"
 
 _ReqMetTitle=" Requirements Met "
-_ReqMetBody="\nAll checks passed! \n\n"
+_ReqMetBody="\nAll checks passed!\n\n"
 
 _UefiDet="UEFI System Detected"
 _BiosDet="BIOS System Detected"
@@ -159,7 +166,7 @@ _MirrorNoneBody="\nA copy of the original mirrorlist was not found.\n\n"
 _MirrorCntryTitle=" Select Country "
 _MirrorCntryBody="\nA list of mirrors by the selected country will be generated.\n\nOnce reviewed, you can choose to use it or not."
 _MirrorGenTitle=" Generating Mirrorlist "
-_MirrorGenBody="\nGenerating a mirrorlist. Please wait... "
+_MirrorGenBody="\nGenerating a mirrorlist. Please wait...\n\n"
 _MirrorGenQ="Use generated mirrorlist for installer?"
 _MirrorGenDone="\nDone! Original Mirrorlist has been saved as:\n\n/etc/pacman.d/mirrorlist.orig\n\n"
 
@@ -245,7 +252,6 @@ _DevSelBody="\nDevices (/dev) are available hard-disks and USB-sticks to install
 # Select Device (Grub) - seperate body text is not required (uses standard device selection text)
 _DevSelGrubTitle=" Select Grub Device "
 
-
 # Partitioning Tool - Translate
 _PartToolTitle=" Partitioning Tool "
 _PartToolBody="\nAn Auto-Partition option is available for beginners. CFDisk is recomended for BIOS, Parted for UEFI.\n\nDO NOT select a UEFI/GPT-only partitioning tool for a BIOS/MBR system as this could cause serious problems, including an unbootable installation."
@@ -269,7 +275,7 @@ _SelRootBody="\nThis is the partition where Arch will be installed."
 
 # Select SWAP
 _SelSwpTitle=" Select SWAP Partition "
-_SelSwpBody="\nIf using a Swapfile, it will be the same size as your RAM."
+_SelSwpBody="\nIf using a Swapfile, it will be created the same size as your RAM."
 _SelSwpNone="None"
 _SelSwpFile="Swapfile"
 
@@ -288,7 +294,7 @@ _OptUefiBody="\nThe bootloader(s) that can be installed later will depend on whe
 
 # UEFI Mountpoint - Translate
 _MntUefiTitle=" Select UEFI Mountpoint "
-_MntUefiBody="\nrEFInd requires /boot/efi. Grub and systemd-boot will work either mountpoint."
+_MntUefiBody="\nrEFInd requires /boot/efi. systemd-boot requires /boot. Grub will work with either mountpoint."
 
 # Extra Partitions
 _ExtPartTitle=" Select Additional Partition "
@@ -317,35 +323,26 @@ _InstWirBody="\nInstalling supplementary wireless packages...\n\n"
 
 # Install BIOS Bootloader
 _InstBiosBtTitle=" Install BIOS Bootloader "
-_InstBiosBtBody="\nGrub2 is recommended for beginners. The installation device can also be selected.\n\nSyslinux is a lighter and simpler alternative, usually used to boot Linux installation media. It will only work with 'ext' filesystems, however."
+_InstBiosBtBody="\nGrub2 is recommended for beginners. The installation device can also be selected.\n\nSyslinux is a lighter and simpler alternative that will only work with ext/btrfs filesystems."
 
 # Grub Installation
 _InstGrubDevTitle=" Select Grub Device "
 _InstGrubDevBody="\nInstall Grub on the same device/hard-drive as Root"
 _InstGrubDevBody2="\n\nPick 'Yes' if you are only installing on one device."
 
-# Syslinux Installation
-_InstSysTitle=" Syslinux Configuration Check "
-_InstSysBody="\nPlease check the syslinux configuration file.\n\nIt should contain the command:\n"
-
-# Install UEFI Bootloader - Translate
+# Install UEFI Bootloader
 _InstUefiBtTitle=" Install UEFI Bootloader "
-_InstUefiBtBody="\n- Grub2 and systemd-boot have no UEFI mount preference.\n- rEFInd requires mount at /boot/efi.\n\nNOTE: rEFInd with LVM is not supported."
+_InstUefiBtBody="\nrEFInd requires /boot/efi. systemd-boot requires /boot. Grub will work with either mountpoint.\n\nNOTE: rEFInd with LVM is not supported."
 
 # Set UEFI Grub as default
 _SetGrubDefTitle=" Set Grub as Default Bootloader? "
 _SetGrubDefBody="\nSome UEFI firmware may not detect Grub unless it is set as the default bootloader, resulting in an unbootable system in such instances.\n\nDo you wish to set Grub as the default bootloader?\n\nIt is recommended to select 'Yes', especially for beginners. This will copy the bootable grubx64.efi stub to"
 _SetGrubDefBody2="and rename it to bootx64.efi, as required.\n\nOtherwise select 'No', particularly if there is already a default bootloader, and/or where intending to use multiple bootloaders."
 
-# Gummiboot Configuration Check - Remove
-#_ChkGumTitle=" Gummiboot Configuration Check "
-#_ChkGumBody="\nPlease check the arch and loader configuration files before closing them to continue.\n"
-
 # Set rEFInd as default
 _SetRefiDefTitle=" Set rEFInd as Default Bootloader? "
 _SetRefiDefBody="\nSome UEFI firmware may not detect rEFInd unless it is set as the default bootloader, resulting in an unbootable system in such instances.\n\nDo you wish to set rEFInd as the default bootloader?\n\nIt is recommended to select 'Yes', especially for beginners. This will install rEFInd to"
 _SetRefiDefBody2="with the bootx64.efi stub required.\n\nOtherwise select 'No', particularly if there is already a default bootloader, and/or where intending to use multiple bootloaders."
-
 
 # efi file set for Grub or Refind
 _SetDefDoneTitle=" UEFI File Copied "
@@ -370,7 +367,7 @@ _NvidiaConfBody="\nA basic NVIDIA configuration file has been created. Please ch
 
 # Graphics Card Detection
 _GCDetTitle="Detected"
-_GCDetBody="\nIs your graphics card"
+_GCDetBody="\nIs your graphics card or virtualisation software"
 _GCDetBody2="-Select 'Yes' to install its OPEN-SOURCE driver.\n\n-Select 'No' to open the graphics card menu, which includes proprietary NVIDIA drivers."
 
 #  Install DE Info
@@ -378,7 +375,7 @@ _DEInfoTitle=" Install Desktop Environments "
 _DEInfoBody="\nThis option can be repeated to install multiple environments.\n\nGnome, KDE (full), and LXDE come with a display manager.\n\nCinnamon, Gnome and KDE come with a Network Manager.\n\n"
 
 # Install DE Menu - Translate
-_InstDETitle=" Install Desktop Environments  "
+_InstDETitle=" Install Desktop Environments "
 _InstDEBody="\nDesktop Environments are listed first, and may have multiple download options."
 
 # Install Common Packages
@@ -390,8 +387,8 @@ _DmDoneTitle="Enabled "
 _DMDoneBody="has been enabled.\n\n"
 
 # LXDM or LightDM
-_DmChoiceTitle=" Choose Display Manager "
-_DmChoiceBody="\nPlease choose your display manager.\n"
+_DmChTitle=" Choose Display Manager "
+_DmChBody="\nPlease choose your display manager.\n"
 
 # DM Already Installed
 _DmInstTitle=" Display Manager Installed "
@@ -408,13 +405,13 @@ _InstNMDoneBody="\nThe network connection manager has been installed and enabled
 # Network Manager Already Installed (no need for seperate title)
 _InstNMErrBody="\nA network connection manager has already been installed and enabled."
 
-# Welcome - Translate
+# Welcome
 _WelTitle=" Welcome to"
 _WelBody="\nThis installer will download the latest packages from the Arch repositories. Installations are vanilla, so only the minimal necessary configuration is undertaken.\n\nHighlight options by pressing their numbers or by using the up/down arrow keys before pressing [enter] to confirm.\n\nSwitch between buttons by using [Tab] or the left/right arrow keys before pressing [enter] to confirm.\n"
 
 # Preparation Menu
 _PrepTitle=" Prepare Installation "
-_PrepBody="\nThe desktop keyboard layout will be used for both the installer and - where installing a desktop environment - the installed system.\n"
+_PrepBody="\nThe console keyboard layout will be used for both the installer and the installed system.\n"
 _PrepKBLayout="Set Desktop Keyboard Layout"
 _PrepMirror="Configure Installer Mirrorlist (optional)"
 _PrepPartDisk="Partition Disk"
@@ -428,8 +425,8 @@ _InstBse="Install Base"
 _InstBootldr="Install Bootloader"
 
 # Configure Base Menu
-_ConfBseTitle=" Configure Base"
-_ConfBseBody="\nBasic configuration of the base is required. This includes setting basic networking, time, language, and keyboard defaults for the installed system."
+_ConfBseTitle=" Configure Base "
+_ConfBseBody="\nBasic configuration of the base."
 _ConfBseFstab="Generate FSTAB"
 _ConfBseHost="Set Hostname"
 _ConfBseTime="Set Timezone"

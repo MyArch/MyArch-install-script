@@ -2,6 +2,29 @@
 #Taduçao de Inglês para Portugues Brasil
 #Traduzido por Carlos Araujo
 
+# Accessibility
+_InstAccOpt="Accessibility Packages (optional)"
+_InstAccTitle=" Install Accessibility Packages "
+_InstAccBody="Select desired accessibility packages."
+
+# btrfs
+_btrfsSVTitle=" btrfs Subvolumes "
+_btrfsSVBody="Create btrfs subvolumes?\n\nAn initial subvolume will be created and then mounted. Other subvolumes branching from this may then be created.\n\nOtherwise you can skip directly to the mounting options.\n"
+_btrfsSVTitle=" btrfs Subvolume Name "
+_btrfsMSubBody1="Enter the name of the initial subvolume to mount (e.g. ROOT). Mounting options may then be selected. Once mounted, all other subvolumes created for "
+_btrfsMSubBody2="will branch from it."
+_btrfsSVErrTitle=" btrfs Subvolume Name Error "
+_btrfsSVErrBody="Blanks or spaces are not permitted. Please try again.\n"
+_btrfsSVBody1="Enter the name of subvolume"
+_btrfsSVBody2="to create within"
+_btrfsSVBody3="\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name.\n\nCreated Subvols:"
+_btrfsMntTitle=" btrfs Mount Options "
+_btrfsMntBody="Use [Space] to de/select the desired mount options and review carefully. Please do not select multiple versions of the same option."
+_btrfsMntConfBody="Confirm the following mount options:\n\n"
+
+# Done!
+_DoneMsg="\nDone!\n\n"
+
 #Autoparticionamento
 _AutoPartBody1="Warning: ALL data on"
 _AutoPartUEFIBody2="será destruído.\n\nUma única partição usando todo o espaço disponível será criada. Se a intenção é usar SWAP, selecione a opção 'File Swap' durante a montagem..\n\nDeseja continuar? "
@@ -266,7 +289,7 @@ _OptUefiBody="\nO Bootloader que vai ser instalado mais tarde vai depender de on
 
 # UEFI Mountpoint - Translate
 _MntUefiTitle=" Selecionar ponto de montagem UEFI "
-_MntUefiBody="\nrEFInd requer /boot/efi.requere /boot/efi. Grub e systemd-boot irá trabalhar com todos."
+_MntUefiBody="\nrEFInd requer montagem em /boot/efi. systemd-boot requer montagem em /boot."
 
 # Extra Partitions
 _ExtPartTitle=" Selecionar Partições Adicionais "
@@ -308,7 +331,7 @@ _InstSysBody="\nPor favor, verifique o arquivo de configuração do syslinux.\n\
 
 # Install UEFI Bootloader - Translate
 _InstUefiBtTitle=" Instalar UEFI Bootloader "
-_InstUefiBtBody="\nrEFInd requer montagem em /boot/efi.\n\nNOTE: rEFInd com LVM não é suportado."
+_InstUefiBtBody="\nrEFInd requer montagem em /boot/efi. systemd-boot requer montagem em /boot.\n\nNOTE: rEFInd com LVM não é suportado."
 
 # Set UEFI Grub as default
 _SetGrubDefTitle=" Definir Grub como Bootloader por padrão? "
