@@ -419,7 +419,7 @@ _ConfBseHost="Ustaw nazwę hosta"
 _ConfBseTime="Ustaw strefę czasową"
 _ConfBseHWC="Ustaw zegar sprzętowy"
 _ConfBseSysLoc="Konfiguruj lokalizację systemu"
-_ConfBseVirtCon="Konfiguruj konsolę wirtualną"
+_ConfBseVirtCon="Konfiguruj konsolę wirtualną / X11"
 
 # User Menu
 _ConfUsrTitle=" Konfiguracja kont użytkowników "
