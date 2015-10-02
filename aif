@@ -365,7 +365,7 @@ set_keymap() {
     --menu "$_KeymapBody" 20 40 16 ${KEYMAPS} 2>${ANSWER} || prep_menu 
     KEYMAP=$(cat ${ANSWER})
     if [[ ! -d /etc/gtk-2.0/ ]]; then
-	   loadkeys $KEYMAP 2>/tmp/.errlog &&
+	   loadkeys $KEYMAP 2>/tmp/.errlog
        check_for_error
     fi
     echo -e "KEYMAP=${KEYMAP}\nFONT=${FONT}" > /tmp/vconsole.conf
