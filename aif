@@ -364,7 +364,7 @@ set_keymap() {
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_KeymapTitle" \
     --menu "$_KeymapBody" 20 40 16 ${KEYMAPS} 2>${ANSWER} || prep_menu 
     KEYMAP=$(cat ${ANSWER})
-    if [[ ! -d /etc/X11/xorg.conf.d/ ]]; then
+    if [[ ! -d /etc/gtk-2.0/ ]]; then
 	   loadkeys $KEYMAP 2>/tmp/.errlog &&
        check_for_error
     fi
