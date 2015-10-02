@@ -383,7 +383,7 @@ set_keymap() {
 	
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_XkbmapTitle" --menu "$_XkbmapBody" 0 0 16 ${XKBMAP_LIST} 2>${ANSWER} || config_base_menu
     XKBMAP=$(cat ${ANSWER} |sed 's/_.*//')
-    if [[ -d /etc/X11/xorg.conf.d/ ]]; then
+    if [[ -d /etc/X11/ ]]; then
 	   setxkbmap $KEYMAP 2>/tmp/.errlog
        check_for_error
     fi
