@@ -166,7 +166,7 @@ select_language() {
     sed -i "s/#${CURR_LOCALE}/${CURR_LOCALE}/" /etc/locale.gen
     locale-gen >/dev/null 2>&1
     export LANG=${CURR_LOCALE}
-    [[ $FONT != "" ]] && setfont $FONT
+    [[ $FONT != "" ]] && [[ ! -d /etc/gtk-2.0/ ]] && setfont $FONT
 }
 
 
@@ -368,7 +368,7 @@ set_keymap() {
 	   loadkeys $KEYMAP 2>/tmp/.errlog &&
        check_for_error
     fi
-    echo "KEYMAP=$KEYMAP" > /tmp/vconsole.conf
+    echo -e "KEYMAP=${KEYMAP}\nFONT=${FONT}" > /tmp/vconsole.conf
   }
 
 # Set keymap for X11
