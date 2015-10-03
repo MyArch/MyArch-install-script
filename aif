@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.5 - 01-Oct-2015)
+# Architect Installation Framework (version 1.5 - 02-Oct-2015)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -49,7 +49,6 @@ SHOW_ONCE=0           		# Show de_wm information only once
 
 # Architecture
 ARCHI=`uname -m`     		# Display whether 32 or 64 bit system
-UEFI=0               		# Is the system UEFI?
 SYSTEM="Unknown"     		# Display whether system is BIOS or UEFI. Default is "unknown"
 ROOT_PART=""          		# ROOT partition
 UEFI_PART=""				# UEFI partition
@@ -152,12 +151,6 @@ select_language() {
        "10") source /aif-dev-master/german.trans
              CURR_LOCALE="de_DE.UTF-8"
              ;;
-#        "") source /aif-master/spanish.trans
-#             CURR_LOCALE="es_ES.UTF-8"
-#             ;;
-#       "") source /aif-master/portuguese.trans
-#             CURR_LOCALE="pt_PT.UTF-8"
-#             ;;
           *) exit 0
              ;;
     esac
@@ -217,10 +210,8 @@ id_system() {
       if [[ -z $(mount | grep /sys/firmware/efi/efivars) ]]; then
         mount -t efivarfs efivarfs /sys/firmware/efi/efivars
       fi
-      UEFI=1
       SYSTEM="UEFI"
     else
-      UEFI=0
       SYSTEM="BIOS"
     fi
          
@@ -471,7 +462,7 @@ generate_fstab() {
              ;;
         "2") genfstab -L -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
              ;;
-        "3") if [[ $UEFI -eq 1 ]]; then
+        "3") if [[ $SYSTEM == "UEFI" ]]; then
                 genfstab -t PARTUUID -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
              else 
                 genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
@@ -689,7 +680,7 @@ delete_partitions(){
  part_table=$(parted -s ${DEVICE} print | grep -i 'partition table' | awk '{print $3}')
 
  # Autopartition for BIOS systems 
- if [[ $UEFI -eq 0 ]]; then
+ if [[ $SYSTEM == "BIOS" ]]; then
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Auto-Partition (BIOS/MBR) " --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBIOSBody2" 0 0
 	
 	if [[ $? -eq 0 ]]; then
@@ -776,12 +767,12 @@ find_partitions() {
     done
     
     # Deal with incorrect partitioning
-    if [[ $NUMBER_PARTITIONS -lt 2 ]] && [[ $UEFI -eq 1 ]]; then
+    if [[ $NUMBER_PARTITIONS -lt 2 ]] && [[ $SYSTEM == "UEFI" ]]; then
         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_UefiPartErrTitle" --msgbox "$_UefiPartErrBody" 0 0
         create_partitions
     fi
     
-    if [[ $NUMBER_PARTITIONS -eq 0 ]] && [[ $UEFI -eq 0 ]]; then
+    if [[ $NUMBER_PARTITIONS -eq 0 ]] && [[ $SYSTEM == "BIOS" ]]; then
         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_BiosPartErrTitle" --msgbox "$_BiosPartErrBody" 0 0	
         create_partitions
     fi
@@ -1059,7 +1050,7 @@ btrfs_mount_opts() {
     fi
     
     # Extra Step for VFAT UEFI Partition. This cannot be in an LVM container.
-    if [[ $UEFI -eq 1 ]]; then
+    if [[ $SYSTEM == "UEFI" ]]; then
     
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelUefiTitle" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || config_base_menu  
        PARTITION=$(cat ${ANSWER})
@@ -1110,7 +1101,7 @@ btrfs_mount_opts() {
 	            check_for_error
 	            
                 # Don't give /boot as an example for UEFI systems!
-                if [[ $UEFI -eq 1 ]]; then
+                if [[ $SYSTEM == "UEFI" ]]; then
                    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --inputbox "$_ExtNameBodyUefi" 0 0 "/" 2>${ANSWER} || config_base_menu
                 else
                    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --inputbox "$_ExtNameBodyBios" 0 0 "/" 2>${ANSWER} || config_base_menu
@@ -1122,7 +1113,7 @@ btrfs_mount_opts() {
                       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtErrTitle" --msgbox "$_ExtErrBody" 0 0
                       
                       # Don't give /boot as an example for UEFI systems!
-                      if [[ $UEFI -eq 1 ]]; then
+                      if [[ $SYSTEM == "UEFI" ]]; then
                          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --inputbox "$_ExtNameBodyUefi" 0 0 "/" 2>${ANSWER} || config_base_menu
                       else
                          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --inputbox "$_ExtNameBodyBios" 0 0 "/" 2>${ANSWER} || config_base_menu
@@ -1646,7 +1637,7 @@ uefi_bootloader() {
     arch_chroot "PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/core_perl" 2>/tmp/.errlog
     check_for_error
 
-    if [[ $UEFI -eq 0 ]]; then
+    if [[ $SYSTEM == "BIOS" ]]; then
        bios_bootloader
     else
        uefi_bootloader
@@ -1924,9 +1915,8 @@ install_de_wm() {
 	"16" $"i3 WM" \
     "17" $"Ice WM" \
     "18" $"Openbox WM" \
-    "19" $"Openbox (fully configured)" \
-    "20" $"Pek WM" \
-    "21" $"WindowMaker WM" 2>${ANSWER}
+    "19" $"Pek WM" \
+    "20" $"WindowMaker WM" 2>${ANSWER}
 
    case $(cat ${ANSWER}) in
         "1") # Cinnamon
@@ -2025,94 +2015,11 @@ install_de_wm() {
               clear
               pacstrap ${MOUNTPOINT} openbox openbox-themes polkit-gnome xterm 2>/tmp/.errlog
              ;; 
-        "19") #Openbox (pre-configured)
-              
-              # Pick File Manager
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " File Manager " \
-              --menu "" 9 0 3 \
- 	          "1" $"PCManFM" \
-	          "2" $"SpaceFM" \
-	          "3" $"Thunar" 2>${ANSWER}
-	
-              case $(cat ${ANSWER}) in
-				"1") OPENBOXFM="pcmanfm" 
-                     ;;
-				"2") OPENBOXFM="spacefm"
-					 ;;
-				"3") OPENBOXFM="thunar"
-					 ;;
-				  *) install_de_wm
-					 ;;            
-			  esac
-			  
-			  # Pick Internet Browser
-			  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Browser " \
-			  --menu "" 0 0 5 \
-			  "1" $"Chromium" \
-			  "2" $"FireFox" \
-			  "3" $"Midori" \
-			  "4" $"Netsurf" \
-			  "5" $"Opera" 2>${ANSWER}
-	
-			  case $(cat ${ANSWER}) in
-				"1") OPENBOXIB="chromium" 
-					 ;;
-				"2") OPENBOXIB="firefox"
-					 ;;
-				"3") OPENBOXIB="midori"
-					 ;;
-				"4") OPENBOXIB="netsurf"
-					 ;;
-				"5") OPENBOXIB="opera"
-					 ;;
-				  *) install_de_wm
-					 ;;            
-			  esac
-			  			  
-              clear
-              pacstrap ${MOUNTPOINT} openbox oblogout openbox-themes numix-themes xcursor-vanilla-dmz tint2 conky libgnomeui obconf lxappearance-obconf lxinput lxrandr lxterminal volumeicon gnome-alsamixer dmenu xlockmore flashplugin polkit-gnome xterm ${OPENBOXFM} ${OPENBOXIB} 2>/tmp/.errlog
-              
-              cp -f /aif-master/openbox-full/oblogout.conf ${MOUNTPOINT}/etc
-              cp -f /aif-master/openbox-full/.gtkrc-2.0 ${MOUNTPOINT}/root
-              sed -i "s/architect/root/" ${MOUNTPOINT}/root/.gtkrc-2.0
-              
-              user_list=""
-              user_list=$(ls ${MOUNTPOINT}/home/ | sed "s/lost+found//")
-		      for i in ${user_list[@]}; do
-				[[ -n ${MOUNTPOINT}/home/$i/.config/openbox ]] && mkdir -p ${MOUNTPOINT}/home/$i/.config/openbox
-				[[ -n ${MOUNTPOINT}/home/$i/.config/tint2 ]] && mkdir -p ${MOUNTPOINT}/home/$i/.config/tint2
-				[[ -n ${MOUNTPOINT}/home/$i/.config/gtk-3.0 ]] && mkdir -p ${MOUNTPOINT}/home/$i/.config/gtk-3.0
-				[[ -n ${MOUNTPOINT}/home/$i/.config/volumeicon ]] && mkdir -p ${MOUNTPOINT}/home/$i/.config/volumeicon
-				
-				cp -f /aif-master/openbox-full/.conkyrc ${MOUNTPOINT}/home/$i
-				cp -f /aif-master/openbox-full/.gtkrc-2.0 ${MOUNTPOINT}/home/$i
-				cp -f /aif-master/openbox-full/settings.ini ${MOUNTPOINT}/home/$i/.config/gtk-3.0
-				cp -f /aif-master/openbox-full/tint2rc ${MOUNTPOINT}/home/$i/.config/tint2
-				cp -f /aif-master/openbox-full/volumeicon ${MOUNTPOINT}/home/$i/.config/volumeicon
-				cp -f /aif-master/openbox-full/autostart ${MOUNTPOINT}/home/$i/.config/openbox
-				cp -f /aif-master/openbox-full/environment ${MOUNTPOINT}/home/$i/.config/openbox
-				cp -f /aif-master/openbox-full/menu.xml ${MOUNTPOINT}/home/$i/.config/openbox
-				cp -f /aif-master/openbox-full/rc.xml ${MOUNTPOINT}/home/$i/.config/openbox
-				
-				sed -i "s/architect/${i}/" ${MOUNTPOINT}/home/$i/.gtkrc-2.0
-				sed -i "s/thunar/${OPENBOXFM}/" ${MOUNTPOINT}/home/$i/.config/openbox/menu.xml ${MOUNTPOINT}/home/$i/.config/openbox/rc.xml
-				sed -i "s/firefox/${OPENBOXIB}/" ${MOUNTPOINT}/home/$i/.config/openbox/menu.xml ${MOUNTPOINT}/home/$i/.config/openbox/rc.xml
-				
-				[[ $OPENBOXFM == "pcmanfm" ]] && sed -i "s/Thunar/PCManFM/" ${MOUNTPOINT}/home/$i/.config/openbox/menu.xml ${MOUNTPOINT}/home/$i/.conkyrc
-				[[ $OPENBOXFM == "spacefm" ]] && sed -i "s/Thunar/SpaceFM/" ${MOUNTPOINT}/home/$i/.config/openbox/menu.xml ${MOUNTPOINT}/home/$i/.conkyrc
-				[[ $OPENBOXIB == "chromium" ]] && sed -i "s/Firefox/Chromium/" ${MOUNTPOINT}/home/$i/.config/openbox/menu.xml ${MOUNTPOINT}/home/$i/.conkyrc
-				[[ $OPENBOXIB == "midori" ]] && sed -i "s/Firefox/Midori/" ${MOUNTPOINT}/home/$i/.config/openbox/menu.xml ${MOUNTPOINT}/home/$i/.conkyrc
-				[[ $OPENBOXIB == "netsurf" ]] && sed -i "s/Firefox/Netsurf/" ${MOUNTPOINT}/home/$i/.config/openbox/menu.xml ${MOUNTPOINT}/home/$i/.conkyrc
-				[[ $OPENBOXIB == "opera" ]] && sed -i "s/Firefox/Opera/" ${MOUNTPOINT}/home/$i/.config/openbox/menu.xml ${MOUNTPOINT}/home/$i/.conkyrc
-
-				arch_chroot "chown -R ${i}:users /home/${i}"
-              done
-             ;;
-        "20") #PekWM
+        "19") #PekWM
               clear
               pacstrap ${MOUNTPOINT} pekwm pekwm-themes polkit-gnome xterm 2>/tmp/.errlog
              ;;
-        "21") #WindowMaker
+        "20") #WindowMaker
              clear
              pacstrap ${MOUNTPOINT} windowmaker polkit-gnome xterm 2>/tmp/.errlog
              ;;        
