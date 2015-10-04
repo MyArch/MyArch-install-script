@@ -95,26 +95,17 @@ FILE2=""					# Which second file is to be opened?
 select_language() {
     
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 10 \
- 	"1" $"English" \
- 	"2" $"Italiano" \
- 	"3" $"Russian" \
- 	"4" $"Turkish" \
- 	"5" $"Dutch" \
- 	"6" $"Greek" \
- 	"7" $"Danish" \
- 	"8" $"Hungarian" \
- 	"9" $"Portuguese (Brazil)" \
-   "10" $"German/Deutsche" 2>${ANSWER}
-# 	"2" $"Deutsch" \
-# 	"3" $"Nederlands" \
-# 	"4" $"Eλληνικά" \
-# 	"5" $"Norsk" \
-# 	"6" $"Italiano" \
-# 	"7" $"Español" \
-# 	"8" $"Русский" \
-# 	"9" $"Polski" \
-# 	"10" $"Magyar" \
-# 	"11" $"Portugese" 2>${ANSWER}
+ 	"1" $"English 	 (en)" \
+ 	"2" $"Italian 	 (it)" \
+ 	"3" $"Russian 	 (ru)" \
+ 	"4" $"Turkish 	 (tr)" \
+ 	"5" $"Dutch   	 (nl)" \
+ 	"6" $"Greek   	 (el)" \
+ 	"7" $"Danish     (da)" \
+ 	"8" $"Hungarian  (hu)" \
+ 	"9" $"Portuguese (pt)" \
+   "10" $"German	 (de)" \
+   "11" $"French   	 (fr)" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
         "1") source /aif-dev-master/english.trans
@@ -150,6 +141,9 @@ select_language() {
              ;;      
        "10") source /aif-dev-master/german.trans
              CURR_LOCALE="de_DE.UTF-8"
+             ;;
+       "11") source /aif-dev-master/french.trans
+             CURR_LOCALE="fr_FR.UTF-8"
              ;;
           *) exit 0
              ;;
