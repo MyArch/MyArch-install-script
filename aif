@@ -105,7 +105,7 @@ select_language() {
  	"8" $"Hungarian 	(hu)" \
  	"9" $"Portuguese 	(pt)" \
    "10" $"German	 	(de)" \
-   "11" $"French   	 (fr)" 2>${ANSWER}
+   "11" $"French		(fr)" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
         "1") source /aif-dev-master/english.trans
