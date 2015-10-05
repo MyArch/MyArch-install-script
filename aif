@@ -1643,14 +1643,15 @@ install_wireless_firmware() {
     
     check_mount
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_WirelssFirmTitle" --menu "$_WirelssFirmBody" 0 0 7 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_WirelssFirmTitle" --menu "$_WirelssFirmBody" 0 0 8 \
  	"1" "$_SeeWirelessDev" \
  	"2" $"Broadcom 802.11b/g/n" \
- 	"3" $"Intel PRO/Wireless 2100" \
- 	"4" $"Intel PRO/Wireless 2200" \
- 	"5" $"ZyDAS ZD1211(b) 802.11a/b/g USB WLAN" \
- 	"6" "$_All" \
- 	"7" "$_Back" 2>${ANSWER}
+ 	"3" $"Broadcom BCM203x / STLC2300 Bluetooth" \
+ 	"4" $"Intel PRO/Wireless 2100" \
+ 	"5" $"Intel PRO/Wireless 2200" \
+ 	"6" $"ZyDAS ZD1211(b) 802.11a/b/g USB WLAN" \
+ 	"7" "$_All" \
+ 	"8" "$_Back" 2>${ANSWER}
 
     case $(cat ${ANSWER}) in
     "1") # Identify the Wireless Device 
@@ -1665,19 +1666,23 @@ install_wireless_firmware() {
          clear
          pacstrap ${MOUNTPOINT} b43-fwcutter 2>/tmp/.errlog
         ;;
-    "3") # Intel 2100
+    "3") # Bluetooth
+         clear
+         pacstrap ${MOUNTPOINT} bluez-firmware 2>/tmp/.errlog
+         ;;
+    "4") # Intel 2100
          clear
          pacstrap ${MOUNTPOINT} ipw2100-fw 2>/tmp/.errlog
         ;;
-    "4") # Intel 2200
+    "5") # Intel 2200
          clear
          pacstrap ${MOUNTPOINT} ipw2200-fw 2>/tmp/.errlog
         ;;
-    "5") # ZyDAS
+    "6") # ZyDAS
          clear
          pacstrap ${MOUNTPOINT} zd1211-firmware 2>/tmp/.errlog
         ;;
-    "6") # All
+    "7") # All
          clear
          pacstrap ${MOUNTPOINT} b43-fwcutter ipw2100-fw ipw2200-fw zd1211-firmware 2>/tmp/.errlog
         ;;
