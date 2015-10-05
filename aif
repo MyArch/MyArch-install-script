@@ -136,7 +136,7 @@ select_language() {
              CURR_LOCALE="hu_HU.UTF-8"
              FONT="lat2-16.psfu"
              ;;
-        "9") source /aif-master/portuguese.trans
+        "9") source /aif-dev-master/portuguese.trans
              CURR_LOCALE="pt_BR.UTF-8"    
              ;;      
        "10") source /aif-dev-master/german.trans
