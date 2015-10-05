@@ -1684,7 +1684,7 @@ install_wireless_firmware() {
         ;;
     "7") # All
          clear
-         pacstrap ${MOUNTPOINT} b43-fwcutter ipw2100-fw ipw2200-fw zd1211-firmware 2>/tmp/.errlog
+         pacstrap ${MOUNTPOINT} b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw zd1211-firmware 2>/tmp/.errlog
         ;;
       *) install_base_menu
         ;;
