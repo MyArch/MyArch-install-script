@@ -431,7 +431,7 @@ _ConfBseHost="Configurer le nom d'hôte"
 _ConfBseTime="Configurer le fuseau horaire"
 _ConfBseHWC="Configurer l'horloge matérielle"
 _ConfBseSysLoc="Configurer les paramètres régionaux"
-_ConfBseVirtCon="Configurer les agencements de clavier"
+_ConfBseVirtCon="Configurer Console Virtuelle"
 
 # Menu utilisateur
 _ConfUsrTitle=" Configurer le ou les utilisateurs"

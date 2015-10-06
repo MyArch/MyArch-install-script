@@ -460,7 +460,7 @@ _ConfBseHost="Bilgisayar Adı Ayarla"
 _ConfBseTime="Zaman Dİlimi ayarla"
 _ConfBseHWC="Donanım Saati Ayarla"
 _ConfBseSysLoc="Sistem locale"
-_ConfBseVirtCon="Sanal Konsol Ayarla / X11"
+_ConfBseVirtCon="Sanal Konsol Ayarla"
 
 # User Menu
 _ConfUsrTitle=" Kullanıcı(lar)ı Ayarla "

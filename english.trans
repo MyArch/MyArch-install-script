@@ -432,7 +432,7 @@ _ConfBseHost="Set Hostname"
 _ConfBseTime="Set Timezone"
 _ConfBseHWC="Set Hardware Clock"
 _ConfBseSysLoc="Set System Locale"
-_ConfBseVirtCon="Set Keyboard Keymaps"
+_ConfBseVirtCon="Set Virtual Console"
 
 # User Menu
 _ConfUsrTitle=" Configure User(s)"

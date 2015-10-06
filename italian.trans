@@ -457,7 +457,7 @@ _ConfBseHost="Imposta Hostname"
 _ConfBseTime="Configura fuso orario"
 _ConfBseHWC="Configura l'Orologio Hardware"
 _ConfBseSysLoc="Configura il linguaggio del sistema"
-_ConfBseVirtCon="Configura Console Virtuale / X11"
+_ConfBseVirtCon="Configura Console Virtuale"
 
 # User Menu
 _ConfUsrTitle=" Configura gli Utenti"

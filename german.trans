@@ -426,7 +426,7 @@ _ConfBseHost="Setze Hostname"
 _ConfBseTime="Setze Timezone"
 _ConfBseHWC="Setze Hardware Clock"
 _ConfBseSysLoc="Setze System Locale"
-_ConfBseVirtCon="Setze Virtual Console / X11"
+_ConfBseVirtCon="Setze Virtual Console"
 
 # User Menu
 _ConfUsrTitle=" Benutzer Einstellungen"

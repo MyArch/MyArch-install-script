@@ -440,7 +440,7 @@ _ConfBseHost="Stel Host-naam in"
 _ConfBseTime="Stel Tijdzone in"
 _ConfBseHWC="Stel Hardware-klok in"
 _ConfBseSysLoc="Stel de Systeemtaal in"
-_ConfBseVirtCon="Stel Virtuele Console / X11"
+_ConfBseVirtCon="Stel Virtuele Console"
 
 # User Menu
 _ConfUsrTitle=" Configureer Gebruiker(s)"

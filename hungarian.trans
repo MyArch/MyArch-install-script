@@ -454,7 +454,7 @@ _ConfBseHost="Hosztnév beállítása"
 _ConfBseTime="Időzóna beállítása"
 _ConfBseHWC="Hardveres óra beállítása"
 _ConfBseSysLoc="Tartózkodási hely beállítása"
-_ConfBseVirtCon="Virtuális konzol / X11 beállítása"
+_ConfBseVirtCon="Virtuális konzol beállítása"
  
 # User Menu
 _ConfUsrTitle=" Felhasználók beállítása"

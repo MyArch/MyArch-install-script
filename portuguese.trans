@@ -436,7 +436,7 @@ _ConfBseHost="Definir Hostname"
 _ConfBseTime="Definir Timezone"
 _ConfBseHWC="Definir Hardware Clock"
 _ConfBseSysLoc="Definir System Locale"
-_ConfBseVirtCon="Definir Console Virtual / X11"
+_ConfBseVirtCon="Definir Console Virtual"
 
 # User Menu
 _ConfUsrTitle=" Configurar Usuário(s)"

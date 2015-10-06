@@ -441,7 +441,7 @@ _ConfBseHost="Indstil Computer Navn"
 _ConfBseTime="Indstil Tids Zone"
 _ConfBseHWC="Indstil Computer Ur"
 _ConfBseSysLoc="Indstil System Sprog"
-_ConfBseVirtCon="Indstil Konsol / X11"
+_ConfBseVirtCon="Indstil Konsol"
 
 # User Menu
 _ConfUsrTitle=" Opsætning af Bruger(e)"
