@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.5.2"
+VERSION="Architect Installation Framework 1.5.3"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
