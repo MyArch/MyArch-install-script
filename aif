@@ -1711,7 +1711,7 @@ install_alsa_xorg_input() {
      # now copy across .xinitrc for all user accounts
      user_list=$(ls ${MOUNTPOINT}/home/ | sed "s/lost+found//")
 	 for i in ${user_list[@]}; do
-	     cp -f ${MOUNTPOINT}/etc/skel/.xinitrc ${MOUNTPOINT}/home/$i
+	     cp -f ${MOUNTPOINT}/etc/X11/xinit/xinitrc ${MOUNTPOINT}/home/$i
 	     arch_chroot "chown -R ${i}:users /home/${i}"
      done
      
