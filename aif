@@ -1830,10 +1830,10 @@ install_gc() {
                                 arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>/tmp/.errlog
 								check_for_error
 								;;
-				    "Syslinux") sed -i 's/INITRD ..\/initramfs-linux.img/INITRD ..\/intel-ucode.img,initramfs-linux.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-								sed -i 's/INITRD ..\/initramfs-linux-lts.img/INITRD ..\/intel-ucode.img,initramfs-linux-lts.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-								sed -i 's/INITRD ..\/initramfs-linux-fallback.img/INITRD ..\/intel-ucode.img,initramfs-linux-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-								sed -i 's/INITRD ..\/initramfs-linux-lts-fallback.img/INITRD ..\/intel-ucode.img,initramfs-linux-lts-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				    "Syslinux") sed -i 's/INITRD[[:space:]]..\/initramfs-linux.img/INITRD ..\/intel-ucode.img,initramfs-linux.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+								sed -i 's/INITRD[[:space:]]..\/initramfs-linux-lts.img/INITRD ..\/intel-ucode.img,initramfs-linux-lts.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+								sed -i 's/INITRD[[:space:]]..\/initramfs-linux-fallback.img/INITRD ..\/intel-ucode.img,initramfs-linux-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+								sed -i 's/INITRD[[:space:]]..\/initramfs-linux-lts-fallback.img/INITRD ..\/intel-ucode.img,initramfs-linux-lts-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
                                 ;;
                 "systemd-boot") sed -i '/linux \//a initrd \/intel-ucode.img' ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
                                 ;;
