@@ -1831,16 +1831,18 @@ install_gc() {
                   arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>/tmp/.errlog
 				  check_for_error
 			   fi
+			   
 			   if [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]]; then
 				    sed -i 's/..\/initramfs-linux.img/..\/intel-ucode.img,initramfs-linux.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 					sed -i 's/..\/initramfs-linux-lts.img/..\/intel-ucode.img,initramfs-linux-lts.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 					sed -i 's/..\/initramfs-linux-fallback.img/..\/intel-ucode.img,initramfs-linux-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 					sed -i 's/..\/initramfs-linux-lts-fallback.img/..\/intel-ucode.img,initramfs-linux-lts-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 			   fi
+			   
                if [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf ]]; then
 				   sed -i '/linux \//a initrd \/intel-ucode.img' ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf                    
                fi
-               
+               ;;
  "VirtualBox") dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
                clear
                [[ $LTS == 0 ]] && pacstrap ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules 2>/tmp/.errlog \
