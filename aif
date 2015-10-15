@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.5.5 - 13-Oct-2015)
+# Architect Installation Framework (version 1.5.6 - 15-Oct-2015)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.5.5"
+VERSION="Architect Installation Framework 1.5.6"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -1832,12 +1832,12 @@ install_gc() {
 				  check_for_error
 			   fi
 			   
-				#if [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]]; then
-				#	sed -i 's/linux.img/a/intel-ucode.img,initramfs-linux.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-				#	sed -i 's/..\/initramfs-linux-lts.img/..\/intel-ucode.img,initramfs-linux-lts.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-				#  sed -i 's/..\/initramfs-linux-fallback.img/..\/intel-ucode.img,initramfs-linux-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-				#  sed -i 's/..\/initramfs-linux-lts-fallback.img/..\/intel-ucode.img,initramfs-linux-lts-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-				#  fi
+				if [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]]; then
+					sed -i 's/linux.img/a/intel-ucode.img,..\/initramfs-linux.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+					sed -i 's/..\/initramfs-linux-lts.img/intel-ucode.img,..\/initramfs-linux-lts.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+					sed -i 's/..\/initramfs-linux-fallback.img/intel-ucode.img,..\/initramfs-linux-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+					sed -i 's/..\/initramfs-linux-lts-fallback.img/intel-ucode.img,..\/initramfs-linux-lts-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				fi
 			   
                if [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf ]]; then
 				   sed -i '/linux \//a initrd \/intel-ucode.img' ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf                    
