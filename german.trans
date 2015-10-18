@@ -1,29 +1,35 @@
-## Deutsche Sprachdatei
+##
+## 							
+## Deutsche Sprachdatei		
+##								
+##
+## Written by Carl Duff (06-Oct-2015)
+##
+##
 
 # Accessibility
-_InstAccOpt="Accessibility Pakete (optional)"
-_InstAccTitle="Accessibility Pakete installieren"
-_InstAccBody="Wähle gewünschte Accessibility Pakete."
+_InstAccTitle="Accessibility Pakete (optional)"
+_InstAccBody="Accessibility Pakete installieren."
+_InstAccBody="Gewuenschte accessibility Pakete auswaehlen."
 
 # btrfs
-_btrfsSVTitle=" btrfs Dateisysteme "
+_btrfsSVTitle=" btrfs Subvolumes "
 _btrfsSVBody="Soll ein btrfs Dateisystem erstellt werden?\n\nEin initiales Dateisystem wird erstellt und gemounted. Weitere Dateisysteme die darin erstellt wurden, werden danach erstellt.\n\nAnsonsten können Sie gleich zu den Mounting Optionen wechseln.\n"
-_btrfsSVTitle=" btrfs Dateisystem Name "
+_btrfsSVTitle=" Name des btrfs Subvolumes"
 _btrfsMSubBody1="Bitte geben Sie einen Namen für das initiale Dateisystem (z.B. ROOT) an. Weitere Mounting Optionen können hier gewählt werden. Wenn fertig gemounted, werden alle anderen Dateisysteme erstellt für "
 _btrfsMSubBody2="wird darin erstellt."
-_btrfsSVErrTitle=" btrfs Dateisystem Name FEHLER "
-_btrfsSVErrBody="Leerzeichen sind nicht erlaubt. Bitte erneut versuchen.\n"
-_btrfsSVBody1="Bitte den Namen des Dateisystems eingeben"
+_btrfsSVErrTitle="Fehler im btrfs Subvolume Namen"
+_btrfsSVErrBody="Leerzeichen sind nicht erlaubt. Bitte erneut versuchen..\n"
 _btrfsSVBody2="wird erstellt in"
 _btrfsSVBody3="\n\nDieser Vorgang wird wiederholt bis ein Sternchen (*) als Name des Dateisystems eingegeben wird.\n\nErstellte Dateisysteme:"
 _btrfsMntTitle=" btrfs Mount Optionen "
 _btrfsMntBody="[Space] zur An/Abwahl der gewünschten Mount Optionen und überprüfen Sie sorgfältig alles. Bitte verwenden Sie jede Option nur 1x."
 _btrfsMntConfBody="Bestätigen Sie die folgenden Mount Optionen:\n\n"
-
 # Done!
-_DoneMsg="\nFertig!\n\n"
 
+_DoneMsg="\nFertig!\n\n"
 # Autopartitionierung
+
 _AutoPartBody1="Warnung: ALLE Daten auf "
 _AutoPartBIOSBody2="werden gelöscht.\n\nEs wird eine einzelne Partition erstellt, die den gesamten verfügbaren Platz einnimmt. Soll diese als SWAP genutzt werden, wählen Sie die 'Swap File' Option beim Mounten.\n\nMöchten Sie fortfahren?"
 _AutoPartUEFIBody2="Werden gelöscht.\n\nEine 512MB UEFI Bootpartition wird erstellt, gefolgt von einer zweiten Systempartition, die den übrigen Festplattenplatz einnimmt. Soll diese als SWAP genutzt werden, wählen Sie die 'Swap File' Option beim Mounten.\n\nMöchten Sie fortfahren?"
@@ -38,15 +44,15 @@ _ErrNoBase="\nDas Paket Arch base muss zuerst installiert werden.\n\n"
 # Vbox Installationen
 
 _VBoxInstTitle=" VirtualBox Installation "
-_VBoxInstBody="\nManchmal laden die VirtualBox Gastmodule für das installierte System nicht (z.B. bei geringer Auflösung und Scroll-Leisten nach dem booten), ein Einzeiler in der Konsole kann dies lösen:\n\n$ su\n# depmod -a\n# modprobe -a vboxvideo vboxguest vboxsf\n# reboot"
+_VBoxInstBody="\nManchmal werden die VirtualBox Gastmodule für das installierte System nicht geladen, folgende Eingaben in der Konsole können dies lösen:\n\n$ su\n# depmod -a\n# modprobe -a vboxvideo vboxguest vboxsf\n# reboot"
 # Select Wireless Firmware Driver(s)
 
 _InstWirelessFirm="Installiere Wlan Geräte Firmware"
 _WirelssFirmTitle=" Wähle Wlan Geräte Firmware "
-_WirelssFirmBody="\nFür manche Wlan Geräte muss zusätzliche Firmware installiert werden.\n\nWenn Sie unsicher sind welche Firmware Pakete Sie benötigen, können Sie einfach alle Firmware Pakete installieren."
+_WirelssFirmBody="\nFür manche Wlan Geräte muss eine zusätzliche Firmware installiert werden.\n\nWenn Sie sich unsicher sind welche Firmware Pakete Sie benötigen, wählen Sie einfach Punkt Nr.6."
 _SeeWirelessDev="Zeige erkannte Wlangeräte (optional)"
-_WirelessShowTitle="Wlangerät "
-_WirelessErrBody="\nNicht erkannt.\n"
+_WirelessShowTitle=" Wlangerät "
+_WirelessErrBody="\nNichts erkannt.\n"
 _All="Alle"
 # Select Config Files
 
@@ -55,7 +61,7 @@ _SeeConfOptTitle=" Konfigurationsdateien "
 _SeeConfOptBody="\nWähle einen Eintrag in der Liste zum überprüfen.\n"
 _SeeConfErrTitle=" Überprüfung ergab FEHLER "
 _SeeConfErrBody1="\nDatei nicht vorhanden.\n\n"
-_SeeConfErrBody2="\nDas "Base" System muss zuerst installiert werden.\n\n"
+_SeeConfErrBody2="\nDas 'Base' System muss zuerst installiert werden.\n\n"
 # Pacman - translate
 
 _PrepPacKey="Aktualisieren der Pacman Schlüssel"
@@ -123,7 +129,7 @@ _LvmCompBody="\nFertig! Alle Logical Volumes für die Volume Group wurden erfolg
 
 
 _DevShowTitle=" Laufwerke / Partitionen "
-_DevShowOpt="Liste Laufwerke (optional)"
+_DevShowOpt="Erkannte Laufwerke anzeigen (optional)"
 # Check Requirements and Identify System Type - Translate
 
 _ChkTitle=" Überprüfe technische Anforderungen "
@@ -144,9 +150,9 @@ _BiosDet="BIOS System erkannt"
 
 _MirrorlistTitle=" Mirrorlist "
 _MirrorlistBody="\nDie Mirrorlist enthält die Server Adressen für Pacman, der Erste Listeneintrag wird von Pacman zuerst verarbeitet.\n\n"
-_MirrorbyCountry="Erstelle eine Mirrorlist nach Ländern sortiert"
-_MirrorEdit="Manuelles editieren der Mirrorlist"
-_MirrorRank="Sortiere die Mirrorlist nach schnellsten Servern"
+_MirrorbyCountry="Nach Ländern sortierte 'Mirrorlist' erstellen"
+_MirrorEdit="Editieren der Mirrorlist"
+_MirrorRank="Sortieren der Mirrorlist nach schnellsten Servern"
 _MirrorRestore="Originale Mirrorlist wieder herstellen"
 _MirrorRankTitle=" Ausführung von RankMirrors "
 _MirrorRankBody="\nSuche nach den schnellsten Servern in der Mirrorlist. Bitte warten...\n\n"
@@ -156,41 +162,41 @@ _MirrorNoneTitle=" Mirrorlist FEHLER "
 _MirrorNoneBody="\nKonnte keine originale Mirrorlist finden.\n\n"
 # Generate Mirrorlist by country
 
-_MirrorCntryTitle=" Wähle ein Land "
-_MirrorCntryBody="\nEine Liste von Spiegelservern für das gewählte Land wird erstellt.\n\n Bitte zunächst überprüfen, danach verwenden oder verwerfen."
+_MirrorCntryTitle=" Wählen Sie ein Land "
+_MirrorCntryBody="\nBitte wählen Sie zunächst ein Land aus, die Liste der  Spiegelserver für das ausgewählte Land wird dann automatisch erstellt.\n\n Die Mirrorlist kann im erscheinenden Editor (Steuerung unten) bearbeitet werden, speichern der Mirrorlist mittels [Strg+o, Enter], schliessen des Editors mittels [Strg+x, Enter]."
 _MirrorGenTitle=" Erstelle Mirrorlist "
 _MirrorGenBody="\nErstelle eine Mirrorlist. Bitte warten...\n\n"
-_MirrorGenQ="Die erstellte Mirrorlist für die Installation verwenden?"
+_MirrorGenQ="Die erstellte Mirrorlist für diese Installation verwenden?"
 _MirrorGenDone="\nFertig! Originale Mirrorlist gespeichert als:\n\n/etc/pacman.d/mirrorlist.orig\n\n"
 # Set Keymap (vconsole)
 
 _KeymapTitle=" Wählen Sie eine Keymap "
-_KeymapBody="\nVerwenden Sie die Tasten [pg up] und [pg down] zur Auswahl, oder drücken Sie den Ersten Buchstaben des Namens der KEYMAP."
-# Set Xkbmap (environment)
+_KeymapTitle=" Virtuelle Konsole "
+_KeymapBody="\nSelect Virtual Console Keymap."
 
 _XkbmapTitle=" Wähle xkbmap "
-_XkbmapBody="Wähle Keyboard Layout"
-# Set Locale
+_XkbmapTitle=" X11 Desktop Umgebung "
+_XkbmapBody="\nWaehlen Sie das Desktop Umgebung Keyboard Layout aus."
 
 _LocateTitle=" Länderauswahl, Lokalisierung "
-_localeBody="Wähle eine Lokalisierung"
+_localeBody="Wählen Sie eine Lokalisierung"
 # Set Timezone
 
-_TimeZTitle=" Wähle eine Zeitzone (Time Zone) "
+_TimeZTitle=" Wählen Sie eine Zeitzone (Time Zone) "
 _TimeZBody="\nDie Zeitzone wird verwendet um die Systemuhr korrekt einzustellen."
-_TimeSubZTitle=" Wähle Zeit Sub-Zone "
-_TimeSubZBody="\nWähle eine Stadt in deiner Nähe."
+_TimeSubZTitle=" Wählen Sie die Zeit Sub-Zone "
+_TimeSubZBody="\nWählen Sie eine Stadt in der Nähe."
 _TimeZQ="Erstelle Zeitzone (Time Zone) als"
 # Set Hardware Clock
 
-_HwCTitle=" Hardware Clock einstellen "
-_HwCBody="\nUTC ist der universale Time Standard, empfohlen sofern kein Dual-Boot mit Windows geplant ist."
+_HwCTitle=" Hardware Uhr einstellen "
+_HwCBody="\nUTC (Universal Time Clock) ist ein universeller System-Uhr-Standard, wird empfohlen sofern kein Dual-Boot-System mit Windows geplant ist. Ansonsten 'local time' verwenden."
 _HwCUTC="UTC"
 _HwLocal="Local Time"
 # Generate FSTAB 
 
 _FstabTitle=" Erstelle FSTAB "
-_FstabBody="\nDie Datei FSTAB (File System TABle) definiert welche Laufwerke/Geräte und Partitionen wie und wo gemounted (eingebunden) bzw. verwendet werden.\n\nUUID/PARTUUID (Universally Unique IDentifier) wird empfohlen.\n\nWenn kein 'Label' für die Partitionen vergeben wurde, wird der Geräte Name verwendet. "
+_FstabBody="\nDie Datei FSTAB (File System TABle) definiert welche Geräte, Laufwerke und Partitionen wie und wo gemounted (eingebunden) bzw. verwendet werden.\n\nUUID/PARTUUID (Universally Unique IDentifier) wird empfohlen.\n\nWenn kein 'Label' für die Partitionen vergeben wurde, wird der Geräte Name verwendet. "
 _FstabDev="Dev (Partition code)"
 _FstabLabel="Label (frei wählbar)"
 _FstabUUID="UUID/PARTUUID (unique code)"
@@ -201,7 +207,7 @@ _FstabUUID="UUID/PARTUUID (unique code)"
 # Set Hostname
 
 _HostNameTitle=" Konfiguriere Host Name "
-_HostNameBody="\nDer Host Name ist die Identifizierung des Systems im Netzwerk.\n\nZahlen und Buchstaben sind erlaubt, (-)  nur am Anfang oder Ende max 63 Zeichen.\n"
+_HostNameBody="\nDer Host Name ist die Identifizierung des Systems in einem Netzwerk.\n\nZahlen und Buchstaben sind erlaubt, Bindestrich (-) darf nur am Anfang oder Ende stehen, darf max. 63 Zeichen lang sein.\n"
 # Set Root Password
 
 _PassRtTitle=" Erstelle das Root Passwort "
@@ -213,26 +219,26 @@ _PassRtErrTitle=" Root Passwort FEHLER "
 _PassRtErrBody="\nDie eingegebenen Root Passwörter stimmen nicht überein. Bitte Erneut eingeben.\n\n"
 # Create New User
 
-_NUsrTitle=" Erstelle neuen User/Benutzer "
-_NUsrBody="\nGeben Sie den Namen des Benutzers in Kleinbuchstaben ein.\n"
+_NUsrTitle=" Erstelle Benutzer Account "
+_NUsrBody="\nBitte geben Sie den Namen des neuen Benutzers in Kleinbuchstaben ein.\n"
 # Username Error
 
 _NUsrErrTitle=" Benutzer Name FEHLER "
 _NUsrErrBody="\nUngültiger Benutzername. Bitte Erneut eingeben.\n\n"
 # Set User Password
 
-_PassNUsrTitle=" Erstelle User/Benutzer Passwort "
-_PassNUsrBody="\neingeben des Passwort für"
-_PassNUsrBody2="\nerneut eingeben des Passwort für" 
+_PassNUsrTitle=" Erstelle das Benutzer Passwort "
+_PassNUsrBody="\nGeben Sie das gewünschte Benutzer Passwort für"
+_PassNUsrBody2="\nGeben Sie das gewünschte Benutzer Passwort erneut ein" 
 # Create New User
 
-_NUsrTitle=" Erstelle neuen User/Benutzer "
+_NUsrTitle=" Erstelle Benutzer Account "
 _NUsrSetTitle=" Benutzereinstellungen "
-_NUsrSetBody="\nErstelle Benutzeraccounts und Gruppenzuordnung...\n\n"
+_NUsrSetBody="\nErstelle Benutzeraccounts, Benutzerordner und Gruppenzuordnungen...\n\n"
 
 # User Password Error
 _PassNUsrErrTitle=" Benutzer Passwort FEHLER "
-_PassNUsrErrBody="\nDie eingegebenen Benutzer Passwörter stimmen nicht überein. Bitte Erneut eingeben.\n\n"
+_PassNUsrErrBody="\nDie eingegebenen Benutzer Passwörter stimmen nicht überein. Bitte erneut eingeben.\n\n"
 
 # Mounting (Partitions)
 _MntStatusTitle=" Mount Status "
@@ -241,14 +247,14 @@ _MntStatusFail="\nMount fehlgeschlagen!\n\n"
 
 # Select Device (installation) - Translate
 _DevSelTitle=" Wähle Gerät / Laufwerk "
-_DevSelBody="\nZur Installation verfügbare HD's und USB-sticks (/dev). Das Erste Laufwerk ist /sda, das Zweite /sdb, usw.\n\nWenn Architect von einem USB-Stick gebootet wurde, bedenken Sie bitte das dieses Laufwerk (USB-Stick) ebenfalls in der Liste erscheint!"
+_DevSelBody="\nZur Installation verfügbare Laufwerke und USB-sticks (/dev). Das Erste Laufwerk wird mit '/sda' bezeichnet, das Zweite mit '/sdb' bezeichnet usw.\n\nWenn der Architect Arch Linux Installer von einem USB-Stick gebootet wurde, bedenken Sie bitte das dieses Laufwerk (USB-Stick) ebenfalls in der Liste erscheint!"
 
 # Select Device (Grub) - seperate body text is not required (uses standard device selection text)
 _DevSelGrubTitle=" Wähle Gerät für die Grub Installation "
 
 # Partitioning Tool - Translate
-_PartToolTitle=" Partitionierungs Tool "
-_PartToolBody="\nFür Anfänger ist eine Auto-Partitionierungs Option verfügbar. CFDisk wird empfohlen für BIOS, Parted für UEFI.\n\nNiemals ein UEFI/GPT 'only' Partitionierungstool für ein BIOS/MBR System verwenden! Sonst können Fehler die das System unbrauchbar machen entstehen."
+_PartToolTitle=" Partitionierung (Partitionstabelle erstellen) "
+_PartToolBody="\nFür Anfänger ist eine automatische Partitionierungsoption verfügbar. CFDisk wird empfohlen für BIOS (dos-Partitionstabellen) und Parted für UEFI (gpt-Partitonstabellen).\n\nNiemals ein UEFI/GPT 'only' Partitionierungstool für ein BIOS/MBR System verwenden! Sonst können Fehler entstehen, die das System unbrauchbar machen."
 
 # UEFI Partitioning Error
 _UefiPartErrTitle=" UEFI Partitionierung FEHLER " 
@@ -256,22 +262,22 @@ _UefiPartErrBody="\nUEFI Systeme benötigen minimum 2 Partitionen für eine Inst
 
 # BIOS Partitioning Error
 _BiosPartErrTitle=" BIOS Partitionierung FEHLER "
-_BiosPartErrBody="\nBIOS Systeme benötigen minimum eine Partitionen für eine Installation (ROOT).\n\nBitte die Partitionen anpassen."
+_BiosPartErrBody="\nBIOS Systeme benötigen minimum eine Partitionen für eine Installation (ROOT).\n\nBitte die Partitionen entsprechend anpassen."
 
 # File System
-_FSTitle=" Wähle ein Dateisystem "
-_FSBody="\nExt4 wird empfohlen. Nicht alle Dateisysteme sind geeignet für eine Root oder Boot Partition. Alle haben unterschiedliche Optionen und Limitationen."
-_FSSkip="Überspringen / Keine" 
+_FSTitle=" Wählen Sie ein Dateisystem "
+_FSBody="\nDas Dateisystem Ext4 (Menüpunkt Nr.5) wird empfohlen. Bitte bedenken Sie, dass nicht alle Dateisysteme geeignet sind als Root oder Boot Partition. Alle Dateisysteme haben unterschiedliche Optionen und Einschränkungen."
+_FSSkip="Überspringen" 
 
 # Select Root
 _SelRootTitle=" Wähle eine ROOT Partition "
-_SelRootBody="\nDas ist die Partition auf der Arch installiert wird."
+_SelRootBody="\nPartition auf der Arch Linux installiert werden soll."
 
 # Select SWAP
-_SelSwpTitle=" Wähle SWAP Partition "
-_SelSwpBody="\nFalls ein Swapfile gewählt wird, entspricht die Größe dem physikalischen RAM."
-_SelSwpNone="Keine"
-_SelSwpFile="Swapfile"
+_SelSwpTitle=" Wählen Sie eine SWAP Partition "
+_SelSwpBody="\nFalls eine SWAP Partition (Auslagerungsdatei aka Swapfile) gewählt wird, entspricht deren Größe, automatisch dem physikalischen RAM."
+_SelSwpNone="Überspringen, keine SWAP Partition erstellen"
+_SelSwpFile="Auslagerungsdatei"
 
 # Select UEFI
 _SelUefiTitle=" Wähle eine UEFI Partition "
@@ -284,7 +290,7 @@ _FormUefiBody2="wurde bereits formatiert.\n\nReformat? Dies löscht ALLE vorhand
 
 # UEFI Options
 _OptUefiTitle=" UEFI Mountpoint Optionen "
-_OptUefiBody="\nDer Bootloader, kann auch später installiert werden, wird dort installiert wo die UEFI Partition gemounted ist.\n\n- Grub2 und systemd-boot haben keine UEFI mount Vorgabe.\n- rEFInd benötigt mount auf /boot/efi.\n\nBeachte: rEFInd mit LVM ist nicht möglich, und die Installation muss manuell geupdated werden. rEFInd wird deshalb für erfahrene Benutzer empfohlen.\n"
+_OptUefiBody="\nDer Bootloader, kann auch später installiert werden, wird dort installiert wo die UEFI Partition gemountet ist.\n\n- Grub2 und systemd-boot haben keine UEFI mount Vorgabe.\n- rEFInd benötigt mount auf /boot/efi.\n\nBeachte: rEFInd mit LVM ist nicht möglich, und die Installation muss manuell geupdated werden. rEFInd wird deshalb für erfahrene Benutzer empfohlen.\n"
 
 # UEFI Mountpoint - Translate
 _MntUefiTitle=" Wähle einen UEFI Mountpoint "
@@ -305,11 +311,11 @@ _ExtErrBody="\nPartition kann nicht gemounted werden. Der Name muss mit einem Sl
 
 # Install Base
 _InstBseTitle=" Installiere 'Base' Pakete "
-_InstBseBody="\nDer aktuellste Linuxkernel unterstützt die neueste Hardware. Der LTS Kernel (Long-Time-Support) ist dafür stabiler und wird wesentlich länger supported.\n\nDie base-devel Pakete Gruppe wird für das Arch User Repository (AUR) benötigt."
-_InstBaseLK="Aktuellsten Linux Kernel"
-_InstBaseLKBD="Aktuellsten Linux Kernel & base-devel Paketgruppe"
-_InstBaseLTS="LTS Kernel"
-_InstBaseLTSBD="LTS Kernel & base-devel"
+_InstBseBody="\nDer aktuelle Linuxkernel unterstützt die neueste Hardware. Der LTS-Kernel (Long-Time-Support) ist stabiler und wird wesentlich länger mit Updates versorgt.\n\nDie 'base-devel' Paketgruppe wird für das 'Arch User Repository' (AUR) und die Softwareentwicklung benötigt."
+_InstBaseLK="Aktuellen Linux Kernel installieren"
+_InstBaseLKBD="Aktuellen Linux Kernel & 'base-devel' installieren"
+_InstBaseLTS="LTS-Kernel installieren"
+_InstBaseLTSBD="LTS-Kernel & 'base-devel' installieren"
 
 # Install Wireless Packages
 _InstWirTitle=" Wlan Gerät erkannt "
@@ -317,12 +323,12 @@ _InstWirBody="\nInstalliere benötigte Pakete für Wlan Gerät...\n\n"
 
 # Install BIOS Bootloader
 _InstBiosBtTitle=" Installiere einen BIOS Bootloader "
-_InstBiosBtBody="\nGrub2 wird für Anfänger empfohlen. Das Laufwerke zur Installation ist frei wählbar.\n\nSyslinux ist leichter und simpler, funktioniert nur auf ext/btrfs Dateisystemen."
+_InstBiosBtBody="\nGrub2 wird für Anfänger empfohlen. Das Laufwerk zur Installation ist dabei frei wählbar.\n\nSyslinux ist leichter und simpler, funktioniert allerdings nur auf ext/btrfs Dateisystemen."
 
 # Grub Installation
 _InstGrubDevTitle=" Wähle ein Gerät zur Grub Installation "
-_InstGrubDevBody="\nInstalliere Grub auf dem gleichen Festplatte wie das Root Verzeichnis"
-_InstGrubDevBody2="\n\nWähle 'Ja' wenn Sie nur auf einem Gerät installieren."
+_InstGrubDevBody="\nInstallieren von Grub auf der gleichen Festplatte wie das Root Verzeichnis"
+_InstGrubDevBody2="\n\nWählen Sie 'Ja' wenn Sie nur eine Partition zur Arch Linux Installation verwendet haben."
 
 # Install UEFI Bootloader
 _InstUefiBtTitle=" Installiere UEFI Bootloader "
@@ -348,7 +354,7 @@ _RefiErrBody="\nDas rEFInd Installation-Skript wird nicht funktionieren, bis die
 
 # ALSA, Xorg, Input
 _AXITitle=" ALSA, Xorg, und Input "
-_AXIBody="\nBevor Graphiktreiber oder Desktop Umgebungen installiert werden können, müssen andere Pakete installiert werden:\n\nalsa - Advanced Linux Sound Architecture\nxorg-* - open-source X window system fpr Grafiken\nxf86-input-* - open-source Treiber für Eingabe Geräte\n\n"
+_AXIBody="\nBevor Grafiktreiber oder eine Desktopumgebung installiert werden können, müssen andere Pakete installiert werden:\n\nalsa - Advanced Linux Sound Architecture\nxorg-* - open-source X window system für Grafiken\nxf86-input-* - open-source Treiber für Eingabe Geräte\n\n"
 
 # Graphics Card Menu
 _GCtitle=" Grafik Karte Auswahl "
@@ -361,20 +367,20 @@ _NvidiaConfBody="\nEine basic NVIDIA Konfigurationsdatei wurde erstellt. Bitte e
 
 # Graphics Card Detection
 _GCDetTitle="Erkannt"
-_GCDetBody="\nIst dies eine Grafikkarte oder eine Virtualisations Software"
-_GCDetBody2="-Wählen Sie 'JA' um die OPEN-SOURCE Treiber zu installieren.\n\n-Wählen Sie 'Nein' um das Menü für Grafikkarten zu öffnen, dieses enthält proprietäre NVIDIA Treiber."
+_GCDetBody="\nIst dies eine Grafikkarte oder eine Virtualisierungssoftware"
+_GCDetBody2="- Wählen Sie 'JA' um die OPEN-SOURCE Treiber zu installieren.\n\n-  Wählen Sie 'Nein' um das Menü für Grafikkarten zu öffnen, dieses enthält proprietäre NVIDIA Treiber."
 
 #  Install DE Info
-_DEInfoTitle=" Installiere Desktop Environments (Umgebungen)"
-_DEInfoBody="\nDie Option kann zur Installation multipler Desktop-Umgebungen wiederholt werden.\n\nGnome, KDE (full), und LXDE enthalten einen display manager.\n\nCinnamon, Gnome und KDE bringen einen Network Manager mit.\n\n"
+_DEInfoTitle=" Installiere Desktop Umgebungen "
+_DEInfoBody="\nDiese Option kann mehrfach zur Installation von Desktopumgebungen wiederholt werden.\n\nGnome, KDE (full), und LXDE enthalten einen 'display manager'.\n\nCinnamon, Gnome und KDE bringen einen Network Manager mit.\n\n"
 
-# Install DE Menu - Translate
-_InstDETitle=" Installiere Desktop Environments (Umgebungen) "
-_InstDEBody="\nDie Desktop Umgebungen stehen in der Liste zuerst, manche haben mehrere Download Optionen."
+# Installiere DE Menue
+_InstDETitle=" Installiere Desktop Umgebungen "
+_InstDEBody="\nDer minimalste Desktop steht in der Liste zuerst, falls mehrere Download Optionen vorhanden sind."
 
 # Install Common Packages
 _InstComTitle=" Common Packages Installieren ? "
-_InstComBody="\nManche Desktop-Umgebungen benötigen diese 'common files' z.B. für Nutzerrechte usw., Erstellung des 'home' Ordners und Dateimanager Funktionalität.\n\nenthaltene Pakete: xdg-user-dirs, gksu, gnome-keyring, polkit, gvfs, and the gnome-icon-theme, etc. Wer den 'full KDE desktop' installiert wird diese Pakete nicht benötigen.\n\nPakete installieren? Diese Abfrage erscheint nur ein mal.\n\n"
+_InstComBody="\nManche Desktopumgebungen benötigen diese 'common files' z.B. für Nutzerrechte usw. oder die Erstellung des 'home' Ordners und die Dateimanager Funktionalität.\n\nEnthaltene Pakete sind: xdg-user-dirs, gksu, gnome-keyring, polkit, gvfs und das gnome-icon-theme etc. Wer den 'full KDE desktop' installiert wird diese Pakete nicht benötigen.\n\nPakete der 'common files' installieren? Diese Auswahlmöglichkeit erscheint nur 1x.\n\n"
 
 # DM Enabled
 _DmDoneTitle="Installiert "
@@ -401,7 +407,7 @@ _InstNMErrBody="\nEin Network Manager wurde bereits installiert."
 
 # Welcome
 _WelTitle=" Willkommen bei"
-_WelBody="\nDer Installer wird die aktuellen Pakete von den Arch Repositories downloaden. Installationsarten sind vanilla, nur minimale Paketanzahl und notwendige Konfiguration .\n\nMarkieren Sie eine Option durch Eingabe ihrer Nummer oder den Cursortasten bevor Sie [enter] drücken.\n\nWechseln zwischen den Knöpfen mittels [Tab] oder die links/rechts Pfeiltasten bevor Sie [enter] drücken.\n"
+_WelBody="\nDer Architect Arch Linux Installer wird die aktuellen Pakete aus den Arch Repositories downloaden. Die Installationsart ist 'vanilla' d.h. nur die minimal benötigte Paketanzahl und die notwendigste Konfiguration wird installiert.\n\nWählen Sie eine Option durch Eingabe der Nummer oder mittels Cursortasten, zum Bestätigen der Auswahl, [ENTER] drücken.\n\nWechseln zwischen den Optionen mittels [Tab] oder den links/rechts Pfeiltasten, bevor Sie [ENTER] drücken.\n"
 
 # Preparation Menu
 _PrepTitle=" Vorbereitungen für die Installation "
@@ -410,46 +416,46 @@ _PrepKBLayout="Wähle Desktop Keyboard Layout"
 _PrepMirror="Konfigurieren der Installer Mirrorlist (optional)"
 _PrepPartDisk="Partitionierung der Laufwerke"
 _PrepMntPart="Mount Partitionen"
-_Back="zurück"
+_Back="Zurück"
 
 # Install Base Menu
 _InstBsMenuTitle=" Installiere Base "
-_InstBseMenuBody="\nEs ist nicht notwendig den Bootloader Grub 2x zu installieren, ein Grub update auf einer vorhandenen Installation wird empfohlen."
-_InstBse="Installiere Base"
-_InstBootldr="Installiere Bootloader"
+_InstBseMenuBody="\nEs ist nicht notwendig den Bootloader 'Grub' 2x zu installieren, ein Grub update auf einer bereits vorhandenen Installation wird empfohlen."
+_InstBse="Installiere 'Base' Paket Gruppe"
+_InstBootldr="Auswahl und Installation eines 'Bootloader' (siehe oben)"
 
 # Configure Base Menu
 _ConfBseTitle=" Konfiguration von Base "
 _ConfBseBody="\nGrundlegende Konfiguration der base Pakete."
 _ConfBseFstab="Erstelle FSTAB"
-_ConfBseHost="Setze Hostname"
-_ConfBseTime="Setze Timezone"
-_ConfBseHWC="Setze Hardware Clock"
-_ConfBseSysLoc="Setze System Locale"
-_ConfBseVirtCon="Setze Virtual Console"
+_ConfBseHost="Eingabe von 'Hostname'"
+_ConfBseTime="Einstellen der 'Zeitzone'"
+_ConfBseHWC="Einstellen der 'Hardware Uhr'"
+_ConfBseSysLoc="Einstellen der Sprache 'System Locale'"
+_ConfBseVirtCon="Set Virtual Console"
 
 # User Menu
 _ConfUsrTitle=" Benutzer Einstellungen"
-_ConfUsrBody="\nRoot ist der 'super-user' oder 'admin' Account. Passwörter können sowohl für den Root Account als auch für alle anderen Nutzer erstellt werden."
-_ConfUsrRoot="Setze Root Passwort"
-_ConfUsrNew="Benutzer erstellen"
+_ConfUsrBody="\nRoot ist der 'super-user' oder 'admin' Account. Passwörter können für den Root Account und weitere Benutzer erstellt werden."
+_ConfUsrRoot="Erstelle ein Passwort für den super-user 'Root'"
+_ConfUsrNew="Neue Benutzer erstellen"
 
 # Desktop Menu
-_InstDEMenuTitle=" Installiere Desktop "
-_InstDEMenuBody="\nVor der Installation eines DE (desktop environment) müssen, grafik, input und sound Treiber installiert werden."
-_InstDEMenuGISD="Installiere grafik, input und sound Treiber"
-_InstDEMenuDE="Installiere Desktop Environment(s)"
-_InstDEMenuNM="Installiere Network Connection Manager"
-_InstDEMenuDM="Installiere Display Manager / Login Screen"
+_InstDEMenuTitle=" Installiere eine Desktopumgebung "
+_InstDEMenuBody="\nVor der Installation einer Desktopumgebung müssen, Grafik-, Input- und Sound- Treiber installiert werden."
+_InstDEMenuGISD="Installiere Grafik-, Input- und Sound- Treiber"
+_InstDEMenuDE="Installiere eine Desktop Umgebung"
+_InstDEMenuNM="Installiere einen Netzwerk/Verbindungs Manager"
+_InstDEMenuDM="Installiere Display Manager/Login Screen"
 
 # Main Menu
 _MMTitle=" Haupt Menu "
-_MMBody="\nJede Option muss der Reihe nach bearbeitet werden. Abschliessen der installation durch 'Fertig'.\n"
-_MMPrep="Installation vorbereiten"
-_MMInstBse="Installiere Base"
-_MMConfBse="Konfiguriere Base"
+_MMBody="\nJeder der Menüpunkte 1-9 sollte der Reihe nach bearbeitet werden,   nachträgliche Korrekturen sind möglich. Das Abschliessen oder beenden der Installation ist durch den Menüpunkt Nr.9 'Fertig' möglich.\n"
+_MMPrep="Die Arch Linux Installation vorbereiten"
+_MMInstBse="Installiere Base Paket Gruppe"
+_MMConfBse="Konfiguriere Base Pakete"
 _MMConfUsr="Konfiguriere Benutzer Account(s)"
-_MMInstDE="Installiere Desktop(s)"
+_MMInstDE="Installiere grafische Desktopumgebung"
 _MMRunMkinit="Starte Kernel Kompilierung mit mkinitcpio"
 _Done="Fertig"
 

@@ -3,6 +3,7 @@
 ## French Translation File		
 ##								
 ##
+## Écrit par Carl Duff (06-Oct-2015)
 ##
 ##
 
@@ -31,7 +32,7 @@ _DoneMsg="\nTerminé !\n\n"
 
 # Partitionnement automatique
 _AutoPartBody1="Avertissement : TOUTES les données sur"
-_AutoPartBIOSBody2="seront effacées.\n\nUne seule partition utilisant tout l'espace disponible sera créée. Si vous avez l'intention d'utiliser un fichier d'échange (SWAP), sélectionnez l'option 'Fichier SWAP' pendant le montage.\n\nSouhaitez-vous continuer ?"
+_AutoPartBIOSBody2="vont être effacées.\n\nUne seule partition utilisant tout l'espace disponible va être créée. Si vous avez l'intention d'utiliser un fichier d'échange (SWAP), sélectionnez l'option 'Fichier SWAP' pendant le montage.\n\nSouhaitez-vous continuer ?"
 _AutoPartUEFIBody2="vont être effacées.\n\nUne partition de démarrage UEFI de 512MB va être créée en premier, suivie par une seconde partition système utilisant tout l'espace restant. Si vous avez l'intention d'utiliser un fichier d'échange (SWAP), sélectionnez l'option 'Fichier SWAP' pendant le montage.\n\nSouhaitez-vous continuer ?"
 
 # Veuillez patienter...
@@ -47,8 +48,8 @@ _VBoxInstTitle=" Installation de VirtualBox "
 _VBoxInstBody="\nSi pour une raison quelconque, les modules d'invité VirtualBox ne sont pas chargés par le système installé (ex : basse résolution et curseurs de défilement après le démarrage), cette suite de commandes corrigera le problème : n\n$ su\n# depmod -a\n# modprobe -a vboxvideo vboxguest vboxsf\n# reboot"
 
 # Sélectionner le(s) pilote(s) du matériel WIFI
-_InstWirelessFirm="Installer le pilote du périphérique WIFI"
-_WirelssFirmTitle=" Sélectionner le pilote du périphérique WIFI"
+_InstWirelessFirm="Installer le pilote de périphérique WIFI"
+_WirelssFirmTitle=" Sélectionner le pilote de périphérique WIFI"
 _WirelssFirmBody="\nCertains périphériques WIFI nécessitent qu'un pilote additionnel soit installé pour fonctionner.\n\nSi rien n'est précisé - ou que vous ne savez pas lequel choisir -, c'est que tous peuvent être installés."
 _SeeWirelessDev="Afficher le périphérique WIFI (optionnel)"
 _WirelessShowTitle=" Périphérique WIFI "
@@ -133,7 +134,7 @@ _DevShowOpt="Liste des périphériques (optionnel)"
 
 # Vérifier les conditions requises et identifier le type de système
 _ChkTitle=" Vérification des conditions requises "
-_ChkBody="\nVérification que l'installateur a bien été exécuté en tant que root et qu'il existe une connexion internet active. Veuillez patienter... \n\n"
+_ChkBody="\nVérification si l'installateur a bien été exécuté en tant que root et qu'il existe une connexion internet active. Veuillez patienter... \n\n"
 
 _RtFailTitle=" Défaillance Root "
 _RtFailBody="\nL'installateur doit être exécuté en tant que root. Sortie.\n\n"
@@ -177,40 +178,40 @@ _KeymapBody="\nSélectionner l'agencement de la console virtuelle."
 _XkbmapTitle=" Environnement de bureau X11 "
 _XkbmapBody="\nSélectionner l'agencement de l'environnement de bureau."
 
-# Configurer les paramètres régionaux
+# Définir les paramètres régionaux
 _LocateTitle=" Sélectionner les paramètres régionaux "
 _localeBody="Sélectionner une région"
 
-# Configurer le fuseau horaire
+# Définir le fuseau horaire
 _TimeZTitle=" Sélectionner le fuseau horaire "
 _TimeZBody="\nLe fuseau horaire est utilisé pour configurer correctement votre horloge système."
 _TimeSubZTitle=" Sélectionner l'heure locale "
 _TimeSubZBody="\nSélectionner la ville la plus proche de vous."
-_TimeZQ="Configurer le fuseau horaire sous"
+_TimeZQ="Définir le fuseau horaire sous"
 
-# Configurer l'horloge matérielle
-_HwCTitle=" Configurer l'horloge matérielle "
-_HwCBody="\nUTC est le temps universel standard, et il est recommandé (uniquement si vous n'utilisez PAS de dual-boot avec Windows."
+# Définir l'horloge matérielle
+_HwCTitle=" Définir l'horloge matérielle "
+_HwCBody="\nUTC est le temps universel standard, et il est recommandé si vous utilisez un dual-boot avec Windows."
 _HwCUTC="UTC"
 _HwLocal="Heure locale" 
 
 # Générer FSTAB
 _FstabTitle=" Générer FSTAB "
-_FstabBody="\nLe fichier FSTAB (File System TABle) configure quels périphériques de stockage vont être montés, et comment ils vont être utilisés.\n\nUUID/PARTUUID (Universally Unique IDentifier) est recommandé.\n\nSi aucun label n'a été précisé pour les partitions auparavant, les noms de périphérique seront utilisés pour l'option de label."
+_FstabBody="\nLe fichier FSTAB (File System TABle) configure quels périphériques de stockage vont être montés, et comment ils vont être utilisés.\n\nUUID/PARTUUID (Universally Unique IDentifier) est recommandé.\n\nSi aucune étiquette n'a été définie pour les partitions auparavant, les noms de périphérique seront utilisés pour l'option d'étiquette."
 _FstabDev="Dev (code de partition)"
-_FstabLabel="Label (défini par l'utilisateur)"
+_FstabLabel="Étiquette (défini par l'utilisateur)"
 _FstabUUID="UUID/PARTUUID (code unique)"
 
 # Vérifier FSTAB
 #_FstabChkTitle=" Vérifier FSTAB "
 #_FstabChkBody="\nVeuillez vérifier le fichier FSTAB, avant de le fermer pour continuer.\n\n"
 
-# Configurer le nom d'hôte
+# Définir le nom d'hôte
 _HostNameTitle=" Configurer le nom d'hôte "
 _HostNameBody="\nLe nom d'hôte est utilisé pour identifier le système sur un réseau.\n\nIl est limité aux caractères alphanumériques, peut contenir un trait d'union (-) - mais pas au début ni à la fin - et ne doit pas être plus long que 63 caractères.\n"
 
-# Configurer le mot de passe Root
-_PassRtTitle=" Configurer le mot de passe Root "
+# Définir le mot de passe Root
+_PassRtTitle=" Définir le mot de passe Root "
 _PassRtBody="\nEntrer le mot de passe Root\n\n"
 _PassRtBody2="\nEntrer à nouveau le mot de passe Root\n\n"
 
@@ -226,8 +227,8 @@ _NUsrBody="\nEntrer le nom de l'utilisateur. Les lettres DOIVENT être entrées 
 _NUsrErrTitle=" Erreur de nom utilisateur "
 _NUsrErrBody="\nUn nom d'utilisateur incorrect a été entré. Veuillez réessayer.\n\n"
 
-# Configurer le mot de passe utilisateur
-_PassNUsrTitle=" Configurer le mot de passe utilisateur "
+# Définir le mot de passe utilisateur
+_PassNUsrTitle=" Définir le mot de passe utilisateur "
 _PassNUsrBody="\nEntrer le mot de passe pour" 
 _PassNUsrBody2="\nEntrer à nouveau le mot de passe pour" 
 
@@ -242,26 +243,26 @@ _PassNUsrErrBody="\nLes mots de passe utilisateur entrés ne fonctionnent pas. V
 # Montage (Partitions)
 _MntStatusTitle=" État de montage "
 _MntStatusSucc="\nMontage réussi !\n\n"
-_MntStatusFail="\nMontage échoué !\n\n"
+_MntStatusFail="\nÉchec de montage !\n\n"
 
 # Sélectionner le périphérique (installation)
 _DevSelTitle=" Sélectionner un périphérique "
-_DevSelBody="\nLes périphériques (/dev) sont des disques durs et des clés USB disponibles pour une installation. Le premier se nomme /sda, le second /sdb, etc... .\n\nSi vous utilisez une clé USB pour exécuter Architect, vérifiez qu'elle soit bien reconnue !"
+_DevSelBody="\nLes périphériques (/dev) sont des disques durs et des clés USB disponibles pour une installation. Le premier se nomme /sda, le second /sdb, etc... \n\nSi vous utilisez une clé USB pour exécuter Architect, vérifiez qu'elle se trouve bien dans la liste !"
 
 # Sélectionner périphérique (Grub) - séparer le corps du texte n'est pas requis (utilise la sélection de texte standard de périphérique)
 _DevSelGrubTitle=" Sélectionner le périphérique Grub "
 
 # Outil de partitionnement
 _PartToolTitle=" Outil de partitionnement "
-_PartToolBody="\nUne option de partitionnement automatique est disponible pour les débutants. CFDisk est recommandé pour BIOS, Parted pour UEFI.\n\nNE PAS sélectionner UEFI/GPT -only partitioning tool pour un système BIOS/MBR pourrait causer de sérieux problèmes, incluant une installation inutilisable."
+_PartToolBody="\nL'option Auto-Partition est disponible pour les débutants. CFDisk est recommandé pour BIOS, Parted pour UEFI.\n\nNE PAS sélectionner UEFI/GPT -only partitioning tool pour un système BIOS/MBR pourrait causer de sérieux problèmes, incluant une installation inutilisable."
 
 # Erreur de partitionnement UEFI
 _UefiPartErrTitle=" Erreur de partitionnement UEFI " 
-_UefiPartErrBody="\n Les systèmes UEFI ont besoin de deux partitions minimum pour l'installation (ROOT et UEFI).\n\nVeuillez configurer vos partitions.\n\n"
+_UefiPartErrBody="\n Les systèmes UEFI ont besoin de 2 partitions minimum pour l'installation (ROOT et UEFI).\n\nVeuillez configurer vos partitions.\n\n"
 
 # Erreur de partitionnement BIOS
 _BiosPartErrTitle=" Erreur de partitionnement BIOS "
-_BiosPartErrBody="\nLes systèmes BIOS ont besoin d'une partition minimum pour l'installation (ROOT).\n\nVeuillez configurer vos partitions."
+_BiosPartErrBody="\nLes systèmes BIOS ont besoin d'1 partition minimum pour l'installation (ROOT).\n\nVeuillez configurer vos partitions."
 
 # Système de fichiers
 _FSTitle=" Choisir un système de fichiers "
@@ -326,15 +327,15 @@ _InstBiosBtBody="\nGrub2 est recommandé pour les débutants. Le périphérique 
 
 # Installation de Grub
 _InstGrubDevTitle=" Sélectionner le périphérique Grub "
-_InstGrubDevBody="\nInstaller Grub sur le même périphérique / disque dur que Root"
+_InstGrubDevBody="\nInstaller Grub sur le même périphérique / disque dur que Root "
 _InstGrubDevBody2="\n\nCliquer sur 'Oui' pour installer sur un seul périphérique."
 
 # Installer le gestionnaire de démarrage UEFI
 _InstUefiBtTitle=" Installer le gestionnaire de démarrage UEFI "
 _InstUefiBtBody="\nrEFInd requiert /boot/efi. systemd-boot requiert /boot. Grub fonctionnera avec l'un ou l'autre point de montage.\n\nNOTE : rEFInd avec LVM n'est pas pris en charge."
 
-# Configurer Grub UEFI par défaut
-_SetGrubDefTitle=" Configurer Grub en tant que gestionnaire de démarrage par défaut ? "
+# Définir Grub UEFI par défaut
+_SetGrubDefTitle=" Définir Grub en tant que gestionnaire de démarrage par défaut ? "
 SetGrubDefBody="\nCertains microcodes UEFI peuvent ne pas détecter Grub (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer Grub comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner 'Oui', spécialement pour les débutants. Ceci copiera le module grubx64.efi amorçable dans"  
 _SetGrubDefBody2="et renommez-le bootx64.efi, comme requis.\n\nAutrement, sélectionner 'Non', particulièrement si un gestionnaire de démarrage par défaut existe déjà, et/ou si vous avez l'intention d'utiliser plusieurs gestionnaires de démarrage."
 
@@ -357,7 +358,7 @@ _AXIBody="\nAvant l'installation de(s) pilote(s) de carte graphique ou d'environ
 
 # Menu des cartes graphiques
 _GCtitle=" Menu des cartes graphiques "
-_GCBody="Choisir Nouveau pour les anciennes cartes NVIDIA. Si votre carte n'est pas listée, choisir 'Inconnue / Générique'.\n"
+_GCBody="Choisir 'Nouveau' pour les anciennes cartes NVIDIA. Si votre carte n'est pas listée, choisir 'Inconnue / Générique'.\n"
 _GCUnknOpt="Inconnue / Générique"
 
 # Vérification de la configuration NVIDIA
@@ -379,7 +380,7 @@ _InstDEBody="\nLes environnements de bureau sont listés en premier, et peuvent 
 
 # Installer des paquets communs
 _InstComTitle=" Installer des paquets communs ? "
-_InstComBody="\nCertains environnements nécessitent des fichiers communs pour être installés, particulièrement pour les permissions, la création des dossiers personnels, et les fonctionnalités du gestionnaire de fichiers.\n\nLes paquets incluent : xdg-user-dirs, gksu, gnome-keyring, polkit, gvfs, et le gnome-icon-theme, etc.... Ceux d'entre vous qui ont seulement installé l'environnement full KDE n'ont pas besoin d'installer ceci.\n\nInstaller ces paquets ? Cette option sera proposée UNE FOIS seulement.\n\n"
+_InstComBody="\nCertains environnements nécessitent des fichiers communs pour être installés, particulièrement pour les permissions, la création des dossiers personnels, et les fonctionnalités du gestionnaire de fichiers.\n\nLes paquets incluent : xdg-user-dirs, gksu, gnome-keyring, polkit, gvfs, et le gnome-icon-theme, etc... Ceux d'entre vous qui ont seulement installé l'environnement full KDE n'ont pas besoin d'installer ceci.\n\nInstaller ces paquets ? Cette option sera proposée UNE FOIS seulement.\n\n"
 
 # DM activé
 _DmDoneTitle="Activé "
@@ -395,7 +396,7 @@ _DmInstBody="\nUn gestionnaire d'affichage est déjà installé et activé.\n\n"
 
 # Gestionnaire de réseau
 _InstNMTitle=" Choisir un gestionnaire de réseau "
-_InstNMBody="\nUn gestionnaire de réseau est recommandé, spécialement pour les connexions WIFI et PPPoE/DSL.\n"
+_InstNMBody="\nNetwork Manager est recommandé, spécialement pour les connexions WIFI et PPPoE/DSL.\n"
 
 # Gestionnaire de réseau installé
 _InstNMDoneTitle=" Gestionnaire de réseau installé "
@@ -427,16 +428,16 @@ _InstBootldr="Installer le gestionnaire de démarrage"
 _ConfBseTitle=" Configurer Base "
 _ConfBseBody="\nConfiguration basique de la base."
 _ConfBseFstab="Générer FSTAB"
-_ConfBseHost="Configurer le nom d'hôte"
-_ConfBseTime="Configurer le fuseau horaire"
-_ConfBseHWC="Configurer l'horloge matérielle"
-_ConfBseSysLoc="Configurer les paramètres régionaux"
-_ConfBseVirtCon="Configurer Console Virtuelle"
+_ConfBseHost="Définir le nom d'hôte"
+_ConfBseTime="Définir le fuseau horaire"
+_ConfBseHWC="Définir l'horloge matérielle"
+_ConfBseSysLoc="Définir les paramètres régionaux"
+_ConfBseVirtCon="Définir la console virtuelle"
 
 # Menu utilisateur
 _ConfUsrTitle=" Configurer le ou les utilisateurs"
-_ConfUsrBody="\Root est le compte 'super-utilisateur' ou 'admin' par défaut. Le même mot de passe peut être appliqué tant pour Root que pour n'importe quel compte utilisateur créé."
-_ConfUsrRoot="Configurer le mot de passe Root"
+_ConfUsrBody="\nRoot est le compte 'super-utilisateur' ou 'admin' par défaut. Le même mot de passe peut être appliqué tant pour Root que pour n'importe quel compte utilisateur créé."
+_ConfUsrRoot="Définir le mot de passe Root"
 _ConfUsrNew="Ajouter un ou des utilisateurs"
 
 # Menu du bureau
@@ -453,7 +454,7 @@ MMBody="\nChaque étape doit être suivie DANS L'ORDRE. Une fois effectué, sél
 _MMPrep="Préparer l'installation"
 _MMInstBse="Installer Base"
 _MMConfBse="Configurer Base"
-_MMConfUsr="Configurer le(s) compte(s) utilisateur"
+_MMConfUsr="Configurer le(s) compte(s) utilisateur(s)"
 _MMInstDE="Installer le ou les environnements de bureau"
 _MMRunMkinit="Exécuter Mkinitcpio"
 _Done="Terminé"
