@@ -8,8 +8,8 @@
 ##
 
 # Accessibility
-_InstAccTitle="Accessibility Pakete (optional)"
-_InstAccBody="Accessibility Pakete installieren."
+_InstAccOpt="Accessibility Pakete (optional)"
+_InstAccTitle="Accessibility Pakete installieren."
 _InstAccBody="Gewuenschte accessibility Pakete auswaehlen."
 
 # btrfs
