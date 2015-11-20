@@ -1766,22 +1766,22 @@ install_ati(){
 		[[ $(lscpu | grep -i "intel\|lenovo") != "" ]] && INTEGRATED_GC="Intel" || INTEGRATED_GC="ATI"
 				
 		# Second, identity the NVIDIA card and driver / menu entry
-		if [[ $(dmesg | grep -i chipset | grep -i 'nvc\|nvd\|nve') != "" ]]; then HIGHLIGHT_SUB=4
-		elif [[ $(dmesg | grep -i chipset | grep -i 'nva\|nv5\|nv8\|nv9'﻿) != "" ]]; then HIGHLIGHT_SUB=5
-		elif [[ $(dmesg | grep -i chipset | grep -i 'nv4\|nv6') != "" ]]; then HIGHLIGHT_SUB=6
-		else HIGHLIGHT_SUB=3
+		if [[ $(dmesg | grep -i chipset | grep -i 'nvc\|nvd\|nve') != "" ]]; then HIGHLIGHT_SUB_GC=4
+		elif [[ $(dmesg | grep -i chipset | grep -i 'nva\|nv5\|nv8\|nv9'﻿) != "" ]]; then HIGHLIGHT_SUB_GC=5
+		elif [[ $(dmesg | grep -i chipset | grep -i 'nv4\|nv6') != "" ]]; then HIGHLIGHT_SUB_GC=6
+		else HIGHLIGHT_SUB_GC=3
 		fi
 	
 	# All non-NVIDIA cards / virtualisation
-	elif [[ $(echo $GRAPHIC_CARD | grep -i 'ati') != "" ]]; then HIGHLIGHT_SUB=1
-	elif [[ $(echo $GRAPHIC_CARD | grep -i 'intel\|lenovo') != "" ]]; then HIGHLIGHT_SUB=2
-	elif [[ $(echo $GRAPHIC_CARD | grep -i 'via') != "" ]]; then HIGHLIGHT_SUB=7
-	elif [[ $(echo $GRAPHIC_CARD | grep -i 'virtualbox') != "" ]]; then HIGHLIGHT_SUB=8
-	elif [[ $(echo $GRAPHIC_CARD | grep -i 'vmware') != "" ]]; then HIGHLIGHT_SUB=9
-	else HIGHLIGHT_SUB=10
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'ati') != "" ]]; then HIGHLIGHT_SUB_GC=1
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'intel\|lenovo') != "" ]]; then HIGHLIGHT_SUB_GC=2
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'via') != "" ]]; then HIGHLIGHT_SUB_GC=7
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'virtualbox') != "" ]]; then HIGHLIGHT_SUB_GC=8
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'vmware') != "" ]]; then HIGHLIGHT_SUB_GC=9
+	else HIGHLIGHT_SUB_GC=10
 	fi
 	
-   dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_GCtitle" \
+   dialog --default-item ${HIGHLIGHT_SUB_GC} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_GCtitle" \
     --menu "$GRAPHIC_CARD\n" 0 0 10 \
  	"1" $"xf86-video-ati" \
 	"2" $"xf86-video-intel" \
