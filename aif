@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.5.5 - 15-Oct-2015)
+# Architect Installation Framework (version 1.6 - 20-Oct-2015)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.5.5"
+VERSION="Architect Installation Framework 1.6"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -42,8 +42,8 @@ ZONE=""               		# For time
 SUBZONE=""            		# For time
 LOCALE="en_US.UTF-8"  		# System locale. Default is "en_US.UTF-8"
 LTS=0                		# Has the LTS Kernel been installed?
-GRAPHIC_CARD=$(hwinfo --gfxcard | grep 'Model')  # Auto-detect popular graphics cards
-GC_DETECTED=""        		# Name of Graphics Card Detected
+GRAPHIC_CARD=""				# graphics card
+INTEGRATED_GC=""			# Integrated graphics card for NVIDIA
 NVIDIA_INST=0         		# Indicates if NVIDIA proprietary driver has been installed
 SHOW_ONCE=0           		# Show de_wm information only once
 
@@ -615,7 +615,7 @@ confirm_mount_btrfs() {
 select_device() {
 	
     DEVICE=""
-    devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd');
+    devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme');
     
     for i in ${devices_list[@]}; do
         DEVICE="${DEVICE} ${i} -"
@@ -1030,7 +1030,8 @@ btrfs_mount_opts() {
           swapon ${MOUNTPOINT}/swapfile >/dev/null 2>&1
        else
           set_mount_type
-          mkswap  ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
+          # Only create a swap if not already in place
+          [[ $(lsblk -o FSTYPE  ${MOUNT_TYPE}${PARTITION} | grep -i "swap") != "swap" ]] &&  mkswap  ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
           swapon  ${MOUNT_TYPE}${PARTITION} >/dev/null 2>>/tmp/.errlog
           check_for_error
           # Since a partition was used, remove that partition from the list
@@ -1721,150 +1722,140 @@ install_alsa_xorg_input() {
 
 setup_graphics_card() {
 
-# basically this is used to manually set the GC_DETECTED variable. Includes proprietary NVIDIA drivers.
-gc_driver_menu() {
+# Save repetition
+install_intel(){
 
-   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_GCtitle" \
-    --menu "$_GCBody" 0 0 10 \
- 	"1" $"AMD/ATI" \
-	"2" $"Intel" \
-	"3" $"Nouveau (NVIDIA open-source)" \
-	"4" $"NVIDIA GeForce 400 +" \
-	"5" $"NVIDIA GeForce 8/9/100-300" \
-	"6" $"NVIDIA GeForce 6/7" \
-	"7" $"Via" \
-	"8" $"VirtualBox" \
-    "9" $"VMWare" \
-	"10" "$_GCUnknOpt" 2>${ANSWER}
+	pacstrap ${MOUNTPOINT} xf86-video-intel libva-intel-driver intel-ucode 2>/tmp/.errlog
+    sed -i 's/MODULES=""/MODULES="i915"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
+           
+    # Intel microcode (Grub, Syslinux and systemd-boot). rEFInd is yet to be added.
+    # Done as seperate if statements in case of multiple bootloaders.
+    if [[ -e ${MOUNTPOINT}/boot/grub/grub.cfg ]]; then
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " grub-mkconfig " --infobox "$_PlsWaitBody" 0 0
+		sleep 1
+		arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
+	fi
+			   
+	if [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]]; then
+		sed -i 's/..\/initramfs-linux.img/..\/intel-ucode.img,..\/initramfs-linux.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+		sed -i 's/..\/initramfs-linux-lts.img/..\/intel-ucode.img,..\/initramfs-linux-lts.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+		sed -i 's/..\/initramfs-linux-fallback.img/..\/intel-ucode.img,..\/initramfs-linux-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+		sed -i 's/..\/initramfs-linux-lts-fallback.img/..\/intel-ucode.img,..\/initramfs-linux-lts-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+	fi
+			   
+	if [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf ]]; then
+		sed -i '/linux \//a initrd \/intel-ucode.img' ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf                    
+	fi
+}
+
+# Save repetition
+install_ati(){
+	pacstrap ${MOUNTPOINT} xf86-video-ati 2>/tmp/.errlog
+	sed -i 's/MODULES=""/MODULES="radeon"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
+}
+
+# Main menu. Correct option for graphics card should be automatically highlighted.
+
+	GRAPHIC_CARD=""
+	INTEGRATED_GC=""
+	GRAPHIC_CARD=$(lspci | grep -i "vga" | sed 's/.*://' | sed 's/(.*//' | sed 's/^[ \t]*//')
+	
+	# Highlight menu entry depending on GC detected. Extra work is needed for NVIDIA
+	if 	[[ $(echo $GRAPHIC_CARD | grep -i "nvidia") != "" ]]; then
+		# If NVIDIA, first need to know the integrated GC
+		[[ $(lscpu | grep -i "intel\|lenovo") != "" ]] && INTEGRATED_GC="Intel" || INTEGRATED_GC="ATI"
+				
+		# Second, identity the NVIDIA card and driver / menu entry
+		if [[ $(dmesg | grep -i chipset | grep -i 'nvc\|nvd\|nve') != "" ]]; then HIGHLIGHT_SUB=4
+		elif [[ $(dmesg | grep -i chipset | grep -i 'nva\|nv5\|nv8\|nv9'﻿) != "" ]]; then HIGHLIGHT_SUB=5
+		elif [[ $(dmesg | grep -i chipset | grep -i 'nv4\|nv6') != "" ]]; then HIGHLIGHT_SUB=6
+		else HIGHLIGHT_SUB=3
+		fi
+	
+	# All non-NVIDIA cards / virtualisation
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'ati') != "" ]]; then HIGHLIGHT_SUB=1
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'intel\|lenovo') != "" ]]; then HIGHLIGHT_SUB=2
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'via') != "" ]]; then HIGHLIGHT_SUB=7
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'virtualbox') != "" ]]; then HIGHLIGHT_SUB=8
+	elif [[ $(echo $GRAPHIC_CARD | grep -i 'vmware') != "" ]]; then HIGHLIGHT_SUB=9
+	else HIGHLIGHT_SUB=10
+	fi
+	
+   dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_GCtitle" \
+    --menu "$GRAPHIC_CARD\n" 0 0 10 \
+ 	"1" $"xf86-video-ati" \
+	"2" $"xf86-video-intel" \
+	"3" $"xf86-video-nouveau (Nvidia open-source)" \
+	"4" $"Nvidia (+ $INTEGRATED_GC)" \
+	"5" $"Nvidia-340xx (+ $INTEGRATED_GC)" \
+	"6" $"Nvidia-304xx (+ $INTEGRATED_GC)" \
+	"7" $"xf86-video-openchrome" \
+	"8" $"virtualbox-guest-xxx" \
+    "9" $"xf86-video-vmware" \
+	"10" "$_GCUnknOpt / xf86-video-fbdev" 2>${ANSWER}
 
    case $(cat ${ANSWER}) in
-        "1") GC_DETECTED="ATI"
+        "1") # ATI/AMD
+			install_ati
              ;;
-        "2") GC_DETECTED="Intel"
+        "2") # Intel
+			install_intel
              ;;
-        "3") GC_DETECTED="NVIDIA"
+        "3") # Nouveau / NVIDIA
+			pacstrap ${MOUNTPOINT} xf86-video-nouveau 2>/tmp/.errlog
+            sed -i 's/MODULES=""/MODULES="nouveau"/' ${MOUNTPOINT}/etc/mkinitcpio.conf       
              ;;
-        "4") GC_DETECTED="NVIDIA-GF"
+        "4") # NVIDIA-GF
+			[[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
+			arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
+  
+            # Now deal with kernel installed
+            [[ $LTS == 0 ]] && pacstrap ${MOUNTPOINT} nvidia nvidia-libgl nvidia-utils pangox-compat 2>/tmp/.errlog \
+            || pacstrap ${MOUNTPOINT} nvidia-lts nvidia-libgl nvidia-utils pangox-compat 2>/tmp/.errlog
+            NVIDIA_INST=1
              ;;
-        "5") GC_DETECTED="NVIDIA-340"
+        "5") # NVIDIA-340
+			[[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
+			arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
+  
+            # Now deal with kernel installed
+            [[ $LTS == 0 ]] && pacstrap ${MOUNTPOINT} nvidia-340xx nvidia-340xx-libgl nvidia-340xx-utils 2>/tmp/.errlog \
+            || pacstrap ${MOUNTPOINT} nvidia-340xx-lts nvidia-340xx-libgl nvidia-340xx-utils 2>/tmp/.errlog
+            NVIDIA_INST=1
              ;;
-        "6") GC_DETECTED="NVIDIA-304"
+        "6") # NVIDIA-304
+			[[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
+			arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
+ 
+            # Now deal with kernel installed
+            [[ $LTS == 0 ]] && pacstrap ${MOUNTPOINT} nvidia-304xx nvidia-304xx-libgl nvidia-304xx-utils 2>/tmp/.errlog \
+            || pacstrap ${MOUNTPOINT}  nvidia-304xx-lts nvidia-304xx-libgl nvidia-304xx-utils 2>/tmp/.errlog
+            NVIDIA_INST=1
              ;;              
-        "7") GC_DETECTED="Via"
+        "7") # Via
+			pacstrap ${MOUNTPOINT} xf86-video-openchrome 2>/tmp/.errlog
              ;;            
-        "8") GC_DETECTED="VirtualBox"
+        "8") # VirtualBox
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
+            clear
+            [[ $LTS == 0 ]] && pacstrap ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules 2>/tmp/.errlog \
+            || pacstrap ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules-lts 2>/tmp/.errlog
+      
+            # Load modules and enable vboxservice whatever the kernel
+            arch_chroot "modprobe -a vboxguest vboxsf vboxvideo"  
+            arch_chroot "systemctl enable vboxservice"
+            echo -e "vboxguest\nvboxsf\nvboxvideo" > ${MOUNTPOINT}/etc/modules-load.d/virtualbox.conf
              ;;
-        "9") GC_DETECTED="VMWare"
+        "9") # VMWare
+			pacstrap ${MOUNTPOINT} xf86-video-vmware xf86-input-vmmouse 2>/tmp/.errlog
              ;;
-        "10") GC_DETECTED="Generic"
+        "10") # Generic / Unknown
+			  pacstrap ${MOUNTPOINT} xf86-video-fbdev 2>/tmp/.errlog
              ;;
           *) install_desktop_menu
              ;;
-    esac  
-    install_gc
-}
-
-# Adapted from Antergos' CLI installer
-detect_graphics_card() {
-	
-    if   [[ $(echo ${GRAPHIC_CARD} | grep -i 'ati') != "" ]]; then
-         GC_DETECTED="ATI" 
-    elif [[ $(echo ${GRAPHIC_CARD} | grep -i 'nvidia') != "" ]]; then
-         GC_DETECTED="NVIDIA" 
-    elif [[ $(echo ${GRAPHIC_CARD} | grep -i 'intel\|lenovo') != "" ]]; then
-         GC_DETECTED="Intel"
-    elif [[ $(echo ${GRAPHIC_CARD} | grep -i 'virtualbox') != "" ]]; then
-         GC_DETECTED="VirtualBox"
-    elif [[ $(echo ${GRAPHIC_CARD} | grep -i 'vmware') != "" ]]; then
-         GC_DETECTED="VMWare"
-    elif [[ $(echo ${GRAPHIC_CARD} | grep -i 'via') != "" ]]; then
-         GC_DETECTED="Via"
-    else
-         GC_DETECTED="Unknown"
-    fi
-
-}
-
-install_gc() {
-
- clear
- 
- case $GC_DETECTED in
-        "ATI") pacstrap ${MOUNTPOINT} xf86-video-ati 2>/tmp/.errlog
-               sed -i 's/MODULES=""/MODULES="radeon"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
-               ;;
-     "NVIDIA") pacstrap ${MOUNTPOINT} xf86-video-nouveau 2>/tmp/.errlog
-               sed -i 's/MODULES=""/MODULES="nouveau"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
-               ;;
-  "NVIDIA-GF") #first remove mesa to avoid file conflicts
-               arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
-  
-               # Now deal with kernel installed
-               [[ $LTS == 0 ]] && pacstrap ${MOUNTPOINT} nvidia nvidia-libgl nvidia-utils pangox-compat 2>/tmp/.errlog \
-               || pacstrap ${MOUNTPOINT} nvidia-lts nvidia-libgl nvidia-utils pangox-compat 2>/tmp/.errlog
-               NVIDIA_INST=1
-               ;;
- "NVIDIA-340") #first remove mesa to avoid file conflicts
-               arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
-  
-               # Now deal with kernel installed
-               [[ $LTS == 0 ]] && pacstrap ${MOUNTPOINT} nvidia-340xx nvidia-340xx-libgl nvidia-340xx-utils 2>/tmp/.errlog \
-               || pacstrap ${MOUNTPOINT} nvidia-340xx-lts nvidia-340xx-libgl nvidia-340xx-utils 2>/tmp/.errlog
-               NVIDIA_INST=1
-               ;;
- "NVIDIA-304") #first remove mesa to avoid file conflicts
-               arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
- 
-               # Now deal with kernel installed
-               [[ $LTS == 0 ]] && pacstrap ${MOUNTPOINT} nvidia-304xx nvidia-304xx-libgl nvidia-304xx-utils 2>/tmp/.errlog \
-               || pacstrap ${MOUNTPOINT}  nvidia-304xx-lts nvidia-304xx-libgl nvidia-304xx-utils 2>/tmp/.errlog
-               NVIDIA_INST=1
-               ;;
-      "Intel") pacstrap ${MOUNTPOINT} xf86-video-intel libva-intel-driver intel-ucode 2>/tmp/.errlog
-               check_for_error
-               sed -i 's/MODULES=""/MODULES="i915"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
-               
-               # Intel microcode (Grub, Syslinux and systemd-boot). rEFInd is yet to be added.
-               # Done as seperate if statements in case of multiple bootloaders.
-               if [[ -e ${MOUNTPOINT}/boot/grub/grub.cfg ]]; then
-                  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " grub-mkconfig " --infobox "$_PlsWaitBody" 0 0
-				  sleep 1
-                  arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>/tmp/.errlog
-				  check_for_error
-			   fi
-			   
-				if [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]]; then
-					sed -i 's/..\/initramfs-linux.img/..\/intel-ucode.img,..\/initramfs-linux.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-					sed -i 's/..\/initramfs-linux-lts.img/..\/intel-ucode.img,..\/initramfs-linux-lts.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-					sed -i 's/..\/initramfs-linux-fallback.img/..\/intel-ucode.img,..\/initramfs-linux-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-					sed -i 's/..\/initramfs-linux-lts-fallback.img/..\/intel-ucode.img,..\/initramfs-linux-lts-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-				fi
-			   
-               if [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf ]]; then
-				   sed -i '/linux \//a initrd \/intel-ucode.img' ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf                    
-               fi
-               ;;
- "VirtualBox") dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
-               clear
-               [[ $LTS == 0 ]] && pacstrap ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules 2>/tmp/.errlog \
-               || pacstrap ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules-lts 2>/tmp/.errlog
-      
-               # Load modules and enable vboxservice whatever the kernel
-               arch_chroot "modprobe -a vboxguest vboxsf vboxvideo"  
-               arch_chroot "systemctl enable vboxservice"
-               echo -e "vboxguest\nvboxsf\nvboxvideo" > ${MOUNTPOINT}/etc/modules-load.d/virtualbox.conf
-               ;;
-     "VMWare") pacstrap ${MOUNTPOINT} xf86-video-vmware xf86-input-vmmouse 2>/tmp/.errlog
-               ;;
-        "Via") pacstrap ${MOUNTPOINT} xf86-video-openchrome 2>/tmp/.errlog
-               ;;
-    "Generic") pacstrap ${MOUNTPOINT} xf86-video-fbdev 2>/tmp/.errlog
-               ;;
-            *) gc_driver_menu  
-               ;;
- esac
-
- check_for_error
+    esac
+    check_for_error
 
  # Create a basic xorg configuration file for NVIDIA proprietary drivers where installed
  # if that file does not already exist.
@@ -1885,15 +1876,6 @@ install_gc() {
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_NvidiaConfTitle" --msgbox "$_NvidiaConfBody" 0 0
     nano ${MOUNTPOINT}/etc/X11/xorg.conf.d/20-nvidia.conf
  fi
-
-}
-
-    detect_graphics_card
-    if [[ $GC_DETECTED == "Unknown" ]]; then
-       gc_driver_menu
-    else
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $GC_DETECTED $_GCDetTitle " --yesno "${GRAPHIC_CARD}\n$_GCDetBody $GC_DETECTED?\n\n$_GCDetBody2" 0 0 && install_gc || gc_driver_menu
-    fi
 
 }
 
