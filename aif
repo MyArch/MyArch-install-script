@@ -1757,7 +1757,7 @@ install_ati(){
 # Main menu. Correct option for graphics card should be automatically highlighted.
 
 	GRAPHIC_CARD=""
-	INTEGRATED_GC=""
+	INTEGRATED_GC="N/A"
 	GRAPHIC_CARD=$(lspci | grep -i "vga" | sed 's/.*://' | sed 's/(.*//' | sed 's/^[ \t]*//')
 	
 	# Highlight menu entry depending on GC detected. Extra work is needed for NVIDIA
@@ -1766,9 +1766,9 @@ install_ati(){
 		[[ $(lscpu | grep -i "intel\|lenovo") != "" ]] && INTEGRATED_GC="Intel" || INTEGRATED_GC="ATI"
 				
 		# Second, identity the NVIDIA card and driver / menu entry
-		if [[ $(dmesg | grep -i chipset | grep -i 'nvc\|nvd\|nve') != "" ]]; then HIGHLIGHT_SUB_GC=4
-		elif [[ $(dmesg | grep -i chipset | grep -i 'nva\|nv5\|nv8\|nv9'﻿) != "" ]]; then HIGHLIGHT_SUB_GC=5
-		elif [[ $(dmesg | grep -i chipset | grep -i 'nv4\|nv6') != "" ]]; then HIGHLIGHT_SUB_GC=6
+		if [[ $(dmesg | grep -i 'chipset' | grep -i 'nvc\|nvd\|nve') != "" ]]; then HIGHLIGHT_SUB_GC=4
+		elif [[ $(dmesg | grep -i 'chipset' | grep -i 'nva\|nv5\|nv8\|nv9'﻿) != "" ]]; then HIGHLIGHT_SUB_GC=5
+		elif [[ $(dmesg | grep -i 'chipset' | grep -i 'nv4\|nv6') != "" ]]; then HIGHLIGHT_SUB_GC=6
 		else HIGHLIGHT_SUB_GC=3
 		fi
 	
@@ -1802,6 +1802,7 @@ install_ati(){
 			install_intel
              ;;
         "3") # Nouveau / NVIDIA
+			[[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
 			pacstrap ${MOUNTPOINT} xf86-video-nouveau 2>/tmp/.errlog
             sed -i 's/MODULES=""/MODULES="nouveau"/' ${MOUNTPOINT}/etc/mkinitcpio.conf       
              ;;
@@ -1902,7 +1903,7 @@ install_de_wm() {
     "10" $"MATE" \
     "11" $"MATE + Extras" \
     "12" $"Xfce" \
-    "13" $"Xfce + extras" \
+    "13" $"Xfce + Extras" \
     "14" $"Awesome WM" \
     "15" $"Fluxbox WM" \
 	"16" $"i3 WM" \
