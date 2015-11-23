@@ -1785,7 +1785,7 @@ install_ati(){
     --menu "$GRAPHIC_CARD\n" 0 0 10 \
  	"1" $"xf86-video-ati" \
 	"2" $"xf86-video-intel" \
-	"3" $"xf86-video-nouveau (Nvidia open-source)" \
+	"3" $"xf86-video-nouveau (+ $INTEGRATED_GC)" \
 	"4" $"Nvidia (+ $INTEGRATED_GC)" \
 	"5" $"Nvidia-340xx (+ $INTEGRATED_GC)" \
 	"6" $"Nvidia-304xx (+ $INTEGRATED_GC)" \
