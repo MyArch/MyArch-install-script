@@ -3,14 +3,14 @@
 ## French Translation File		
 ##								
 ##
-## Écrit par Carl Duff (06-Oct-2015)
+## Écrit par Carl Duff (20-Nov-2015)
 ##
 ##
 
 # Accessibilité
 _InstAccOpt="Paquets d'accessibilité (optionnel)"
 _InstAccTitle=" Installer les paquets d'accessibilité "
-_InstAccBody="Sélectionner les paquets d'accessibilité désirés."
+_InstAccBody="Sélectionner les paquets d'accessibilité souhaités."
 
 # btrfs
 _btrfsSVTitle="Sous-volumes btrfs "
@@ -21,19 +21,19 @@ _btrfsMSubBody2="seront raccordés à partir de celui-ci."
 _btrfsSVErrTitle=" Erreur de nom du sous-volume btrfs "
 _btrfsSVErrBody="Les blancs ou espaces ne sont pas permis. Veuillez réessayer.\n"
 _btrfsSVBody1="Entrer le nom du sous-volume"
-_btrfsSVBody2="à créer dedans"
+_btrfsSVBody2="à créer dans"
 _btrfsSVBody3="\n\nCe processus sera répété jusqu'à ce qu'un astérisque (*) soit entré comme nom de sous-volume.\n\nSous-volumes Créés :" 
 _btrfsMntTitle=" Options de montage btrfs "
-_btrfsMntBody="Utiliser [Espace] pour dé/sélectionner les options de montage désirées et visualiser avec prudence. Veuillez ne pas sélectionner plusieurs versions de la même option."
+_btrfsMntBody="Utiliser [Espace] pour dé/sélectionner les options de montage désirées. Veuillez ne pas sélectionner plusieurs versions de la même option."
 _btrfsMntConfBody="Confirmer les options de montage suivantes :\n\n"
 
 # Terminé !
 _DoneMsg="\nTerminé !\n\n"
 
-# Partitionnement automatique
+# Partition auto
 _AutoPartBody1="Avertissement : TOUTES les données sur"
-_AutoPartBIOSBody2="vont être effacées.\n\nUne seule partition utilisant tout l'espace disponible va être créée. Si vous avez l'intention d'utiliser un fichier d'échange (SWAP), sélectionnez l'option 'Fichier SWAP' pendant le montage.\n\nSouhaitez-vous continuer ?"
-_AutoPartUEFIBody2="vont être effacées.\n\nUne partition de démarrage UEFI de 512MB va être créée en premier, suivie par une seconde partition système utilisant tout l'espace restant. Si vous avez l'intention d'utiliser un fichier d'échange (SWAP), sélectionnez l'option 'Fichier SWAP' pendant le montage.\n\nSouhaitez-vous continuer ?"
+_AutoPartBIOSBody2="vont être effacées.\n\nUne seule partition utilisant tout l'espace disponible va être créée. Si vous avez l'intention d'utiliser un fichier d'échange (SWAP), sélectionnez l'option « Fichier SWAP » pendant le montage.\n\nSouhaitez-vous continuer ?"
+_AutoPartUEFIBody2="vont être effacées.\n\nUne partition de démarrage UEFI de 512MB va être créée en premier, suivie par une seconde partition système utilisant tout l'espace restant. Si vous avez l'intention d'utiliser un fichier d'échange (SWAP), sélectionnez l'option « Fichier SWAP » pendant le montage.\n\nSouhaitez-vous continuer ?"
 
 # Veuillez patienter...
 _PlsWaitBody="\nVeuillez patienter...\n\n"
@@ -50,7 +50,7 @@ _VBoxInstBody="\nSi pour une raison quelconque, les modules d'invité VirtualBox
 # Sélectionner le(s) pilote(s) du matériel WIFI
 _InstWirelessFirm="Installer le pilote de périphérique WIFI"
 _WirelssFirmTitle=" Sélectionner le pilote de périphérique WIFI"
-_WirelssFirmBody="\nCertains périphériques WIFI nécessitent qu'un pilote additionnel soit installé pour fonctionner.\n\nSi rien n'est précisé - ou que vous ne savez pas lequel choisir -, c'est que tous peuvent être installés."
+_WirelssFirmBody="\nCertains périphériques WIFI nécessitent qu'un pilote additionnel soit installé pour fonctionner.\n\nSi rien n'est précisé (ou que vous ne savez pas lequel choisir), c'est que tous peuvent être installés."
 _SeeWirelessDev="Afficher le périphérique WIFI (optionnel)"
 _WirelessShowTitle=" Périphérique WIFI "
 _WirelessErrBody="\nAucun détecté.\n"
@@ -59,10 +59,10 @@ _All="Tous"
 # Sélectionner les fichiers de configuration
 _SeeConfOpt="Vérifier les fichiers de configuration (optionnel)"
 _SeeConfOptTitle=" Fichiers de configuration "
-_SeeConfOptBody="\nSélectionner n'importe quel fichier listé ci-dessous pour être vérifié ou modifié.\n"
+_SeeConfOptBody="\nSélectionner un fichier listé ci-dessous pour être vérifié ou modifié.\n"
 _SeeConfErrTitle=" Vérification d'erreur(s) "
 _SeeConfErrBody1="\nLe fichier n'existe pas.\n\n"
-_SeeConfErrBody2="\nLe Système de base doit être installé en premier\n\n"
+_SeeConfErrBody2="\nLe Système Base doit être installé en premier\n\n"
 
 # Pacman
 _PrepPacKey="Actualiser les clés de Pacman"
@@ -71,61 +71,61 @@ _PrepPacKey="Actualiser les clés de Pacman"
 _PrepLVM="Gestionnaire de volume(s) logique(s) (optionnel)"
 
 _LvmDetTitle=" LVM Détecté "
-_LvmDetBody1="\nUn Gestionnaire de volume logique (LVM) a été détecté. Les partitions déjà utilisées pour le LVM ne peuvent être sélectionnées. Souhaitez-vous désactiver le LVM existant ?\n\nSélectionner 'Oui' pour supprimer le LVM existant.\nSélectionner 'Non' pour le garder.\n"
+_LvmDetBody1="\nUn Gestionnaire de volume logique (LVM) a été détecté. Les partitions déjà utilisées pour le LVM ne peuvent être sélectionnées. Souhaitez-vous désactiver le LVM existant ?\n\nSélectionner « Oui » pour supprimer le LVM existant.\nSélectionner « Non » pour le garder.\n"
 _LvmRmTitle=" Désactivation du LVM "
 _LvmDetBody2="\nGestionnaire de volume logique (LVM) existant détecté. Activation. Veuillez patienter...\n\n"
 _LvmRmBody="\nDésactivation de tous les volumes physiques (PV), groupes de volume (VG), et volumes logiques (LV) existants.\n\nVeuillez patienter...\n\n"
 
 _LvmPartErrTitle=" Erreur de partition LVM "
-_LvmPartErrBody="\nIl n'y a aucunes partitions viables disponible à utiliser pour le gestionnaire de volume logique. Un minimum de une est nécessaire.\n\nSi le LVM est déjà en cours d'utilisation, la désactivation de celui-ci permettra aux partitions utilisées pour les volumes physiques d'être utilisées de nouveau.\n\n"
+_LvmPartErrBody="\nIl n'y a aucunes partitions exploitables disponible à utiliser pour le gestionnaire de volume logique. Un minimum de 1 est nécessaire.\n\nSi le LVM est déjà en cours d'utilisation, la désactivation de celui-ci permettra aux partitions utilisées pour les volumes physiques d'être utilisées de nouveau.\n\n"
 
-_LvmNameVgTitle=" Nom du groupe de volume LVM "
-_LvmNameVgBody="\nEntrer le nom du groupe de volume (VG) à créer.\n\nLe VG est le nouveau 'Périphérique virtuel / disque dur' à créer en dehors de la partition sélectionnée ensuite.\n"
+_LvmNameVgTitle=" Nom du groupe de volumes LVM "
+_LvmNameVgBody="\nEntrer le nom du groupe de volumes (VG) à créer.\n\nLe VG est le nouveau « Périphérique virtuel / disque dur » à créer en dehors de la partition sélectionnée.\n"
 
 _LvmNameVgErrTitle=" Erreur de nom LVM - VG "
-_LvmNameVgErr="\nNom entré invalide. Le nom du groupe de volume doit être en caractère alphanumérique, mais ne doit pas contenir d'espaces, ni commencer par un '/', ou être déjà utilisé.\n\n"
+_LvmNameVgErr="\nNom entré incorrect. Le nom du groupe de volumes doit être en caractère alphanumérique, mais ne doit pas contenir d'espaces, ni commencer par un « / », ou être déjà utilisé.\n\n"
 
 _LvmPvSelTitle=" LVM - Sélectionner des partitions "
 _LvmPvSelBody="\nSélectionner la ou les partitions à utiliser pour le volume physique (PV).\n"
 _LvmPvCreateTitle=" LVM - Partition ajoutée "
 
-_LvmPvConfTitle=" LVM - Créer un Groupe de Volume "
-_LvmPvConfBody1="\nConfirmer la création du groupe de volume "
+_LvmPvConfTitle=" LVM - Créer un Groupe de Volumes "
+_LvmPvConfBody1="\nConfirmer la création du groupe de volumes "
 _LvmPvConfBody2="avec les partitions suivantes : \n\n"
 
 _LvmPvActTitle=" LVM - Création de VG "
-_LvmPvActBody1="\nCréation et activation du groupe de volume "
+_LvmPvActBody1="\nCréation et activation du groupe de volumes "
 _LvmPvActBody2="\n\nVeuillez patienter...\n\n"
 
 _LvmPvDoneTitle=" LVM - VG créé "
-_LvmPvDoneBody1="\nGroupe de volume "
+_LvmPvDoneBody1="\nLe groupe de volumes "
 LvmPvDoneBody2="a été créé"
 
 _LvmLvNumTitle=" LVM - Créer des volumes logiques "
 _LvmLvNumBody1="\nEntrer le nombre de volumes logiques (LVs) à créer dans "
-_LvmLvNumBody2="Le minimum est de 1, le maximum est de 9.\n\nLVs sont essentiellement des partitions. Le dernier (ou le seul) LV utilisera 100% de l'espace restant dans le groupe de volume."
+_LvmLvNumBody2="Le minimum est de 1, le maximum est de 9.\n\n Les LVs sont essentiellement des partitions. Le dernier (ou le seul) LV utilisera 100% de l'espace restant dans le groupe de volumes."
 
 _LvmLvNumErrTitle=" LVM - Erreur de nombre LV "
-_LvmLvNumErrBody="\nLe chiffre entré est non valide. Le minimum est de 1, le maximum est de 9.\n\n"
+_LvmLvNumErrBody="\nLe chiffre entré est incorrect. Le minimum est de 1, le maximum est de 9.\n\n"
 
 _LvmLvNameTitle=" LVM - Nom de LV " 
-_LvmLvNameBody1="\nEntrer le nom du volume logique (LV) à créer.\n\nCeci ressemble à une configuration de nom / de label pour une partition.\n"
-LvmLvNameBody2="\nNOTE : Ce LV utilisera automatiquement tout l'espace restant dans le groupe de volume"
+_LvmLvNameBody1="\nEntrer le nom du volume logique (LV) à créer.\n\nCeci ressemble à une configuration de nom / d'étiquette pour une partition.\n"
+LvmLvNameBody2="\nNOTE : Ce LV utilisera automatiquement tout l'espace restant dans le groupe de volumes"
 
 _LvmLvNameErrTitle=" LVM - Erreur de nom du LV "
-_LvmLvNameErrBody="\nNom entré invalide. Le nom du volume logique (LV) peut contenir des caractères alphanumériques, mais ne peut pas contenir d'espaces ou être précédé par un '/'.\n\n" 
+_LvmLvNameErrBody="\nNom entré incorrect. Le nom du volume logique (LV) peut contenir des caractères alphanumériques, mais ne peut pas contenir d'espaces ou être précédé par un « / ».\n\n" 
 
 _LvmLvSizeTitle=" LVM - Configurer la taille du LV "
 _LvmLvSizeBody1="restant"
 _LvmLvSizeBody2="\n\nEntrer la taille du volume logique (LV) en Mégaoctets (M) ou en Gigaoctets (G). Par exemple, 100M créera un VL de 100 Mégaoctets. 10G créera un VL de 10 Gigaoctets.\n"
 
 _LvmLvSizeErrTitle=" LVM - Erreur de configuration de taille du VL "
-_LvmLvSizeErrBody="\nValeur entrée non valide. Une valeur numérique doit être entrée avec un 'M' (Mégaoctets) ou un 'G' (Gigaoctets) à la fin.\n\nLes exemples incluent, 100M, 10G, ou 250M. La valeur doit aussi ne pas être égale ou supérieure à la taille restante du GV.\n\n"
+_LvmLvSizeErrBody="\nValeur entrée incorrecte. Une valeur numérique doit être entrée avec un « M » (Mégaoctets) ou un « G » (Gigaoctets) à la fin.\n\nLes exemples incluent, 100M, 10G, ou 250M. De plus, la valeur ne doit pas être égale ou supérieure à la taille restante du VG.\n\n"
 
 _LvmLvDoneTitle=" LVM - Volume logique créé "
 
 _LvmCompTitle=" LVM - Processus achevé "
-_LvmCompBody="\nTerminé ! Tous les volumes logiques ont été créés pour le groupe de volume.\n\nSouhaitez-vous voir le nouveau schéma du LVM ?\n\n"
+_LvmCompBody="\nTerminé ! Tous les volumes logiques ont été créés pour le groupe de volumes.\n\nSouhaitez-vous voir le nouveau schéma du LVM ?\n\n"
 
 
 # Afficher les périphériques et partitions
@@ -134,7 +134,7 @@ _DevShowOpt="Liste des périphériques (optionnel)"
 
 # Vérifier les conditions requises et identifier le type de système
 _ChkTitle=" Vérification des conditions requises "
-_ChkBody="\nVérification si l'installateur a bien été exécuté en tant que root et qu'il existe une connexion internet active. Veuillez patienter... \n\n"
+_ChkBody="\nVérification des conditions requises (installateur exécuté en tant que root et connexion internet active). Veuillez patienter... \n\n"
 
 _RtFailTitle=" Défaillance Root "
 _RtFailBody="\nL'installateur doit être exécuté en tant que root. Sortie.\n\n"
@@ -142,15 +142,15 @@ _RtFailBody="\nL'installateur doit être exécuté en tant que root. Sortie.\n\n
 _ConFailTitle=" Échec de connexion "
 _ConFailBody="\nLe test de connexion internet a échoué. Sortie.\n\n"
 
-_ReqMetTitle=" Conditions requises rencontrées "
-_ReqMetBody="\nTous les tests ont réussi !\n\n"
+_ReqMetTitle=" Conditions requises effectuées "
+_ReqMetBody="\nTests réalisés avec succès !\n\n"
 
 _UefiDet="Système UEFI détecté"
-_UefiDet="Système BIOS détecté"
+_BiosDet="Système BIOS détecté"
 
 # Installateur de liste des miroirs
 _MirrorlistTitle=" Liste des miroirs "
-_MirrorlistBody="\nLa liste des miroirs contient des adresses de serveurs utilisées par pacman pour installer des paquets. Ils sont accessibles par pacman dans l'ordre listé.\n\n"
+_MirrorlistBody="\nLa liste des miroirs contient des adresses de serveurs utilisées par pacman pour installer des paquets. Ils sont accessibles via pacman dans l'ordre listé.\n\n"
 _MirrorbyCountry="Générer la liste par pays"
 _MirrorEdit="Éditer manuellement la liste des miroirs"
 _MirrorRank="Classer la liste des miroirs par serveurs les plus rapides"
@@ -160,17 +160,17 @@ _MirrorRankBody="\nRecherche des serveurs les plus rapides de la liste des miroi
 _MirrorRankDone="\nTerminé ! La liste des miroirs a été classée par serveurs les plus rapides.\n\n"
 _MirrorRestDone="\nTerminé ! La liste originale des miroirs a été restaurée.\n\n"
 _MirrorNoneTitle=" Erreur de liste des miroirs "
-_MirrorNoneBody="\nUne copie de la liste originale des miroirs n'a pas été trouvée.\n\n"
+_MirrorNoneBody="\nLa copie de la liste originale des miroirs est introuvable.\n\n"
 
 # Générer la liste des miroirs par pays
 _MirrorCntryTitle=" Sélectionner un pays "
 _MirrorCntryBody="\nLa liste des miroirs sélectionnés par pays va être générée.\n\nUne fois la liste vérifiée, vous pourrez choisir de l'utiliser ou non."
 MirrorGenTitle=" Génération de la liste des miroirs "
 _MirrorGenBody="\nGénération de la liste des miroirs. Veuillez patienter...\n\n"
-_MirrorGenQ="Utiliser la liste des miroirs générée pour l'installateur ?"
+_MirrorGenQ="Utiliser la liste des miroirs générée ?"
 _MirrorGenDone="\nTerminé ! La liste originale des miroirs a été sauvegardée sous : \n\n/etc/pacman.d/mirrolist.orig\n\n"
 
-# Configurer le clavier (vconsole)
+# Configurer l'agencement du clavier (vconsole)
 _KeymapTitle=" Console virtuelle "
 _KeymapBody="\nSélectionner l'agencement de la console virtuelle."
 
@@ -186,18 +186,18 @@ _localeBody="Sélectionner une région"
 _TimeZTitle=" Sélectionner le fuseau horaire "
 _TimeZBody="\nLe fuseau horaire est utilisé pour configurer correctement votre horloge système."
 _TimeSubZTitle=" Sélectionner l'heure locale "
-_TimeSubZBody="\nSélectionner la ville la plus proche de vous."
+_TimeSubZBody="\nSélectionner la ville la plus proche de chez vous."
 _TimeZQ="Définir le fuseau horaire sous"
 
 # Définir l'horloge matérielle
 _HwCTitle=" Définir l'horloge matérielle "
-_HwCBody="\nUTC est le temps universel standard, et il est recommandé si vous utilisez un dual-boot avec Windows."
+_HwCBody="\nUTC est le temps universel standard, et il est recommandé (sauf si vous utilisez un dual-boot avec Windows.)"
 _HwCUTC="UTC"
 _HwLocal="Heure locale" 
 
 # Générer FSTAB
 _FstabTitle=" Générer FSTAB "
-_FstabBody="\nLe fichier FSTAB (File System TABle) configure quels périphériques de stockage vont être montés, et comment ils vont être utilisés.\n\nUUID/PARTUUID (Universally Unique IDentifier) est recommandé.\n\nSi aucune étiquette n'a été définie pour les partitions auparavant, les noms de périphérique seront utilisés pour l'option d'étiquette."
+_FstabBody="\nLe fichier FSTAB (File System TABle) définit les périphériques de stockage qui vont être montés, et comment ils vont être utilisés.\n\nUUID/PARTUUID (Universally Unique IDentifier) est recommandé.\n\nSi aucune étiquette n'a été définie pour les partitions auparavant, les noms de périphérique seront utilisés pour l'option d'étiquette."
 _FstabDev="Dev (code de partition)"
 _FstabLabel="Étiquette (défini par l'utilisateur)"
 _FstabUUID="UUID/PARTUUID (code unique)"
@@ -217,7 +217,7 @@ _PassRtBody2="\nEntrer à nouveau le mot de passe Root\n\n"
 
 # Erreur de mot de passe Root
 _PassRtErrTitle=" Erreur de mot de passe Root "
-_PassRtErrBody="\nLes mots de passe Root entrés ne fonctionnent pas. Veuillez réessayer.\n\n"
+_PassRtErrBody="\nLes mots de passe Root entrés ne correspondent pas. Veuillez réessayer.\n\n"
 
 # Créer un nouvel utilisateur
 _NUsrTitle=" Créer un nouvel utilisateur "
@@ -225,7 +225,7 @@ _NUsrBody="\nEntrer le nom de l'utilisateur. Les lettres DOIVENT être entrées 
 
 # Erreur de nom utilisateur
 _NUsrErrTitle=" Erreur de nom utilisateur "
-_NUsrErrBody="\nUn nom d'utilisateur incorrect a été entré. Veuillez réessayer.\n\n"
+_NUsrErrBody="\nNom d'utilisateur incorrect. Veuillez réessayer.\n\n"
 
 # Définir le mot de passe utilisateur
 _PassNUsrTitle=" Définir le mot de passe utilisateur "
@@ -238,23 +238,23 @@ _NUsrSetBody="\nCréation de l'utilisateur et des paramètres de groupes...\n\n"
 
 # Erreur de mot de passe utilisateur
 _PassNUsrErrTitle=" Erreur de mot de passe utilisateur "
-_PassNUsrErrBody="\nLes mots de passe utilisateur entrés ne fonctionnent pas. Veuillez réessayer.\n\n"
+_PassNUsrErrBody="\nLes mots de passe utilisateur entrés ne correspondent pas. Veuillez réessayer.\n\n"
 
 # Montage (Partitions)
 _MntStatusTitle=" État de montage "
 _MntStatusSucc="\nMontage réussi !\n\n"
 _MntStatusFail="\nÉchec de montage !\n\n"
 
-# Sélectionner le périphérique (installation)
+# Sélectionner un périphérique (installation)
 _DevSelTitle=" Sélectionner un périphérique "
 _DevSelBody="\nLes périphériques (/dev) sont des disques durs et des clés USB disponibles pour une installation. Le premier se nomme /sda, le second /sdb, etc... \n\nSi vous utilisez une clé USB pour exécuter Architect, vérifiez qu'elle se trouve bien dans la liste !"
 
-# Sélectionner périphérique (Grub) - séparer le corps du texte n'est pas requis (utilise la sélection de texte standard de périphérique)
+# Sélectionner le périphérique (Grub) - séparer le corps de texte n'est pas requis (utilise la sélection de texte standard de périphérique)
 _DevSelGrubTitle=" Sélectionner le périphérique Grub "
 
 # Outil de partitionnement
 _PartToolTitle=" Outil de partitionnement "
-_PartToolBody="\nL'option Auto-Partition est disponible pour les débutants. CFDisk est recommandé pour BIOS, Parted pour UEFI.\n\nNE PAS sélectionner UEFI/GPT -only partitioning tool pour un système BIOS/MBR pourrait causer de sérieux problèmes, incluant une installation inutilisable."
+_PartToolBody="\nL'option 'Partition auto' est disponible (et recommandée) pour les débutants. CFDisk est recommandé pour BIOS, Parted pour UEFI."
 
 # Erreur de partitionnement UEFI
 _UefiPartErrTitle=" Erreur de partitionnement UEFI " 
@@ -266,20 +266,20 @@ _BiosPartErrBody="\nLes systèmes BIOS ont besoin d'1 partition minimum pour l'i
 
 # Système de fichiers
 _FSTitle=" Choisir un système de fichiers "
-_FSBody="\nExt4 est recommandé. Tous les systèmes de fichiers ne sont pas viables pour Root ou pour les partitions de démarrage. Tous ont des caractéristiques différentes et des restrictions."
+_FSBody="\nExt4 est recommandé. Tous les systèmes de fichiers ne sont pas exploitables pour Root ou pour les partitions de démarrage. Tous ont des caractéristiques différentes et des restrictions."
 _FSSkip="Passer / Aucun" 
 
 # Sélectionner Root
 _SelRootTitle=" Sélectionner la partition ROOT "
-_SelRootBody="\nVoici la partition où Arch sera installé."
+_SelRootBody="\nSélectionner la partition où Arch sera installé."
 
-# Sélectionner le SWAP
+# Sélectionner SWAP
 _SelSwpTitle=" Sélectionner la partition SWAP "
 _SelSwpBody="\nSi vous utilisez un fichier d'échange, il doit être de la même taille que votre mémoire RAM."
 _SelSwpNone="Aucun"
 _SelSwpFile="Fichier d'échange"
 
-# Sélectionner l'UEFI
+# Sélectionner UEFI
 _SelUefiTitle=" Sélectionner la partition UEFI " 
 _SelUefiBody="\nCeci est une partition spéciale pour le démarrage des systèmes UEFI."
 
@@ -294,11 +294,11 @@ _OptUefiBody="\nLe(s) gestionnaire(s) de démarrage pouvant être installé(s) u
 
 # Point de montage UEFI
 _MntUefiTitle=" Sélectionner un point de montage UEFI "
-_MntUefiBody="\nrEFInd requiert /boot/efi. systemd-boot requiert /boot. Grub fonctionnera avec l'un ou l'autre point de montage."
+_MntUefiBody="\nrEFInd requiert /boot/efi. systemd-boot requiert /boot. Grub fonctionne avec l'un ou l'autre point de montage."
 
 # Partitions supplémentaires
 _ExtPartTitle=" Sélectionner une partition additionnelle "
-_ExtPartBody="\nSélectionner des partitions additionnelles dans n'importe quel ordre, ou cliquer sur 'Terminé' pour finir."
+_ExtPartBody="\nSélectionner des partitions additionnelles dans n'importe quel ordre, ou cliquer sur « Terminé » afin de poursuivre."
 
 # Nommer les partitions supplémentaires
 _ExtNameTitle=" Nom de la partition :"
@@ -311,7 +311,7 @@ _ExtErrBody="\nLa partition ne peut être montée. Un nom doit être donné apr�
 
 # Installer Base
 _InstBseTitle=" Installer Base "
-_InstBseBody="\nLe noyau actuel prend en charge le matériel récent. Le noyau LTS est plus stable, et sa prise en charge plus longue.\n\nLe groupe de paquets base-devel sera nécessaire pour utiliser le dépôt AUR (Arch User Repository)."
+_InstBseBody="\nLe noyau actuel prend en charge le matériel récent. Le noyau LTS est plus stable, et sa prise en charge plus longue.\n\nLe groupe de paquets base-devel est nécessaire pour utiliser le dépôt AUR (Arch User Repository)."
 _InstBaseLK="Noyau actuel"
 _InstBaseLKBD="Noyau actuel & base-devel"
 _InstBaseLTS="Noyau LTS"
@@ -328,25 +328,25 @@ _InstBiosBtBody="\nGrub2 est recommandé pour les débutants. Le périphérique 
 # Installation de Grub
 _InstGrubDevTitle=" Sélectionner le périphérique Grub "
 _InstGrubDevBody="\nInstaller Grub sur le même périphérique / disque dur que Root "
-_InstGrubDevBody2="\n\nCliquer sur 'Oui' pour installer sur un seul périphérique."
+_InstGrubDevBody2="\n\nCliquer sur « Oui » pour installer sur un seul périphérique."
 
 # Installer le gestionnaire de démarrage UEFI
 _InstUefiBtTitle=" Installer le gestionnaire de démarrage UEFI "
-_InstUefiBtBody="\nrEFInd requiert /boot/efi. systemd-boot requiert /boot. Grub fonctionnera avec l'un ou l'autre point de montage.\n\nNOTE : rEFInd avec LVM n'est pas pris en charge."
+_InstUefiBtBody="\nrEFInd requiert /boot/efi. systemd-boot requiert /boot. Grub fonctionne avec l'un ou l'autre point de montage.\n\nNOTE : rEFInd avec LVM n'est pas pris en charge."
 
 # Définir Grub UEFI par défaut
 _SetGrubDefTitle=" Définir Grub en tant que gestionnaire de démarrage par défaut ? "
-SetGrubDefBody="\nCertains microcodes UEFI peuvent ne pas détecter Grub (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer Grub comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner 'Oui', spécialement pour les débutants. Ceci copiera le module grubx64.efi amorçable dans"  
-_SetGrubDefBody2="et renommez-le bootx64.efi, comme requis.\n\nAutrement, sélectionner 'Non', particulièrement si un gestionnaire de démarrage par défaut existe déjà, et/ou si vous avez l'intention d'utiliser plusieurs gestionnaires de démarrage."
+SetGrubDefBody="\nCertains microcodes UEFI peuvent ne pas détecter Grub (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer Grub comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner « Oui », spécialement pour les débutants. Ceci copiera le module grubx64.efi amorçable dans"  
+_SetGrubDefBody2="et le renommera bootx64.efi, comme requis.\n\nAutrement, sélectionner « Non », particulièrement si un gestionnaire de démarrage par défaut existe déjà, et/ou si vous avez l'intention d'utiliser plusieurs gestionnaires de démarrage."
 
-# Configurer rEFInd par défaut
-_SetRefiDefTitle=" Configurer rEFInd en tant que gestionnaire de démarrage par défaut ? "
-SetRefiDefBody="\nCertains microcodes UEFI peuvent ne pas détecter rEFInd (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer rEFInd comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner 'Oui', spécialement pour les débutants. Ceci installera rEFInd dans" 
-_SetRefiDefBody2="avec le module bootx64.efi requis.\n\nAutrement, sélectionner 'Non', particulièrement si un gestionnaire de démarrage par défaut existe déjà, et/ou si vous avez l'intention d'utiliser plusieurs gestionnaires de démarrage."
+# Définir rEFInd par défaut
+_SetRefiDefTitle=" Définir rEFInd en tant que gestionnaire de démarrage par défaut ? "
+SetRefiDefBody="\nCertains microcodes UEFI peuvent ne pas détecter rEFInd (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer rEFInd comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner « Oui », spécialement pour les débutants. Ceci installera rEFInd dans" 
+_SetRefiDefBody2="avec le module bootx64.efi requis.\n\nAutrement, sélectionner « Non », particulièrement si un gestionnaire de démarrage par défaut existe déjà, et/ou si vous avez l'intention d'utiliser plusieurs gestionnaires de démarrage."
 
-# fichier efi configuré pour Grub ou Refind
+# fichier efi défini pour Grub ou Refind
 _SetDefDoneTitle=" Fichier UEFI copié "
-_SetDefDoneBody="a été configuré comme le gestionnaire de démarrage par défaut.\n\n"
+_SetDefDoneBody="a été défini comme le gestionnaire de démarrage par défaut.\n\n"
 
 # Erreur de point de montage de rEFInd
 _RefiErrTitle=" Point de montage rEFInd UEFI "
@@ -358,17 +358,11 @@ _AXIBody="\nAvant l'installation de(s) pilote(s) de carte graphique ou d'environ
 
 # Menu des cartes graphiques
 _GCtitle=" Menu des cartes graphiques "
-_GCBody="Choisir 'Nouveau' pour les anciennes cartes NVIDIA. Si votre carte n'est pas listée, choisir 'Inconnue / Générique'.\n"
 _GCUnknOpt="Inconnue / Générique"
 
 # Vérification de la configuration NVIDIA
 _NvidiaConfTitle=" Vérification de la configuration NVIDIA "
-_NvidiaConfBody="\nUn fichier basique de configuration NVIDIA a été créé. Veuillez le vérifier avant de fermer pour continuer.\n"
-
-# Détection de carte graphique
-_GCDetTitle="Détectée"
-_GCDetBody="\nVotre carte graphique ou votre logiciel de virtualisation est"
-_GCDetBody2="-Sélectionner 'Oui' pour installer les pilotes libres.\n\n-Sélectionner 'Non' pour ouvrir le menu des cartes graphiques, qui inclut les pilotes propriétaires NVIDIA."
+_NvidiaConfBody="\nUn fichier de configuration NVIDIA a été créé. Veuillez le vérifier avant de fermer pour continuer.\n"
 
 # Info d'installation DE
 _DEInfoTitle=" Installer le ou les environnements de bureau "
@@ -380,10 +374,10 @@ _InstDEBody="\nLes environnements de bureau sont listés en premier, et peuvent 
 
 # Installer des paquets communs
 _InstComTitle=" Installer des paquets communs ? "
-_InstComBody="\nCertains environnements nécessitent des fichiers communs pour être installés, particulièrement pour les permissions, la création des dossiers personnels, et les fonctionnalités du gestionnaire de fichiers.\n\nLes paquets incluent : xdg-user-dirs, gksu, gnome-keyring, polkit, gvfs, et le gnome-icon-theme, etc... Ceux d'entre vous qui ont seulement installé l'environnement full KDE n'ont pas besoin d'installer ceci.\n\nInstaller ces paquets ? Cette option sera proposée UNE FOIS seulement.\n\n"
+_InstComBody="\nCertains environnements nécessitent des fichiers communs pour être installés, particulièrement pour les permissions, la création des dossiers personnels et les fonctionnalités du gestionnaire de fichiers.\n\nLes paquets incluent : xdg-user-dirs, gksu, gnome-keyring, polkit, gvfs, et le gnome-icon-theme, etc... Ceux d'entre vous qui ont seulement installé l'environnement full KDE n'ont pas besoin d'installer ceci.\n\nInstaller ces paquets ? Cette option sera proposée UNE FOIS seulement.\n\n"
 
 # DM activé
-_DmDoneTitle="Activé "
+_DmDoneTitle="activé "
 _DMDoneBody="a été activé.\n\n"
 
 # LXDM ou LightDM
@@ -407,36 +401,36 @@ _InstNMErrBody="\nUn gestionnaire de connexion réseau a déjà été installé 
 
 # Bienvenue
 _WelTitle=" Bienvenue dans"
-_WelBody="\nCet installateur va télécharger les derniers paquets provenant des dépôts Arch. Seule la configuration minimum nécessaire sera téléchargée.\n\nSurligner les options en pressant sur leur numéro respectif, ou en utilisant les flèches haut/bas avant d'appuyer sur [entrée] pour confirmer.\n\nNaviguer entre les boutons en utilisant [Tab] ou les flèches gauche/droite avant d'appuyer sur [entrée] pour confirmer.\n"
+_WelBody="\nCet installateur va télécharger les derniers paquets provenant des dépôts Arch. Seule la configuration nécessaire sera téléchargée.\n\nSurligner les options en pressant sur leur numéro respectif, ou en utilisant les flèches haut/bas avant d'appuyer sur [entrée] pour confirmer.\n\nNaviguer entre les boutons en utilisant [Tab] ou les flèches gauche/droite avant d'appuyer sur [entrée] pour confirmer.\n"
 
 # Menu de Préparation 
 _PrepTitle=" Préparer l'installation "
-_PrepBody="\nLa console de l'agencement du clavier doit être utilisée tant pour l'installateur que pour le système installé.\n"
+_PrepBody="\nL'agencement du clavier va être utilisé pour l'installateur et pour le système installé.\n"
 _PrepKBLayout="Configurer l'agencement du clavier"
-_PrepMirror="Configurer l'installateur de la liste des miroirs (optionnel)"
+_PrepMirror="Configurer la liste des miroirs (optionnel)"
 _PrepPartDisk="Partitionner le(s) disque(s)"
 _PrepMntPart="Monter les partitions"
 _Back="Retour"
 
 # Menu d'installation de Base
 _InstBsMenuTitle=" Installer Base "
-_InstBseMenuBody="\nIl n'est pas nécessaire d'installer un gestionnaire de démarrage à côté d'une distribution Linux existante qui utilise Grub ; Mettez seulement à jour le Grub existant."
+_InstBseMenuBody="\nIl n'est pas nécessaire d'installer un gestionnaire de démarrage à côté d'une distribution Linux existante qui utilise Grub ; Mettez seulement à jour le Grub déjà présent."
 _InstBse="Installer Base"
 _InstBootldr="Installer le gestionnaire de démarrage"
 
 # Configurer le menu de Base
 _ConfBseTitle=" Configurer Base "
-_ConfBseBody="\nConfiguration basique de la base."
+_ConfBseBody="\nConfiguration simple de la base."
 _ConfBseFstab="Générer FSTAB"
 _ConfBseHost="Définir le nom d'hôte"
 _ConfBseTime="Définir le fuseau horaire"
 _ConfBseHWC="Définir l'horloge matérielle"
 _ConfBseSysLoc="Définir les paramètres régionaux"
-_ConfBseVirtCon="Définir la console virtuelle"
+_ConfBseVirtCon="Configurer la console virtuelle"
 
 # Menu utilisateur
 _ConfUsrTitle=" Configurer le ou les utilisateurs"
-_ConfUsrBody="\nRoot est le compte 'super-utilisateur' ou 'admin' par défaut. Le même mot de passe peut être appliqué tant pour Root que pour n'importe quel compte utilisateur créé."
+_ConfUsrBody="\nRoot est le compte « super-utilisateur » ou « admin » par défaut. Le même mot de passe peut être appliqué pour Root ou pour tout autre compte utilisateur."
 _ConfUsrRoot="Définir le mot de passe Root"
 _ConfUsrNew="Ajouter un ou des utilisateurs"
 
@@ -446,11 +440,11 @@ _InstDEMenuBody="\nAvant d'installer un environnement de bureau, les pilotes aud
 _InstDEMenuGISD="Installer les pilotes audio, d'entrée, et graphiques"
 _InstDEMenuDE="Installer le ou les environnements de bureau"
 _InstDEMenuNM="Installer le gestionnaire de connexion réseau"
-_InstDEMenuDM="Installer le gestionnaire d'affichage / écran de connexion"
+_InstDEMenuDM="Installer le gestionnaire d'affichage / l'écran de connexion"
 
 # Menu principal
 _MMTitle=" Menu principal "
-MMBody="\nChaque étape doit être suivie DANS L'ORDRE. Une fois effectué, sélectionner 'Terminé' pour finaliser correctement l'installation.\n"
+MMBody="\nChaque étape doit être suivie DANS L'ORDRE. Une fois effectué, sélectionner « Terminé » pour finaliser correctement l'installation.\n"
 _MMPrep="Préparer l'installation"
 _MMInstBse="Installer Base"
 _MMConfBse="Configurer Base"

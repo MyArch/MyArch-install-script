@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.6.1 - 23-Nov-2015)
+# Architect Installation Framework (version 1.6.2 - 02-Dec-2015)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.6.1"
+VERSION="Architect Installation Framework 1.6.2"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -94,7 +94,7 @@ FILE2=""					# Which second file is to be opened?
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 11 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 12 \
  	"1" $"English		(en)" \
  	"2" $"Italian 		(it)" \
  	"3" $"Russian 		(ru)" \
@@ -105,7 +105,8 @@ select_language() {
  	"8" $"Hungarian 	(hu)" \
  	"9" $"Portuguese 	(pt)" \
    "10" $"German	 	(de)" \
-   "11" $"French		(fr)" 2>${ANSWER}
+   "11" $"French		(fr)" \
+   "12" $"Polish		(pl)" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
         "1") source /aif-dev-master/english.trans
@@ -144,6 +145,9 @@ select_language() {
              ;;
        "11") source /aif-dev-master/french.trans
              CURR_LOCALE="fr_FR.UTF-8"
+             ;;
+       "12") source /aif-dev-master/polish.trans
+             CURR_LOCALE="pl_PL.UTF-8"
              ;;
           *) exit 0
              ;;
