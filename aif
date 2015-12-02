@@ -148,7 +148,7 @@ select_language() {
              ;;
        "12") source /aif-dev-master/polish.trans
              CURR_LOCALE="pl_PL.UTF-8"
-             FONT="lat9w-16"
+             FONT="latarcyrheb-sun16"
              ;;
           *) exit 0
              ;;
