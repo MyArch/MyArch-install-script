@@ -1,7 +1,7 @@
 ##
-## 							
-## Nederlands vertalings bestand		
-##								
+##
+## Nederlands vertalings bestand
+##
 ##
 ## Geschreven door Carl Duff (06-Oct-2015)
 ##
@@ -47,7 +47,7 @@ _ErrNoBase="\nJe moet eerst het Arch basissysteem installeren.\n\n"
 _VBoxInstTitle=" VirtualBox Installeren "
 _VBoxInstBody="\nIndien, om welke reden ook, de VirtualBox gastmodules niet laden voor het geïnstalleerde systeem (o.a. lage resolutie en scrollbars na het opstarten), dan zal één van de volgende commando's dit verhelpen:\n\n$ su\n# depmod -a\n# modprobe -a vboxvideo vboxguest vboxsf\n# reboot"
 
-# Selecteer een stuurprogramma voor uw draadloze netwerkkaart 
+# Selecteer een stuurprogramma voor uw draadloze netwerkkaart
 _InstWirelessFirm="Installeer een stuurprogramma voor uw draadloze netwerkkaart"
 _WirelssFirmTitle=" Selecteer een stuurprogramma voor uw draadloze netwerkkaart "
 _WirelssFirmBody="\nSommige draadloze netwerkkaarten vereisen een bijkomende stuurprogramma vooraleer ze kunnen functioneren.\n\nBen je niet zeker of er een extra stuurprogamma nodig is - of welk stuurprogramma er nodig is - dan mag je alle stuurprogramma's installeren."
@@ -108,7 +108,7 @@ _LvmLvNumBody2="Minimum is 1, maximum is 9.\n\nLVs zijn essentiele partities. Th
 _LvmLvNumErrTitle=" LVM - LV verkeerd aantal "
 _LvmLvNumErrBody="\nOngeldig getal ingegeven. Minimum is 1, maximum is 9.\n\n"
 
-_LvmLvNameTitle=" LVM - Naam LV " 
+_LvmLvNameTitle=" LVM - Naam LV "
 _LvmLvNameBody1="\nGeef de naam van het Logical Volume (LV) dat aangemaakt wordt.\n\nDit is hetzelfde als het instellen van een naam / label voor een partitie.\n"
 _LvmLvNameBody2="\n\nNOTE: Deze LV zal automatisch alle resterende vrije ruimte in de Volume Groep innemen."
 
@@ -132,7 +132,7 @@ _LvmCompBody="\nKlaar! Alle Logical Volumes van de Volume Groep zijn aangemaakt.
 _DevShowTitle=" Opslagmedia / Partities "
 _DevShowOpt="Lijst opslagmedia (optioneel)"
 
-# Controleren: Architect afhankelijkheden en identificeer het Systeem Type
+# Controleren: Arch afhankelijkheden en identificeer het Systeem Type
 _ChkTitle=" Controle van de Afhankelijkheden "
 _ChkBody="\nControle, ben je aangemeld als ROOT? Is dit systeem verbonden met het internet? Even geduld aub...\n\n"
 
@@ -193,7 +193,7 @@ _TimeZQ="Stel de Tijdzone in als"
 _HwCTitle=" Stel de Hardware-klok in "
 _HwCBody="\nUTC is de universele standaardtijd, en is aangewezen behalve bij een dual-installatie met Windows."
 _HwCUTC="UTC"
-_HwLocal="Locale Tijd" 
+_HwLocal="Locale Tijd"
 
 # Genereer FSTAB
 _FstabTitle=" Genereer FSTAB "
@@ -229,7 +229,7 @@ _NUsrErrBody="\nEen foute gebruikersnaam werd ingegeven. probeer opnieuw aub.\n\
 
 # Stel gebruikerswachtwoord in
 _PassNUsrTitle=" Stel het gebruikerswachtwoord in "
-_PassNUsrBody="\nGeef wachtwoord in voor" 
+_PassNUsrBody="\nGeef wachtwoord in voor"
 _PassNUsrBody2="\nHerhaal het wachtwoord voor"
 
 # Maak een nieuwe gebruiker aan
@@ -247,7 +247,7 @@ _MntStatusFail="\nAankoppeling mislukt!\n\n"
 
 # Selecteer opslagmedium  (installatie)
 _DevSelTitle=" Selecteer opslagmedium"
-_DevSelBody="\nOpslagmedia (/dev) zijn de beschikbare en beschrijfbare harde schijven en USB-sticks. De eerste is /sda, de tweede /sdb, en zo verder.\n\nWanneer er een USB-stick gebruikt wordt om Architect op te starten zal deze ook op deze lijst voorkomen!"
+_DevSelBody="\nOpslagmedia (/dev) zijn de beschikbare en beschrijfbare harde schijven en USB-sticks. De eerste is /sda, de tweede /sdb, en zo verder.\n\nWanneer er een USB-stick gebruikt wordt om Arch op te starten zal deze ook op deze lijst voorkomen!"
 
 # Selecteer opslagmedium (Grub)
 _DevSelGrubTitle=" Selecteer Grub opslagmedium "
@@ -257,7 +257,7 @@ _PartToolTitle=" Partities instellen "
 _PartToolBody="\nEr is een auto-partitionering optie beschikbaar voor beginners.CFDisk is aanbevolen voor BIOS, Parted voor UEFI.\n\nOpgelet! selecteer GEEN exclusieve UEFI/GPT-partitionering voor een BIOS/MBR systeem omdat dit serieuse problemen kan veroorzaken, en zelfs kan leiden tot een onopstartbare systeem."
 
 # UEFI Partitioneringsfout
-_UefiPartErrTitle=" Foute UEFI Partitionering " 
+_UefiPartErrTitle=" Foute UEFI Partitionering "
 _UefiPartErrBody="\nUEFI systemen moeten geinstalleerd worden op minimum twee partities (ROOT and UEFI).\n\nConfigureer uw partities aub.\n\n"
 
 # BIOS Partitioneringsfout
@@ -267,7 +267,7 @@ _BiosPartErrBody="\nBIOS systemen moeten geinstalleerd worden op minimum één p
 # Bestandsysteem
 _FSTitle=" Kies uw bestandsysteem "
 _FSBody="\nExt4 is hier aanbevolen. Niet alle bestandsystemen zijn geschikt voor de Root of Boot-Partities. Elk bestandsysteem heeft verschillende eigenschappen en beperkingen."
-_FSSkip="Sla over / Geen" 
+_FSSkip="Sla over / Geen"
 
 # Selecteer Root
 _SelRootTitle=" Selecteer ROOT Partitie "

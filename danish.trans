@@ -1,8 +1,8 @@
 ##
-## 							
-## Danish Translation File		
-## 							
-## 
+##
+## Danish Translation File
+##
+##
 ## Translation by Frede Hundewadt 2015-09-11 frede.hundewadt@gmail.com
 ##
 
@@ -108,7 +108,7 @@ _LvmLvNumBody2="Mindst 1, højest 9.\n\nLogiske Diske (LV) er faktisk Disk Afsni
 _LvmLvNumErrTitle=" LVM - Logisk Disk (LV) nummer fejl "
 _LvmLvNumErrBody="\nNummeret er ugyldigt. Mindste er 1, højeste er 9.\n\n"
 
-_LvmLvNameTitle=" LVM - Logisk Disk (LV) navn " 
+_LvmLvNameTitle=" LVM - Logisk Disk (LV) navn "
 _LvmLvNameBody1="\nIndtast navn for denne Logiske Disk (LV).\n\nDette svarer til navn/etiket/label for et disk afsnit.\n"
 _LvmLvNameBody2="\nBEMÆRK: Denne Logiske Disk udfylder al ledig plads i denne Disk Gruppe (VG)"
 
@@ -193,7 +193,7 @@ _TimeZQ="Sæt tids zone som"
 _HwCTitle=" Sæt Hardware Ur "
 _HwCBody="\nUTC er den universelle tids standard, og anbefales med mindre du også bruger Windows på samme system."
 _HwCUTC="UTC"
-_HwLocal="Lokal tid" 
+_HwLocal="Lokal tid"
 
 # Generate FSTAB
 _FstabTitle=" Opret FSTAB "
@@ -229,7 +229,7 @@ _NUsrErrBody="\nEt ugyldigt brugernavn blev indtastet. Prøv venligst igen.\n\n"
 
 # Set User Password
 _PassNUsrTitle=" Sæt Bruger Adgangskode "
-_PassNUsrBody="\nIndtast adgangskode for" 
+_PassNUsrBody="\nIndtast adgangskode for"
 _PassNUsrBody2="\nGentag adgangskode for"
 
 # Create New User
@@ -247,7 +247,7 @@ _MntStatusFail="\nMount Fejlet!\n\n"
 
 # Select Device (installation) - Translate
 _DevSelTitle=" Vælg Enhed "
-_DevSelBody="\nEnheder (/dev) er tilgængelige hard-diske og USB-pinde der kan installeres på. Den første er /sda, den anden /sdb, og frem.\n\nNår Architect startes fra USB-pind, vær opmærksom på at denne også vises i listen!"
+_DevSelBody="\nEnheder (/dev) er tilgængelige hard-diske og USB-pinde der kan installeres på. Den første er /sda, den anden /sdb, og frem.\n\nNår Arch startes fra USB-pind, vær opmærksom på at denne også vises i listen!"
 
 # Select Device (Grub) - seperate body text is not required (uses standard device selection text)
 _DevSelGrubTitle=" Vælg Grub enhed "
@@ -258,7 +258,7 @@ _PartToolTitle=" Disk opsætnings værktøj "
 _PartToolBody="\nEn auto-opsætning er kan vælges for førstegangsbrugere.\n\n På den anden side, Vælg IKKE et UEFI/GPT opsætnings værktøj til et BIOS/MBR system da det giver problemer, blandt andet en installation der ikke starter."
 
 # UEFI Partitioning Error
-_UefiPartErrTitle=" UEFI Disk Afsnit Fejl " 
+_UefiPartErrTitle=" UEFI Disk Afsnit Fejl "
 _UefiPartErrBody="\nUEFI systemer fordrer mindst 2 disk afsnit til installation (ROOT og UEFI).\n\nVenligst opsæt dine disk afsnit.\n\n"
 
 # BIOS Partitioning Error
@@ -268,7 +268,7 @@ _BiosPartErrBody="\nBIOS systemer fordrer mindst 1 disk afsnit til installation 
 # File System
 _FSTitle=" Vælg Filsystem "
 _FSBody="\nExt4 anbefales. Ikke alle filsystem typer er anvendelige til Root eller Boot afsnit. Alle typer har forskellige egenskaber og begrænsninger."
-_FSSkip="Spring over / Intet" 
+_FSSkip="Spring over / Intet"
 
 # Select Root
 _SelRootTitle=" Vælg ROOT Afsnit "

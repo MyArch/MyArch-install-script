@@ -1,7 +1,7 @@
 ##
-## 							
-## Turkish Translation File		
-##								
+##
+## Turkish Translation File
+##
 ##
 ## Written by "Erkan Erdem / ErkanMDR" (02th February 2015)
 ## Edited by Arda Ünlü -- 2 - 4 Aug 2015 & 6th Sept 2015
@@ -110,7 +110,7 @@ _LvmLvNumBody2="En az 1, en fazla 9.\n\nLV'nin bölümleri vardır. Son (veya te
 _LvmLvNumErrTitle=" LVM - LV Sayı Hatası "
 _LvmLvNumErrBody="\nYanlış sayı girildi. En az 1, en çok 9.\n\n"
 
-_LvmLvNameTitle=" LVM - LV'yi Adlandır " 
+_LvmLvNameTitle=" LVM - LV'yi Adlandır "
 _LvmLvNameBody1="\nYaratılacak Mantıksal Hacim (LV) adı girin.\n\nBir bölümün adını ayarlamak gibidir.\n"
 _LvmLvNameBody2="\nNOT: Bu LV Hacim Grubunda kalan tüm alanı kullanacak."
 
@@ -195,7 +195,7 @@ _TimeZQ="Zaman Dİlimini ayarla:"
 _HwCTitle=" Donanım Saatini Ayarla "
 _HwCBody="\nUTC üniversal saat standartıdır, ve Windows ile dual-boot kullanımı için tavsiye edilir."
 _HwCUTC="UTC"
-_HwLocal="Yerel Zaman" 
+_HwLocal="Yerel Zaman"
 
 # Generate FSTAB
 _FstabTitle=" FSTAB Oluştur "
@@ -231,7 +231,7 @@ _NUsrErrBody="\nKullanıcı adı geçersiz karakterler içeriyor. Lütfen tekrar
 
 # Set User Password
 _PassNUsrTitle=" Kullanıcı Şifresi Oluştur "
-_PassNUsrBody="\nKullanıcı şifresi giriniz" 
+_PassNUsrBody="\nKullanıcı şifresi giriniz"
 _PassNUsrBody2="\nKUllanıcı şifresini tekrar giriniz for"
 
 # Create New User
@@ -249,7 +249,7 @@ _MntStatusFail="\nBağlama Hatası!\n\n"
 
 # Select Device (installation)
 _DevSelTitle=" Aygıt Seç "
-_DevSelBody="\nAygıtlar (/dev) kurulabilecek hard diskler ve USB çubuklarıdır. Birincisi /sda, ikincisi /sdb, vb.\n\nArchitect'i USB çubuğu ile kurarken dikkat edin, o da listelenecektir!"
+_DevSelBody="\nAygıtlar (/dev) kurulabilecek hard diskler ve USB çubuklarıdır. Birincisi /sda, ikincisi /sdb, vb.\n\nArch'i USB çubuğu ile kurarken dikkat edin, o da listelenecektir!"
 
 # Select Device (Grub) - seperate body text is not required (uses standard device selection text)
 _DevSelGrubTitle=" Grub Aygıtı Seçin "
@@ -260,7 +260,7 @@ _PartToolTitle=" Bölümlendirme Aracı "
 _PartToolBody="\nGParted önerilen, hem BIOS hem de UEFI destekleyen, kullanıcı dostu bir grafiksel araçtır.\n\nBIOS/MBR olan bir sistem için sadece UEFI/GPT destekleyen bir bölümlendirme aracı SEÇMEYİNİZ. Açılamayan bir sistem gibi çeşitli sorunlara yol açabilir."
 
 # UEFI Partitioning Error
-_UefiPartErrTitle=" UEFI Bölümlendirme Hatası " 
+_UefiPartErrTitle=" UEFI Bölümlendirme Hatası "
 _UefiPartErrBody="\nUEFI sistemleri kurulum için en az 2 bölüm gerektirirler (ROOT ve UEFI).\n\nLütfen bölümlerinizi ayarlayın.\n\n"
 
 # BIOS Partitioning Error
@@ -270,7 +270,7 @@ _BiosPartErrBody="\nBIOS sistemleri kurulum için en az 1 bölüm gerektirirler 
 # File System
 _FSTitle=" Dosya Sistemi Seçin "
 _FSBody="\nExt4 önerilir. Dosya sistemi türlerinin hepsi Root ve Boot bölümleri için uygun değildir. Hepsinin farklı özellikleri ve sınırları vardır."
-_FSSkip="Atla / Hiçbiri" 
+_FSSkip="Atla / Hiçbiri"
 
 # Select Root
 _SelRootTitle=" ROOT Blümü Seçin "

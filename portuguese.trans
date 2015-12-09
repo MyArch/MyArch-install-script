@@ -1,5 +1,4 @@
-								
-#Taduçao de Inglês para Portugues Brasil
+o de Inglês para Portugues Brasil
 #Traduzido por Carlos Araujo
 
 # Accessibility
@@ -103,7 +102,7 @@ _LvmLvNumBody2="Mínimo é 1, máximo é 9.\n\nLVs são essencialmente partiçõ
 _LvmLvNumErrTitle=" LVM - Erro do LV no Número "
 _LvmLvNumErrBody="\nInválido Número Inserido. Mínimo é 1, máximo é 9.\n\n"
 
-_LvmLvNameTitle=" LVM - Nome do LV " 
+_LvmLvNameTitle=" LVM - Nome do LV "
 _LvmLvNameBody1="\nInsira o nome do Volume Lógico (Logical Volume (LV)) para criá-lo.\n\nIsto é como criar o nome '/' da etiqueta para uma partição.\n"
 _LvmLvNameBody2="\nNOTA: Este Volume Lógico (LV) vai automaticamente usar todo o espaço restante no Grupo de Volume (Volume Group)"
 
@@ -187,7 +186,7 @@ _TimeZQ="Definir fuso horário como"
 _HwCTitle=" Definir Relógio do Hardware "
 _HwCBody="\nUTC é o padrão de tempo universal, e é recomendado, a não ser que faça dual-booting com Windows."
 _HwCUTC="UTC"
-_HwLocal="Hora Local" 
+_HwLocal="Hora Local"
 
 # Generate FSTAB
 _FstabTitle=" Gerando FSTAB "
@@ -223,7 +222,7 @@ _NUsrErrBody="\nNome de usuários está incorreto. Por favor, tente outra vez.\n
 
 # Set User Password
 _PassNUsrTitle=" Definir Palavra-Chave de Usuário "
-_PassNUsrBody="\nInsira Palavra-Passe para" 
+_PassNUsrBody="\nInsira Palavra-Passe para"
 _PassNUsrBody2="\nRe-Insira Palavra-Passe para"
 
 # Create New User
@@ -241,7 +240,7 @@ _MntStatusFail="\nMontagem Falhou!\n\n"
 
 # Select Device (installation) - Translate
 _DevSelTitle=" Selecionar Dispositivo "
-_DevSelBody="\nDispositivos (/dev) estão disponíveis no disco-rígido e pendrive USB para serem instalados. O primeiro é /sda, o segundo é /sdb, e por adiante.\n\nQuando se utiliza uma pendrive USB para inicializar Architect, tenha cuidado porque também pode ficar listado!"
+_DevSelBody="\nDispositivos (/dev) estão disponíveis no disco-rígido e pendrive USB para serem instalados. O primeiro é /sda, o segundo é /sdb, e por adiante.\n\nQuando se utiliza uma pendrive USB para inicializar Arch, tenha cuidado porque também pode ficar listado!"
 
 # Select Device (Grub) - seperate body text is not required (uses standard device selection text)
 _DevSelGrubTitle=" Seleccionar Dispositivo Grub "
@@ -252,7 +251,7 @@ _PartToolTitle=" Ferramenta de Partições "
 _PartToolBody="\nAuto-Particionamento é recomendada para iniciantes e suporta ambos os sistemas de BIOS e UEFI/GPT.\n\nNÃO SELECIONAR UEFI / GPT - a única ferramenta de particionamento de uma BIOS do sistema /MBR, pois isso pode causar sérios problemas, incluindo a instalação não dar boot."
 
 # UEFI Partitioning Error
-_UefiPartErrTitle=" UEFI Erro de Partição " 
+_UefiPartErrTitle=" UEFI Erro de Partição "
 _UefiPartErrBody="\nSistemas UEFI requerem o minímo de duas partições para a instalação (ROOT and UEFI).\n\nPor Favor configure as suas partições.\n\n"
 
 # BIOS Partitioning Error
@@ -262,7 +261,7 @@ _BiosPartErrBody="\nSistemas BIOS requerem pelo menos uma partição para instal
 # File System
 _FSTitle=" Escolher Sistema de Arquivos"
 _FSBody="\nExt4 é recomendado. Nem todos os sistemas de arquivos são viáveis para as partições Root ou Boot. Todas têm funcionalidades diferentes e limitações."
-_FSSkip="Deixar / Nenhum" 
+_FSSkip="Deixar / Nenhum"
 
 # Select Root
 _SelRootTitle=" Selecionar Partição ROOT "

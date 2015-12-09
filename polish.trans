@@ -1,7 +1,7 @@
 ##
-## 							
-## Polish Translation File		
-##								
+##
+## Polish Translation File
+##
 ##
 ## Napisane przez Carl Duff (20-Lis-2015)
 ##
@@ -108,7 +108,7 @@ _LvmLvNumBody2="Minimalnie 1, maksymalnie 9.\n\nWolumeny logiczne to właściwie
 _LvmLvNumErrTitle=" LVM - Błąd liczby wolumenów logicznych "
 _LvmLvNumErrBody="\nWpisano błędną liczbę. Minimum to 1, maksimum to 9.\n\n"
 
-_LvmLvNameTitle=" LVM - Nazwij wolumen logiczny " 
+_LvmLvNameTitle=" LVM - Nazwij wolumen logiczny "
 _LvmLvNameBody1="\nWpisz nazwę tworzonego wolumenu logicznego (LV).\n\nTo jest jak tworzenie nazwy / etykiety partycji.\n"
 _LvmLvNameBody2="\nUWAGA: Ten wolumen logiczny automatycznie zajmie całą wolną przestrzeń w grupie wolumenów"
 
@@ -193,7 +193,7 @@ _TimeZQ="Ustaw strefę czasową jako"
 _HwCTitle=" Ustaw zegar sprzętowy "
 _HwCBody="\nUTC to uniwersalny standard czasu, i jest rekomendowany chyba, że system Windows jest również zainstalowany na tym komputerze."
 _HwCUTC="UTC"
-_HwLocal="Czas lokalny" 
+_HwLocal="Czas lokalny"
 
 # Stwórz plik FSTAB
 _FstabTitle=" Stwórz plik FSTAB "
@@ -229,7 +229,7 @@ _NUsrErrBody="\nWpisano błędną nazwę użytkownika. Spróbuj jeszcze raz.\n\n
 
 # Ustaw hasło użytkownika
 _PassNUsrTitle=" Ustaw hasło użytkownika "
-_PassNUsrBody="\nWpisz hasło dla" 
+_PassNUsrBody="\nWpisz hasło dla"
 _PassNUsrBody2="\nWpisz ponownie hasło dla"
 
 # Stwórz nowego użytkownika
@@ -247,7 +247,7 @@ _MntStatusFail="\nBłąd montowania!\n\n"
 
 # Wybrane urządzenie (instalacja)
 _DevSelTitle=" Wybierz urządzenie "
-_DevSelBody="\nUrządzenia (/dev) to dyski twarde i USB. pierwszy to /sda, drugi /sdb, itd.\n\nJeśli używasz dysku USB do uruchomienia Architect-a, Uważaj, bo on również będzie na liście!"
+_DevSelBody="\nUrządzenia (/dev) to dyski twarde i USB. pierwszy to /sda, drugi /sdb, itd.\n\nJeśli używasz dysku USB do uruchomienia Arch-a, Uważaj, bo on również będzie na liście!"
 
 # Wybrane urządzenie (Grub) - osobny tekst treści nie jest wymagany (używa standardowego tekstu wyboru urządzenia)
 _DevSelGrubTitle=" Wybierz urządzenie do instalacji Grub-a "
@@ -257,7 +257,7 @@ _PartToolTitle=" Narzędzie partycjonowania "
 _PartToolBody="\nDla początkujących użytkowników dostępna jest opcja automatycznego partycjonowania. CFDisk jest polecany dla maszyn opartych na BIOS, Parted w przypadku UEFI.\n\nNIE UŻYWAJ narzędzia dp partycjonowania UEFI/GPT w przypadku systemów z BIOS/MBR bo może to spowodować poważne problemy, włączając w to niemożliwą do uruchomienia instalację."
 
 # Błąd partycjonowania UEFI
-_UefiPartErrTitle=" Błąd partycjonowania UEFI " 
+_UefiPartErrTitle=" Błąd partycjonowania UEFI "
 _UefiPartErrBody="\nSystemy UEFI wymagają minimum dwóch partycji do instalacji (partycja ROOT i UEFI).\n\nProszę skonfigurować twoje partycje.\n\n"
 
 # Błąd partycjonowania BIOS
@@ -267,7 +267,7 @@ _BiosPartErrBody="\nSystemy BIOS wymagają przynajmniej jednej partycji do insta
 # System plików
 _FSTitle=" Wybierz system plików "
 _FSBody="\nExt4 jest polecany. Nie wszystkie systemy plików są dobrym wyborem dla partycji systemowej (ROOT) i rozruchowej (BOOT). Wszystkie mają różne możliwości i ograniczenia."
-_FSSkip="Pomiń / Brak" 
+_FSSkip="Pomiń / Brak"
 
 # Wybierz partycję systemową (ROOT)
 _SelRootTitle=" Wybierz partycję systemową (ROOT) "

@@ -1,7 +1,7 @@
 ##
-## 							
-## English Translation File		
-##								
+##
+## English Translation File
+##
 ##
 ## Written by Carl Duff (20-Nov-2015)
 ##
@@ -108,7 +108,7 @@ _LvmLvNumBody2="Minimum is 1, maximum is 9.\n\nLVs are essentially partitions. T
 _LvmLvNumErrTitle=" LVM - LV Number Error "
 _LvmLvNumErrBody="\nInvalid Number entered. Minimum is 1, maximum is 9.\n\n"
 
-_LvmLvNameTitle=" LVM - Name LV " 
+_LvmLvNameTitle=" LVM - Name LV "
 _LvmLvNameBody1="\nEnter the name of the Logical Volume (LV) to create.\n\nThis is like setting a name / label for a partition.\n"
 _LvmLvNameBody2="\nNOTE: This LV will automatically use up all space remaining on the Volume Group"
 
@@ -193,7 +193,7 @@ _TimeZQ="Set Time Zone as"
 _HwCTitle=" Set Hardware Clock "
 _HwCBody="\nUTC is the universal time standard, and is recommended unless dual-booting with Windows."
 _HwCUTC="UTC"
-_HwLocal="Local Time" 
+_HwLocal="Local Time"
 
 # Generate FSTAB
 _FstabTitle=" Generate FSTAB "
@@ -229,7 +229,7 @@ _NUsrErrBody="\nAn incorrect user name was entered. Please try again.\n\n"
 
 # Set User Password
 _PassNUsrTitle=" Set User Password "
-_PassNUsrBody="\nEnter password for" 
+_PassNUsrBody="\nEnter password for"
 _PassNUsrBody2="\nRe-enter password for"
 
 # Create New User
@@ -247,7 +247,7 @@ _MntStatusFail="\nMount Failed!\n\n"
 
 # Select Device (installation) - Translate
 _DevSelTitle=" Select Device "
-_DevSelBody="\nDevices (/dev) are available hard-disks and USB-sticks to install on. The first is /sda, the second /sdb, and so on.\n\nWhere using a USB-stick to boot Architect, be careful as it will also be listed!"
+_DevSelBody="\nDevices (/dev) are available hard-disks and USB-sticks to install on. The first is /sda, the second /sdb, and so on.\n\nWhen using a USB-stick to boot Arch, be careful as it will also be listed!"
 
 # Select Device (Grub) - seperate body text is not required (uses standard device selection text)
 _DevSelGrubTitle=" Select Grub Device "
@@ -257,7 +257,7 @@ _PartToolTitle=" Partitioning Tool "
 _PartToolBody="\nAn Auto-Partition option is available for beginners. CFDisk is recomended for BIOS, Parted for UEFI.\n\nDO NOT select a UEFI/GPT-only partitioning tool for a BIOS/MBR system as this could cause serious problems, including an unbootable installation."
 
 # UEFI Partitioning Error
-_UefiPartErrTitle=" UEFI Partitioning Error " 
+_UefiPartErrTitle=" UEFI Partitioning Error "
 _UefiPartErrBody="\nUEFI systems require a minimum of two partitions for installation (ROOT and UEFI).\n\nPlease configure your partitions.\n\n"
 
 # BIOS Partitioning Error
@@ -267,7 +267,7 @@ _BiosPartErrBody="\nBIOS systems require a minmum of one partition for installat
 # File System
 _FSTitle=" Choose Filesystem "
 _FSBody="\nExt4 is recommended. Not all filesystems are viable for Root or Boot partitions. All have different features and limitations."
-_FSSkip="Skip / None" 
+_FSSkip="Skip / None"
 
 # Select Root
 _SelRootTitle=" Select ROOT Partition "
@@ -419,6 +419,7 @@ _PrepMntPart="Mount Partitions"
 _Back="Back"
 
 # Install Base Menu
+_InstAskPac="Do you want to check package before installation ? (pacstrap never gonna install package without your consent)"
 _InstBsMenuTitle=" Install Base "
 _InstBseMenuBody="\nIt will not be necessary to install a bootloader where installing alongside an existing Linux distro that uses Grub; just update its Grub instead."
 _InstBse="Install Base"

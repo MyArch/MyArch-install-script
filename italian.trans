@@ -1,7 +1,7 @@
 ##
-## 							
-## File di traduzione Italiano		
-##								
+##
+## File di traduzione Italiano
+##
 ##
 ## Scritto da Frank G (20-Nov-2015)
 ##
@@ -108,7 +108,7 @@ _LvmLvNumBody2="Il minimo è 1, il massimo è 9.\n\nI Volumi Logici sono essenzi
 _LvmLvNumErrTitle=" LVM - Errore del numero di LV "
 _LvmLvNumErrBody="\nIl numero inserito non è valido. Il minimo è 1, il massimo è 9.\n\n"
 
-_LvmLvNameTitle=" LVM - Assegna un nome al LV " 
+_LvmLvNameTitle=" LVM - Assegna un nome al LV "
 _LvmLvNameBody1="\nInserisci un nome per il nuovo Volume Logico (LV).\n\nQuesta operazione equivale ad assegnare un nome / una etichetta ad una partizione.\n"
 _LvmLvNameBody2="\nATTENZIONE: Questo LV utilizzerà automaticamente tutto lo spazio rimanente nel Gruppo di Volumi"
 
@@ -189,11 +189,11 @@ _TimeSubZTitle=" Seleziona la zona di fuso orario "
 _TimeSubZBody="\nSeleziona la città più vicina alla tua posizione."
 _TimeZQ="Imposta il fuso orario come"
 
-# Impostazione orologio hardware 
+# Impostazione orologio hardware
 _HwCTitle=" Configura l'orologio hardware "
 _HwCBody="\nUTC è il tempo universale standard ed è generalmente raccomandato eccetto in configurazioni di dual-boot con Windows."
 _HwCUTC="UTC"
-_HwLocal="Ora locale" 
+_HwLocal="Ora locale"
 
 # Generare FSTAB
 _FstabTitle=" Genera FSTAB "
@@ -229,7 +229,7 @@ _NUsrErrBody="\nE' stato scelto un nome utente non valido. Provare nuovamente.\n
 
 # Impostare la password dell'utente
 _PassNUsrTitle=" Impostare la password dell'utente "
-_PassNUsrBody="\nImmetti la password per" 
+_PassNUsrBody="\nImmetti la password per"
 _PassNUsrBody2="\nImmetti nuovamente la password per"
 
 # Crea un nuovo utente
@@ -247,7 +247,7 @@ _MntStatusFail="\nMontaggio fallito!\n\n"
 
 # Seleziona il Dispositivo (installazione)
 _DevSelTitle=" Seleziona il dispositivo "
-_DevSelBody="\nI dispositivi (/dev) sono gli hard disk ed i supporti di memorizzazione USB idonei all'installazione. Il primo è /sda, il secondo /sdb e così via.\n\nSe si utilizza un supporto USB per avviare Architect, prestare attenzione poichè quest'ultimo sarà anch'esso elencato!"
+_DevSelBody="\nI dispositivi (/dev) sono gli hard disk ed i supporti di memorizzazione USB idonei all'installazione. Il primo è /sda, il secondo /sdb e così via.\n\nSe si utilizza un supporto USB per avviare Arch, prestare attenzione poichè quest'ultimo sarà anch'esso elencato!"
 
 # Seleziona il dispositivo (Grub) - un corpo di testo separato non è necessario (utilizza il testo standard del dispositivo )
 _DevSelGrubTitle=" Seleziona il dispositivo su cui installare Grub "
@@ -257,7 +257,7 @@ _PartToolTitle=" Strumento di partizionamento del disco "
 _PartToolBody="\nUna opzione di partizionamento automatico è disponibile per i principianti. CFDisk è consigliato per BIOS, Parted per UEFI.\n\nNON utilizzare uno strumento di partizionamento compatibile solo con UEFI/GPT per un sistema che supporta solo BIOS/MBR poichè ciò potrebbe causare gravi problemi all'installazione, ad esempio rendere il sistema operativo non avviabile"
 
 # Errore di partizionamento UEFI
-_UefiPartErrTitle=" Errore di partizionamento UEFI " 
+_UefiPartErrTitle=" Errore di partizionamento UEFI "
 _UefiPartErrBody="\nI sistemi UEFI richiedono un minimo di due partizioni per completare correttamente l'installazione (ROOT e UEFI).\n\nConfigura nuovamente le tue partizioni.\n\n"
 
 # Errore di partizionamento BIOS
@@ -267,7 +267,7 @@ _BiosPartErrBody="\nI sistemi BIOS necessitano un minimo di una partizione per c
 # File System
 _FSTitle=" Scegli il Filesystem "
 _FSBody="\nExt4 è la scelta consigliata. Non tutti i filesystem sono utilizzabili per la partizione di Root o quella di Boot. Ciascuno dispone di funzionalità e limitazioni differenti."
-_FSSkip="Salta / Nessuno" 
+_FSSkip="Salta / Nessuno"
 
 # Select Root
 _SelRootTitle=" Seleziona la partizione di Root "

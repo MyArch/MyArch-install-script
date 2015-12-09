@@ -1,7 +1,7 @@
 ##
-## 							
-## Deutsche Sprachdatei		
-##								
+##
+## Deutsche Sprachdatei
+##
 ##
 ## Written by Carl Duff (06-Oct-2015)
 ##
@@ -108,7 +108,7 @@ _LvmLvNumErrTitle=" LVM - LV Anzahl FEHLER "
 _LvmLvNumErrBody="\nUngültige Anzahl. Minimum ist 1, Maximum ist 9.\n\n"
 _LvmLvNameTitle=" LVM - Name LV "
 
-_LvmLvNameBody1="\nGeben Sie den Namen für das Logical Volume (LV) ein.\n\nÄhnlich der Vergabe von Namen oder Partitionen.\n" 
+_LvmLvNameBody1="\nGeben Sie den Namen für das Logical Volume (LV) ein.\n\nÄhnlich der Vergabe von Namen oder Partitionen.\n"
 _LvmLvNameBody2="\nNOTE: Diese LV wird automatisch den verbleibenden Platz der Volume Group verwenden"
 _LvmLvNameErrTitle=" LVM - Name LV FEHLER "
 
@@ -193,7 +193,7 @@ _HwCTitle=" Hardware Uhr einstellen "
 _HwCBody="\nUTC (Universal Time Clock) ist ein universeller System-Uhr-Standard, wird empfohlen sofern kein Dual-Boot-System mit Windows geplant ist. Ansonsten 'local time' verwenden."
 _HwCUTC="UTC"
 _HwLocal="Local Time"
-# Generate FSTAB 
+# Generate FSTAB
 
 _FstabTitle=" Erstelle FSTAB "
 _FstabBody="\nDie Datei FSTAB (File System TABle) definiert welche Geräte, Laufwerke und Partitionen wie und wo gemounted (eingebunden) bzw. verwendet werden.\n\nUUID/PARTUUID (Universally Unique IDentifier) wird empfohlen.\n\nWenn kein 'Label' für die Partitionen vergeben wurde, wird der Geräte Name verwendet. "
@@ -229,7 +229,7 @@ _NUsrErrBody="\nUngültiger Benutzername. Bitte Erneut eingeben.\n\n"
 
 _PassNUsrTitle=" Erstelle das Benutzer Passwort "
 _PassNUsrBody="\nGeben Sie das gewünschte Benutzer Passwort für"
-_PassNUsrBody2="\nGeben Sie das gewünschte Benutzer Passwort erneut ein" 
+_PassNUsrBody2="\nGeben Sie das gewünschte Benutzer Passwort erneut ein"
 # Create New User
 
 _NUsrTitle=" Erstelle Benutzer Account "
@@ -247,7 +247,7 @@ _MntStatusFail="\nMount fehlgeschlagen!\n\n"
 
 # Select Device (installation) - Translate
 _DevSelTitle=" Wähle Gerät / Laufwerk "
-_DevSelBody="\nZur Installation verfügbare Laufwerke und USB-sticks (/dev). Das Erste Laufwerk wird mit '/sda' bezeichnet, das Zweite mit '/sdb' bezeichnet usw.\n\nWenn der Architect Arch Linux Installer von einem USB-Stick gebootet wurde, bedenken Sie bitte das dieses Laufwerk (USB-Stick) ebenfalls in der Liste erscheint!"
+_DevSelBody="\nZur Installation verfügbare Laufwerke und USB-sticks (/dev). Das Erste Laufwerk wird mit '/sda' bezeichnet, das Zweite mit '/sdb' bezeichnet usw.\n\nWenn der Arch Arch Linux Installer von einem USB-Stick gebootet wurde, bedenken Sie bitte das dieses Laufwerk (USB-Stick) ebenfalls in der Liste erscheint!"
 
 # Select Device (Grub) - seperate body text is not required (uses standard device selection text)
 _DevSelGrubTitle=" Wähle Gerät für die Grub Installation "
@@ -257,7 +257,7 @@ _PartToolTitle=" Partitionierung (Partitionstabelle erstellen) "
 _PartToolBody="\nFür Anfänger ist eine automatische Partitionierungsoption verfügbar. CFDisk wird empfohlen für BIOS (dos-Partitionstabellen) und Parted für UEFI (gpt-Partitonstabellen).\n\nNiemals ein UEFI/GPT 'only' Partitionierungstool für ein BIOS/MBR System verwenden! Sonst können Fehler entstehen, die das System unbrauchbar machen."
 
 # UEFI Partitioning Error
-_UefiPartErrTitle=" UEFI Partitionierung FEHLER " 
+_UefiPartErrTitle=" UEFI Partitionierung FEHLER "
 _UefiPartErrBody="\nUEFI Systeme benötigen minimum 2 Partitionen für eine Installation (ROOT und UEFI).\n\nBitte die Partitionen anpassen.\n\n"
 
 # BIOS Partitioning Error
@@ -267,7 +267,7 @@ _BiosPartErrBody="\nBIOS Systeme benötigen minimum eine Partitionen für eine I
 # File System
 _FSTitle=" Wählen Sie ein Dateisystem "
 _FSBody="\nDas Dateisystem Ext4 (Menüpunkt Nr.5) wird empfohlen. Bitte bedenken Sie, dass nicht alle Dateisysteme geeignet sind als Root oder Boot Partition. Alle Dateisysteme haben unterschiedliche Optionen und Einschränkungen."
-_FSSkip="Überspringen" 
+_FSSkip="Überspringen"
 
 # Select Root
 _SelRootTitle=" Wähle eine ROOT Partition "
@@ -407,7 +407,7 @@ _InstNMErrBody="\nEin Network Manager wurde bereits installiert."
 
 # Welcome
 _WelTitle=" Willkommen bei"
-_WelBody="\nDer Architect Arch Linux Installer wird die aktuellen Pakete aus den Arch Repositories downloaden. Die Installationsart ist 'vanilla' d.h. nur die minimal benötigte Paketanzahl und die notwendigste Konfiguration wird installiert.\n\nWählen Sie eine Option durch Eingabe der Nummer oder mittels Cursortasten, zum Bestätigen der Auswahl, [ENTER] drücken.\n\nWechseln zwischen den Optionen mittels [Tab] oder den links/rechts Pfeiltasten, bevor Sie [ENTER] drücken.\n"
+_WelBody="\nDer Arch Linux Installer wird die aktuellen Pakete aus den Arch Repositories downloaden. Die Installationsart ist 'vanilla' d.h. nur die minimal benötigte Paketanzahl und die notwendigste Konfiguration wird installiert.\n\nWählen Sie eine Option durch Eingabe der Nummer oder mittels Cursortasten, zum Bestätigen der Auswahl, [ENTER] drücken.\n\nWechseln zwischen den Optionen mittels [Tab] oder den links/rechts Pfeiltasten, bevor Sie [ENTER] drücken.\n"
 
 # Preparation Menu
 _PrepTitle=" Vorbereitungen für die Installation "

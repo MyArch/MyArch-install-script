@@ -1,7 +1,7 @@
 ##
-## 							
-## French Translation File		
-##								
+##
+## French Translation File
+##
 ##
 ## Écrit par Carl Duff (20-Nov-2015)
 ##
@@ -22,7 +22,7 @@ _btrfsSVErrTitle=" Erreur de nom du sous-volume btrfs "
 _btrfsSVErrBody="Les blancs ou espaces ne sont pas permis. Veuillez réessayer.\n"
 _btrfsSVBody1="Entrer le nom du sous-volume"
 _btrfsSVBody2="à créer dans"
-_btrfsSVBody3="\n\nCe processus sera répété jusqu'à ce qu'un astérisque (*) soit entré comme nom de sous-volume.\n\nSous-volumes Créés :" 
+_btrfsSVBody3="\n\nCe processus sera répété jusqu'à ce qu'un astérisque (*) soit entré comme nom de sous-volume.\n\nSous-volumes Créés :"
 _btrfsMntTitle=" Options de montage btrfs "
 _btrfsMntBody="Utiliser [Espace] pour dé/sélectionner les options de montage désirées. Veuillez ne pas sélectionner plusieurs versions de la même option."
 _btrfsMntConfBody="Confirmer les options de montage suivantes :\n\n"
@@ -108,12 +108,12 @@ _LvmLvNumBody2="Le minimum est de 1, le maximum est de 9.\n\n Les LVs sont essen
 _LvmLvNumErrTitle=" LVM - Erreur de nombre LV "
 _LvmLvNumErrBody="\nLe chiffre entré est incorrect. Le minimum est de 1, le maximum est de 9.\n\n"
 
-_LvmLvNameTitle=" LVM - Nom de LV " 
+_LvmLvNameTitle=" LVM - Nom de LV "
 _LvmLvNameBody1="\nEntrer le nom du volume logique (LV) à créer.\n\nCeci ressemble à une configuration de nom / d'étiquette pour une partition.\n"
 LvmLvNameBody2="\nNOTE : Ce LV utilisera automatiquement tout l'espace restant dans le groupe de volumes"
 
 _LvmLvNameErrTitle=" LVM - Erreur de nom du LV "
-_LvmLvNameErrBody="\nNom entré incorrect. Le nom du volume logique (LV) peut contenir des caractères alphanumériques, mais ne peut pas contenir d'espaces ou être précédé par un « / ».\n\n" 
+_LvmLvNameErrBody="\nNom entré incorrect. Le nom du volume logique (LV) peut contenir des caractères alphanumériques, mais ne peut pas contenir d'espaces ou être précédé par un « / ».\n\n"
 
 _LvmLvSizeTitle=" LVM - Configurer la taille du LV "
 _LvmLvSizeBody1="restant"
@@ -193,7 +193,7 @@ _TimeZQ="Définir le fuseau horaire sous"
 _HwCTitle=" Définir l'horloge matérielle "
 _HwCBody="\nUTC est le temps universel standard, et il est recommandé (sauf si vous utilisez un dual-boot avec Windows.)"
 _HwCUTC="UTC"
-_HwLocal="Heure locale" 
+_HwLocal="Heure locale"
 
 # Générer FSTAB
 _FstabTitle=" Générer FSTAB "
@@ -229,8 +229,8 @@ _NUsrErrBody="\nNom d'utilisateur incorrect. Veuillez réessayer.\n\n"
 
 # Définir le mot de passe utilisateur
 _PassNUsrTitle=" Définir le mot de passe utilisateur "
-_PassNUsrBody="\nEntrer le mot de passe pour" 
-_PassNUsrBody2="\nEntrer à nouveau le mot de passe pour" 
+_PassNUsrBody="\nEntrer le mot de passe pour"
+_PassNUsrBody2="\nEntrer à nouveau le mot de passe pour"
 
 # Créer un nouvel utilisateur
 _NUsrSetTitle=" Paramètres utilisateur "
@@ -247,7 +247,7 @@ _MntStatusFail="\nÉchec de montage !\n\n"
 
 # Sélectionner un périphérique (installation)
 _DevSelTitle=" Sélectionner un périphérique "
-_DevSelBody="\nLes périphériques (/dev) sont des disques durs et des clés USB disponibles pour une installation. Le premier se nomme /sda, le second /sdb, etc... \n\nSi vous utilisez une clé USB pour exécuter Architect, vérifiez qu'elle se trouve bien dans la liste !"
+_DevSelBody="\nLes périphériques (/dev) sont des disques durs et des clés USB disponibles pour une installation. Le premier se nomme /sda, le second /sdb, etc... \n\nSi vous utilisez une clé USB pour exécuter Arch, vérifiez qu'elle se trouve bien dans la liste !"
 
 # Sélectionner le périphérique (Grub) - séparer le corps de texte n'est pas requis (utilise la sélection de texte standard de périphérique)
 _DevSelGrubTitle=" Sélectionner le périphérique Grub "
@@ -257,7 +257,7 @@ _PartToolTitle=" Outil de partitionnement "
 _PartToolBody="\nL'option 'Partition auto' est disponible (et recommandée) pour les débutants. CFDisk est recommandé pour BIOS, Parted pour UEFI."
 
 # Erreur de partitionnement UEFI
-_UefiPartErrTitle=" Erreur de partitionnement UEFI " 
+_UefiPartErrTitle=" Erreur de partitionnement UEFI "
 _UefiPartErrBody="\n Les systèmes UEFI ont besoin de 2 partitions minimum pour l'installation (ROOT et UEFI).\n\nVeuillez configurer vos partitions.\n\n"
 
 # Erreur de partitionnement BIOS
@@ -267,7 +267,7 @@ _BiosPartErrBody="\nLes systèmes BIOS ont besoin d'1 partition minimum pour l'i
 # Système de fichiers
 _FSTitle=" Choisir un système de fichiers "
 _FSBody="\nExt4 est recommandé. Tous les systèmes de fichiers ne sont pas exploitables pour Root ou pour les partitions de démarrage. Tous ont des caractéristiques différentes et des restrictions."
-_FSSkip="Passer / Aucun" 
+_FSSkip="Passer / Aucun"
 
 # Sélectionner Root
 _SelRootTitle=" Sélectionner la partition ROOT "
@@ -280,13 +280,13 @@ _SelSwpNone="Aucun"
 _SelSwpFile="Fichier d'échange"
 
 # Sélectionner UEFI
-_SelUefiTitle=" Sélectionner la partition UEFI " 
+_SelUefiTitle=" Sélectionner la partition UEFI "
 _SelUefiBody="\nCeci est une partition spéciale pour le démarrage des systèmes UEFI."
 
 # Formater UEFI
 _FormUefiTitle=" Partition UEFI "
 _FormUefiBody="La partition UEFI"
-_FormUefiBody2="a déjà été formatée.\n\nLa reformater ? Ceci effacera TOUTES les données déjà présentes sur la partition.\n\n" 
+_FormUefiBody2="a déjà été formatée.\n\nLa reformater ? Ceci effacera TOUTES les données déjà présentes sur la partition.\n\n"
 
 # Options UEFI
 _OptUefiTitle=" Options de point de montage UEFI "
@@ -336,12 +336,12 @@ _InstUefiBtBody="\nrEFInd requiert /boot/efi. systemd-boot requiert /boot. Grub 
 
 # Définir Grub UEFI par défaut
 _SetGrubDefTitle=" Définir Grub en tant que gestionnaire de démarrage par défaut ? "
-SetGrubDefBody="\nCertains microcodes UEFI peuvent ne pas détecter Grub (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer Grub comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner « Oui », spécialement pour les débutants. Ceci copiera le module grubx64.efi amorçable dans"  
+SetGrubDefBody="\nCertains microcodes UEFI peuvent ne pas détecter Grub (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer Grub comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner « Oui », spécialement pour les débutants. Ceci copiera le module grubx64.efi amorçable dans"
 _SetGrubDefBody2="et le renommera bootx64.efi, comme requis.\n\nAutrement, sélectionner « Non », particulièrement si un gestionnaire de démarrage par défaut existe déjà, et/ou si vous avez l'intention d'utiliser plusieurs gestionnaires de démarrage."
 
 # Définir rEFInd par défaut
 _SetRefiDefTitle=" Définir rEFInd en tant que gestionnaire de démarrage par défaut ? "
-SetRefiDefBody="\nCertains microcodes UEFI peuvent ne pas détecter rEFInd (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer rEFInd comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner « Oui », spécialement pour les débutants. Ceci installera rEFInd dans" 
+SetRefiDefBody="\nCertains microcodes UEFI peuvent ne pas détecter rEFInd (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer rEFInd comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner « Oui », spécialement pour les débutants. Ceci installera rEFInd dans"
 _SetRefiDefBody2="avec le module bootx64.efi requis.\n\nAutrement, sélectionner « Non », particulièrement si un gestionnaire de démarrage par défaut existe déjà, et/ou si vous avez l'intention d'utiliser plusieurs gestionnaires de démarrage."
 
 # fichier efi défini pour Grub ou Refind
@@ -403,7 +403,7 @@ _InstNMErrBody="\nUn gestionnaire de connexion réseau a déjà été installé 
 _WelTitle=" Bienvenue dans"
 _WelBody="\nCet installateur va télécharger les derniers paquets provenant des dépôts Arch. Seule la configuration nécessaire sera téléchargée.\n\nSurligner les options en pressant sur leur numéro respectif, ou en utilisant les flèches haut/bas avant d'appuyer sur [entrée] pour confirmer.\n\nNaviguer entre les boutons en utilisant [Tab] ou les flèches gauche/droite avant d'appuyer sur [entrée] pour confirmer.\n"
 
-# Menu de Préparation 
+# Menu de Préparation
 _PrepTitle=" Préparer l'installation "
 _PrepBody="\nL'agencement du clavier va être utilisé pour l'installateur et pour le système installé.\n"
 _PrepKBLayout="Configurer l'agencement du clavier"
@@ -413,6 +413,7 @@ _PrepMntPart="Monter les partitions"
 _Back="Retour"
 
 # Menu d'installation de Base
+_InstAskPac="Voulez-vous que l'installateur vous demande avant d'installer les paquets ? (pacstrap n'installera pas de paquets sans votre accord)"
 _InstBsMenuTitle=" Installer Base "
 _InstBseMenuBody="\nIl n'est pas nécessaire d'installer un gestionnaire de démarrage à côté d'une distribution Linux existante qui utilise Grub ; Mettez seulement à jour le Grub déjà présent."
 _InstBse="Installer Base"
