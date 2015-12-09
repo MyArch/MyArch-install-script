@@ -93,7 +93,7 @@ PACSTRAP() {
   if [[ AUTO -eq 0 ]]; then
     pacstrap -i "$@"
   else
-    pacstrap
+    pacstrap "$@"
   fi
 }
 
@@ -115,55 +115,55 @@ select_language() {
   "12" $"Polish		(pl)" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
-    source english.trans
+    source ./english.trans
     CURR_LOCALE="en_US.UTF-8"
     ;;
     "2")
-    source italian.trans
+    source ./italian.trans
     CURR_LOCALE="it_IT.UTF-8"
     ;;
     "3")
-    source russian.trans
+    source ./russian.trans
     CURR_LOCALE="ru_RU.UTF-8"
     FONT="LatKaCyrHeb-14.psfu"
     ;;
     "4")
-    source turkish.trans
+    source ./turkish.trans
     CURR_LOCALE="tr_TR.UTF-8"
     FONT="LatKaCyrHeb-14.psfu"
     ;;
     "5")
-    source dutch.trans
+    source ./dutch.trans
     CURR_LOCALE="nl_NL.UTF-8"
     ;;
     "6")
-    source greek.trans
+    source ./greek.trans
     CURR_LOCALE="el_GR.UTF-8"
     FONT="iso07u-16.psfu"
     ;;
     "7")
-    source danish.trans
+    source ./danish.trans
     CURR_LOCALE="da_DK.UTF-8"
     ;;
     "8")
-    source hungarian.trans
+    source ./hungarian.trans
     CURR_LOCALE="hu_HU.UTF-8"
     FONT="lat2-16.psfu"
     ;;
     "9")
-    source portuguese.trans
+    source ./portuguese.trans
     CURR_LOCALE="pt_BR.UTF-8"
     ;;
     "10")
-    source german.trans
+    source ./german.trans
     CURR_LOCALE="de_DE.UTF-8"
     ;;
     "11")
-    source french.trans
+    source ./french.trans
     CURR_LOCALE="fr_FR.UTF-8"
     ;;
     "12")
-    source polish.trans
+    source ./polish.trans
     CURR_LOCALE="pl_PL.UTF-8"
     FONT="latarcyrheb-sun16"
     ;;
@@ -2100,7 +2100,7 @@ install_base_menu() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  if [[ AUTO -eq -1 ]] && [[ DIALOG --yesno "$_InstAskPac" 0 0 ]]; then
+  if [[ AUTO -eq -1 ]] && [ DIALOG --yesno "$_InstAskPac" 0 0 ]; then
     AUTO=0
   else
     AUTO=1
