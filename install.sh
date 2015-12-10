@@ -99,6 +99,8 @@ PACSTRAP() {
 
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
+  # Set english as base in case some language miss some translation
+  source ./english.trans
   DIALOG --title " Select Language " \
   --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 12 \
   "1" $"English		(en)" \
@@ -115,7 +117,6 @@ select_language() {
   "12" $"Polish		(pl)" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
-    source ./english.trans
     CURR_LOCALE="en_US.UTF-8"
     ;;
     "2")
