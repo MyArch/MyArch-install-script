@@ -196,7 +196,7 @@ check_requirements() {
   DIALOG --title "$_ReqMetTitle" --msgbox "$_ReqMetBody" 0 0
   clear
   echo "" > /tmp/.errlog
-  pacman -Syy
+  pacman -Sy
 }
 
 # Adapted from AIS. Checks if system is made by Apple, whether the system is
@@ -1270,13 +1270,12 @@ install_base() {
     "1")
     # Latest Kernel
     clear
-    PACSTRAP ${MOUNTPOINT} base btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} base btrfs-progs ntp sudo f2fs-tools
     ;;
     "2")
     # Latest Kernel and base-devel
     clear
-    PACSTRAP ${MOUNTPOINT} base base-devel btrfs-progs ntp sudo f2fs-tools \
-    2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} base base-devel btrfs-progs ntp sudo f2fs-tools
     ;;
     "3")
     # LTS Kernel
@@ -1287,7 +1286,7 @@ install_base() {
      logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils\
      pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow\
      sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which\
-     xfsprogs btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
+     xfsprogs btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1
     ;;
     "4")
@@ -1299,7 +1298,7 @@ install_base() {
      logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils\
      pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow\
      sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which\
-     xfsprogs base-devel btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
+     xfsprogs base-devel btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1
     ;;
     *)
@@ -1316,7 +1315,7 @@ install_base() {
     sleep 2
     clear
     PACSTRAP ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant\
-     dialog 2>/tmp/.errlog
+     dialog
     check_for_error
   fi
 }
@@ -1334,7 +1333,7 @@ install_bootloader() {
     case $(cat ${ANSWER}) in
       "1")
       # Grub
-      PACSTRAP ${MOUNTPOINT} grub os-prober 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} grub os-prober
       check_for_error
       # An LVM VG/LV can consist of multiple devices. Where LVM used, user must select the device manually.
       if [[ $LVM_ROOT -eq 1 ]]; then
@@ -1361,7 +1360,7 @@ install_bootloader() {
       ;;
       "2"|"3")
       # Syslinux
-      PACSTRAP ${MOUNTPOINT} syslinux 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} syslinux
       # Install to MBR or root partition, accordingly
       [[ $(cat ${ANSWER}) == "2" ]] && arch_chroot "syslinux-install_update -iam" 2>>/tmp/.errlog
       [[ $(cat ${ANSWER}) == "3" ]] && arch_chroot "syslinux-install_update -i" 2>>/tmp/.errlog
@@ -1395,7 +1394,7 @@ install_bootloader() {
       "1")
       # Grub2
       clear
-      PACSTRAP ${MOUNTPOINT} grub os-prober efibootmgr dosfstools 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} grub os-prober efibootmgr dosfstools
       check_for_error
       DIALOG --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
       sleep 1
@@ -1419,7 +1418,7 @@ install_bootloader() {
       # This could result in unknown consequences should the script be updated at some point.
       if [[ $UEFI_MOUNT == "/boot/efi" ]]; then
         clear
-        PACSTRAP ${MOUNTPOINT} refind-efi efibootmgr dosfstools 2>/tmp/.errlog
+        PACSTRAP ${MOUNTPOINT} refind-efi efibootmgr dosfstools
         check_for_error
         DIALOG --title "$_SetRefiDefTitle" --yesno "$_SetRefiDefBody ${UEFI_MOUNT}/EFI/boot $_SetRefiDefBody2" 0 0
         if [[ $? -eq 0 ]]; then
@@ -1445,7 +1444,7 @@ install_bootloader() {
       "3")
       # systemd-boot
       clear
-      PACSTRAP ${MOUNTPOINT} efibootmgr dosfstools 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} efibootmgr dosfstools
       arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>>/tmp/.errlog
       check_for_error
       # Deal with LVM Root
@@ -1510,32 +1509,33 @@ install_wireless_firmware() {
     "2")
     # Broadcom
     clear
-    PACSTRAP ${MOUNTPOINT} b43-fwcutter 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} b43-fwcutter
     ;;
     "3")
     # Bluetooth
     clear
-    PACSTRAP ${MOUNTPOINT} bluez-firmware 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} bluez-firmware
     ;;
     "4")
     # Intel 2100
     clear
-    PACSTRAP ${MOUNTPOINT} ipw2100-fw 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} ipw2100-fw
     ;;
     "5")
     # Intel 2200
     clear
-    PACSTRAP ${MOUNTPOINT} ipw2200-fw 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} ipw2200-fw
     ;;
     "6")
     # ZyDAS
     clear
-    PACSTRAP ${MOUNTPOINT} zd1211-firmware 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} zd1211-firmware
     ;;
     "7")
     # All
     clear
-    PACSTRAP ${MOUNTPOINT} b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw zd1211-firmware 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw\
+     zd1211-firmware
     ;;
     *)
     install_base_menu
@@ -1550,7 +1550,8 @@ install_wireless_firmware() {
 install_alsa_xorg_input() {
   DIALOG --title "$_AXITitle" --msgbox "$_AXIBody" 0 0
   clear
-  PACSTRAP ${MOUNTPOINT} alsa-utils xorg-server xorg-server-utils xorg-xinit xf86-input-synaptics xf86-input-keyboard xf86-input-mouse 2>/tmp/.errlog
+  PACSTRAP ${MOUNTPOINT} alsa-utils xorg-server xorg-server-utils xorg-xinit\
+   xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
   check_for_error
   # copy the keyboard configuration file, if generated
   [[ -e /tmp/00-keyboard.conf ]] && cp /tmp/00-keyboard.conf ${MOUNTPOINT}/etc/X11/xorg.conf.d/00-keyboard.conf
@@ -1567,7 +1568,7 @@ setup_graphics_card() {
 
   # Save repetition
   install_intel(){
-    PACSTRAP ${MOUNTPOINT} xf86-video-intel libva-intel-driver intel-ucode 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} xf86-video-intel libva-intel-driver intel-ucode
     sed -i 's/MODULES=""/MODULES="i915"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
     # Intel microcode (Grub, Syslinux and systemd-boot). rEFInd is yet to be added.
     # Done as seperate if statements in case of multiple bootloaders.
@@ -1589,7 +1590,7 @@ setup_graphics_card() {
 
   # Save repetition
   install_ati(){
-    PACSTRAP ${MOUNTPOINT} xf86-video-ati 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} xf86-video-ati
     sed -i 's/MODULES=""/MODULES="radeon"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
   }
 
@@ -1639,7 +1640,7 @@ setup_graphics_card() {
     "3")
     # Nouveau / NVIDIA
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
-    PACSTRAP ${MOUNTPOINT} xf86-video-nouveau 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} xf86-video-nouveau
     sed -i 's/MODULES=""/MODULES="nouveau"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
     ;;
     "4")
@@ -1647,8 +1648,8 @@ setup_graphics_card() {
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
     arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
     # Now deal with kernel installed
-    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} nvidia nvidia-libgl nvidia-utils pangox-compat 2>/tmp/.errlog \
-    || PACSTRAP ${MOUNTPOINT} nvidia-lts nvidia-libgl nvidia-utils pangox-compat 2>/tmp/.errlog
+    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} nvidia nvidia-libgl nvidia-utils pangox-compat \
+    || PACSTRAP ${MOUNTPOINT} nvidia-lts nvidia-libgl nvidia-utils pangox-compat
     NVIDIA_INST=1
     ;;
     "5")
@@ -1656,8 +1657,8 @@ setup_graphics_card() {
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
     arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
     # Now deal with kernel installed
-    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} nvidia-340xx nvidia-340xx-libgl nvidia-340xx-utils 2>/tmp/.errlog \
-    || PACSTRAP ${MOUNTPOINT} nvidia-340xx-lts nvidia-340xx-libgl nvidia-340xx-utils 2>/tmp/.errlog
+    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} nvidia-340xx nvidia-340xx-libgl nvidia-340xx-utils  \
+    || PACSTRAP ${MOUNTPOINT} nvidia-340xx-lts nvidia-340xx-libgl nvidia-340xx-utils
     NVIDIA_INST=1
     ;;
     "6")
@@ -1665,20 +1666,20 @@ setup_graphics_card() {
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
     arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
     # Now deal with kernel installed
-    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} nvidia-304xx nvidia-304xx-libgl nvidia-304xx-utils 2>/tmp/.errlog \
-    || PACSTRAP ${MOUNTPOINT}  nvidia-304xx-lts nvidia-304xx-libgl nvidia-304xx-utils 2>/tmp/.errlog
+    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} nvidia-304xx nvidia-304xx-libgl nvidia-304xx-utils  \
+    || PACSTRAP ${MOUNTPOINT}  nvidia-304xx-lts nvidia-304xx-libgl nvidia-304xx-utils
     NVIDIA_INST=1
     ;;
     "7")
     # Via
-    PACSTRAP ${MOUNTPOINT} xf86-video-openchrome 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} xf86-video-openchrome
     ;;
     "8")
     # VirtualBox
     DIALOG --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
     clear
-    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules 2>/tmp/.errlog \
-    || PACSTRAP ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules-lts 2>/tmp/.errlog
+    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules  \
+    || PACSTRAP ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules-lts
     # Load modules and enable vboxservice whatever the kernel
     arch_chroot "modprobe -a vboxguest vboxsf vboxvideo"
     arch_chroot "systemctl enable vboxservice"
@@ -1686,11 +1687,11 @@ setup_graphics_card() {
     ;;
     "9")
     # VMWare
-    PACSTRAP ${MOUNTPOINT} xf86-video-vmware xf86-input-vmmouse 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} xf86-video-vmware xf86-input-vmmouse
     ;;
     "10")
     # Generic / Unknown
-    PACSTRAP ${MOUNTPOINT} xf86-video-fbdev 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} xf86-video-fbdev
     ;;
     *)
     install_desktop_menu
@@ -1749,40 +1750,40 @@ install_de_wm() {
     "1")
     # Cinnamon
     clear
-    PACSTRAP ${MOUNTPOINT} cinnamon xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} cinnamon xterm
     ;;
     "2")
     # Enlightement
     clear
-    PACSTRAP ${MOUNTPOINT} enlightenment terminology polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} enlightenment terminology polkit-gnome xterm
     ;;
     "3")
     # Gnome-Shell
     clear
-    PACSTRAP ${MOUNTPOINT} gnome-shell gdm xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} gnome-shell gdm xterm
     GNOME_INSTALLED=1
     ;;
     "4")
     # Gnome
     clear
-    PACSTRAP ${MOUNTPOINT} gnome rp-pppoe xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} gnome rp-pppoe xterm
     GNOME_INSTALLED=1
     ;;
     "5")
     # Gnome + Extras
     clear
-    PACSTRAP ${MOUNTPOINT} gnome gnome-extra rp-pppoe xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} gnome gnome-extra rp-pppoe xterm
     GNOME_INSTALLED=1
     ;;
     "6")
     # KDE5 BASE
     clear
-    PACSTRAP ${MOUNTPOINT} plasma-desktop xdg-utils rp-pppoe xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} plasma-desktop xdg-utils rp-pppoe xterm
     ;;
     "7")
     # KDE5
     clear
-    PACSTRAP ${MOUNTPOINT} plasma xdg-user-dirs xdg-utils rp-pppoe xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} plasma xdg-user-dirs xdg-utils rp-pppoe xterm
     if [[ $NM_INSTALLED -eq 0 ]]; then
       arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
       NM_INSTALLED=1
@@ -1792,69 +1793,69 @@ install_de_wm() {
     "8")
     # LXDE
     clear
-    PACSTRAP ${MOUNTPOINT} lxde xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} lxde xterm
     LXDE_INSTALLED=1
     ;;
     "9")
     # LXQT
     clear
-    PACSTRAP ${MOUNTPOINT} lxqt oxygen-icons xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} lxqt oxygen-icons xterm
     LXQT_INSTALLED=1
     ;;
     "10")
     # MATE
     clear
-    PACSTRAP ${MOUNTPOINT} mate xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} mate xterm
     ;;
     "11")
     # MATE + Extras
     clear
-    PACSTRAP ${MOUNTPOINT} mate mate-extra xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} mate mate-extra xterm
     ;;
     "12")
     # Xfce
     clear
-    PACSTRAP ${MOUNTPOINT} xfce4 polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} xfce4 polkit-gnome xterm
     ;;
     "13")
     # Xfce + Extras
     clear
-    PACSTRAP ${MOUNTPOINT} xfce4 xfce4-goodies polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} xfce4 xfce4-goodies polkit-gnome xterm
     ;;
     "14")
     # Awesome
     clear
-    PACSTRAP ${MOUNTPOINT} awesome vicious polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} awesome vicious polkit-gnome xterm
     ;;
     "15")
     #Fluxbox
     clear
-    PACSTRAP ${MOUNTPOINT} fluxbox fbnews polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} fluxbox fbnews polkit-gnome xterm
     ;;
     "16")
     #i3
     clear
-    PACSTRAP ${MOUNTPOINT} i3-wm i3lock i3status dmenu polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} i3-wm i3lock i3status dmenu polkit-gnome xterm
     ;;
     "17")
     #IceWM
     clear
-    PACSTRAP ${MOUNTPOINT} icewm icewm-themes polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} icewm icewm-themes polkit-gnome xterm
     ;;
     "18")
     #Openbox
     clear
-    PACSTRAP ${MOUNTPOINT} openbox openbox-themes polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} openbox openbox-themes polkit-gnome xterm
     ;;
     "19")
     #PekWM
     clear
-    PACSTRAP ${MOUNTPOINT} pekwm pekwm-themes polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} pekwm pekwm-themes polkit-gnome xterm
     ;;
     "20")
     #WindowMaker
     clear
-    PACSTRAP ${MOUNTPOINT} windowmaker polkit-gnome xterm 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} windowmaker polkit-gnome xterm
     ;;
     *)
     install_desktop_menu
@@ -1866,7 +1867,7 @@ install_de_wm() {
     DIALOG --title "$_InstComTitle" --yesno "$_InstComBody" 0 0
     if [[ $? -eq 0 ]]; then
       clear
-      PACSTRAP ${MOUNTPOINT} gksu gnome-keyring polkit xdg-user-dirs xdg-utils gamin gvfs gvfs-afc gvfs-smb ttf-dejavu gnome-icon-theme python2-xdg bash-completion ntfs-3g 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} gksu gnome-keyring polkit xdg-user-dirs xdg-utils gamin gvfs gvfs-afc gvfs-smb ttf-dejavu gnome-icon-theme python2-xdg bash-completion ntfs-3g
       check_for_error
     fi
   fi
@@ -1889,21 +1890,21 @@ install_dm() {
       "1")
       # LXDM
       clear
-      PACSTRAP ${MOUNTPOINT} lxdm 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} lxdm
       arch_chroot "systemctl enable lxdm.service" >/dev/null 2>>/tmp/.errlog
       DM="LXDM"
       ;;
       "2")
       # LIGHTDM
       clear
-      PACSTRAP ${MOUNTPOINT} lightdm lightdm-gtk-greeter 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} lightdm lightdm-gtk-greeter
       arch_chroot "systemctl enable lightdm.service" >/dev/null 2>>/tmp/.errlog
       DM="LightDM"
       ;;
       "3")
       # SDDM
       clear
-      PACSTRAP ${MOUNTPOINT} sddm 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} sddm
       arch_chroot "sddm --example-config > /etc/sddm.conf"
       arch_chroot "systemctl enable sddm.service" >/dev/null 2>>/tmp/.errlog
       DM="SDDM"
@@ -1911,7 +1912,7 @@ install_dm() {
       "4")
       # SLiM
       clear
-      PACSTRAP ${MOUNTPOINT} slim 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} slim
       arch_chroot "systemctl enable slim.service" >/dev/null 2>>/tmp/.errlog
       DM="SLiM"
       # Amend the xinitrc file accordingly for all user accounts
@@ -1991,7 +1992,7 @@ install_nm() {
       "1")
       # connman
       clear
-      PACSTRAP ${MOUNTPOINT} connman 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} connman
       arch_chroot "systemctl enable connman.service" 2>>/tmp/.errlog
       ;;
       "2")
@@ -2002,13 +2003,13 @@ install_nm() {
       "3")
       # Network Manager
       clear
-      PACSTRAP ${MOUNTPOINT} networkmanager network-manager-applet rp-pppoe 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} networkmanager network-manager-applet rp-pppoe
       arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
       ;;
       "4")
       # WICD
       clear
-      PACSTRAP ${MOUNTPOINT} wicd-gtk 2>/tmp/.errlog
+      PACSTRAP ${MOUNTPOINT} wicd-gtk
       arch_chroot "systemctl enable wicd.service" 2>>/tmp/.errlog
       ;;
       *)
@@ -2100,7 +2101,7 @@ install_base_menu() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  if [[ AUTO -eq -1 ]] && [ DIALOG --yesno "$_InstAskPac" 0 0 ]; then
+  if [ $AUTO == -1 ] && DIALOG --yesno "$_InstAskPac" 0 0 ; then
     AUTO=0
   else
     AUTO=1
@@ -2282,82 +2283,82 @@ install_acc_menu() {
     "1")
     # accerciser
     clear
-    PACSTRAP ${MOUNTPOINT} accerciser 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} accerciser
     ;;
     "2")
     # at-spi2-atk
     clear
-    PACSTRAP ${MOUNTPOINT} at-spi2-atk 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} at-spi2-atk
     ;;
     "3")
     # at-spi2-core
     clear
-    PACSTRAP ${MOUNTPOINT} at-spi2-core 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} at-spi2-core
     ;;
     "4")
     # brltty
     clear
-    PACSTRAP ${MOUNTPOINT} brltty 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} brltty
     ;;
     "5")
     # caribou
     clear
-    PACSTRAP ${MOUNTPOINT} caribou 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} caribou
     ;;
     "6")
     # dasher
     clear
-    PACSTRAP ${MOUNTPOINT} dasher 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} dasher
     ;;
     "7")
     # espeak
     clear
-    PACSTRAP ${MOUNTPOINT} espeak 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} espeak
     ;;
     "8")
     # espeakup
     clear
-    PACSTRAP ${MOUNTPOINT} espeakup 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} espeakup
     ;;
     "9")
     # festival
     clear
-    PACSTRAP ${MOUNTPOINT} festival 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} festival
     ;;
     "10")
     # java-access-bridge
     clear
-    PACSTRAP ${MOUNTPOINT} java-access-bridge 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} java-access-bridge
     ;;
     "11")
     # java-atk-wrapper
     clear
-    PACSTRAP ${MOUNTPOINT} java-atk-wrapper 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} java-atk-wrapper
     ;;
     "12")
     # julius
     clear
-    PACSTRAP ${MOUNTPOINT} julius 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} julius
     ;;
     "13")
     # orca
     clear
-    PACSTRAP ${MOUNTPOINT} orca 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} orca
     ;;
     "14")
     # qt-at-spi
     clear
-    PACSTRAP ${MOUNTPOINT} qt-at-spi 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} qt-at-spi
     ;;
     "15")
     # speech-dispatcher
     clear
-    PACSTRAP ${MOUNTPOINT} speech-dispatcher 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} speech-dispatcher
     ;;
     "16")
     # install all
     clear
-    PACSTRAP ${MOUNTPOINT} accerciser at-spi2-atk at-spi2-core brltty dasher espeak espeakup festival java-access-bridge caribou julius orca qt-at-spi speech-dispatcher 2>/tmp/.errlog
+    PACSTRAP ${MOUNTPOINT} accerciser at-spi2-atk at-spi2-core brltty dasher espeak espeakup festival java-access-bridge caribou julius orca qt-at-spi speech-dispatcher
     ;;
     *)
     main_menu_online
