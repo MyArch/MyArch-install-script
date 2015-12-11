@@ -2094,7 +2094,7 @@ install_base_menu() {
   fi
   if [ $AUTO == -1 ] && DIALOG --yesno "$_InstAskPac" 0 0 ; then
     AUTO=0
-  else
+  elif [ $AUTO == -1 ]; then
     AUTO=1
   fi
   DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstBsMenuTitle" --menu "$_InstBseMenuBody" 0 0 5 \
