@@ -1281,25 +1281,15 @@ install_base() {
     "3")
     # LTS Kernel
     clear
-    PACSTRAP ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd\
-     diffutils e2fsprogs file filesystem findutils gawk gcc-libs gettext glibc\
-     grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts\
-     logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils\
-     pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow\
-     sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which\
-     xfsprogs btrfs-progs ntp sudo f2fs-tools
+    PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/')\
+     btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1
     ;;
     "4")
     # LTS Kernel and base-devel
     clear
-    PACSTRAP ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd\
-     diffutils e2fsprogs file filesystem findutils gawk gcc-libs gettext glibc\
-     grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts\
-     logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils\
-     pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow\
-     sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which\
-     xfsprogs base-devel btrfs-progs ntp sudo f2fs-tools
+    PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/')\
+     base-devel btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1
     ;;
     *)
