@@ -405,6 +405,10 @@ _InstNMDoneBody="\nThe network connection manager has been installed and enabled
 # Network Manager Already Installed (no need for seperate title)
 _InstNMErrBody="\nA network connection manager has already been installed and enabled."
 
+# Shell install menu
+_InstShellTitle=" Choose a shell "
+_InstShellBody="\nChoose a shell to install."
+
 # Welcome
 _WelTitle=" Welcome to"
 _WelBody="\nThis installer will download the latest packages from the Arch repositories. Installations are vanilla, so only the minimal necessary configuration is undertaken.\n\nHighlight options by pressing their numbers or by using the up/down arrow keys before pressing [enter] to confirm.\n\nSwitch between buttons by using [Tab] or the left/right arrow keys before pressing [enter] to confirm.\n"
@@ -449,6 +453,10 @@ _InstDEMenuDE="Install Desktop Environment(s)"
 _InstDEMenuNM="Install Network Connection Manager"
 _InstDEMenuDM="Install Display Manager / Login Screen"
 
+# Additional Software Menu
+_InstAddMenuTitle=" Install Additional Software "
+_InstAddMenuBody="\nChoose some additional package to install. You can choose your favorite shell or your favorite browser !"
+
 # Main Menu
 _MMTitle=" Main Menu "
 _MMBody="\nEach step must be followed IN ORDER. Once complete, select 'Done' to properly finalise the installation.\n"
@@ -457,6 +465,7 @@ _MMInstBse="Install Base"
 _MMConfBse="Configure Base"
 _MMConfUsr="Configure User Account(s)"
 _MMInstDE="Install Desktop(s)"
+_MMAddSoft="Install Additional Software"
 _MMRunMkinit="Run Mkinitcpio"
 _Done="Done"
 

@@ -399,6 +399,10 @@ _InstNMDoneBody="\nLe gestionnaire de connexion réseau a été installé et act
 # Gestionnaire de réseau déjà installé
 _InstNMErrBody="\nUn gestionnaire de connexion réseau a déjà été installé et activé."
 
+# Menu d'installation shell
+_InstShellTitle=" Choisissez un shell "
+_InstShellBody="\nChoisissez un shell à installer."
+
 # Bienvenue
 _WelTitle=" Bienvenue dans"
 _WelBody="\nCet installateur va télécharger les derniers paquets provenant des dépôts Arch. Seule la configuration nécessaire sera téléchargée.\n\nSurligner les options en pressant sur leur numéro respectif, ou en utilisant les flèches haut/bas avant d'appuyer sur [entrée] pour confirmer.\n\nNaviguer entre les boutons en utilisant [Tab] ou les flèches gauche/droite avant d'appuyer sur [entrée] pour confirmer.\n"
@@ -443,14 +447,19 @@ _InstDEMenuDE="Installer le ou les environnements de bureau"
 _InstDEMenuNM="Installer le gestionnaire de connexion réseau"
 _InstDEMenuDM="Installer le gestionnaire d'affichage / l'écran de connexion"
 
+# Menu logiciel additionnel
+_InstAddMenuTitle=" Installer d'autres logiciels "
+_InstAddMenuBody="\nIci, vous pouvez choisir d'installer des logiciels suplémentaires. Choississez votre shell, votre navigateur ou encore votre éditeur de texte !"
+
 # Menu principal
 _MMTitle=" Menu principal "
-MMBody="\nChaque étape doit être suivie DANS L'ORDRE. Une fois effectué, sélectionner « Terminé » pour finaliser correctement l'installation.\n"
+_MMBody="\nChaque étape doit être suivie DANS L'ORDRE. Une fois effectué, sélectionner « Terminé » pour finaliser correctement l'installation.\n"
 _MMPrep="Préparer l'installation"
 _MMInstBse="Installer Base"
 _MMConfBse="Configurer Base"
 _MMConfUsr="Configurer le(s) compte(s) utilisateur(s)"
 _MMInstDE="Installer le ou les environnements de bureau"
+_MMAddSoft="Installer d'autres programmes"
 _MMRunMkinit="Exécuter Mkinitcpio"
 _Done="Terminé"
 

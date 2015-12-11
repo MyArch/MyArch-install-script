@@ -2015,6 +2015,42 @@ install_nm() {
   fi
 }
 
+# Install shell
+install_shell() {
+  DIALOG --title "$_InstShellTitle" \
+  --menu "$_InstShellBody" 0 0 10 \
+  "1" "bash" \
+  "2" "dash" \
+  "3" "fish" \
+  "4" "mksh" \
+  "5" "tcsh" \
+  "6" "zsh" \
+  "7" "$_Back" 2>${ANSWER}
+  case $(cat ${ANSWER}) in
+    "1")
+    PACSTRAP ${MOUNTPOINT} bash
+    "2")
+    PACSTRAP ${MOUNTPOINT} dash
+    ;;
+    "3")
+    PACSTRAP ${MOUNTPOINT} fish
+    ;;
+    "4")
+    PACSTRAP ${MOUNTPOINT} mksh
+    ;;
+    "5")
+    PACSTRAP ${MOUNTPOINT} tcsh
+    ;;
+    "6")
+    PACSTRAP ${MOUNTPOINT} zsh
+    ;;
+    *)
+    install_add_menu
+    ;;
+  esac
+  check_for_error
+}
+
 test() {
   ping -c 3 google.com > /tmp/.outfile &
   DIALOG --title "checking" --no-kill --tailboxbg /tmp/.outfile 20 60
@@ -2213,7 +2249,8 @@ install_desktop_menu() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstDEMenuTitle" --menu "$_InstDEMenuBody" 0 0 5 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstDEMenuTitle" \
+  --menu "$_InstDEMenuBody" 0 0 5 \
   "1" "$_InstDEMenuGISD" \
   "2" "$_InstDEMenuDE" \
   "3" "$_InstDEMenuNM" \
@@ -2359,6 +2396,34 @@ install_acc_menu() {
   install_acc_menu
 }
 
+# Install additional software
+install_add_menu() {
+  if [[ $SUB_MENU != "install_add_menu" ]]; then
+    SUB_MENU="install_add_menu"
+    HIGHLIGHT_SUB=1
+  else
+    if [[ $HIGHLIGHT_SUB != 7 ]]; then
+      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
+    fi
+  fi
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstAddMenuTitle" \
+  --menu "$_InstAddMenuBody" 0 0 10 \
+  "1" "Shell" \
+  "2" "Editor" \
+  "3" "Browser" \
+  "99" "$_Back" 2>${ANSWER}
+  case $(cat ${ANSWER}) in
+    "1")
+    install_shell
+    ;;
+    *)
+    main_menu_online
+    ;;
+  esac
+  check_for_error
+  install_add_menu
+}
+
 edit_configs() {
   # Clear the file variables
   FILE=""
@@ -2372,7 +2437,8 @@ edit_configs() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_SeeConfOptTitle" --menu "$_SeeConfOptBody" 0 0 10 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_SeeConfOptTitle" \
+  --menu "$_SeeConfOptBody" 0 0 10 \
   "1" "/etc/vconsole.conf" \
   "2" "/etc/locale.conf" \
   "3" "/etc/hostname" \
@@ -2468,9 +2534,10 @@ main_menu_online() {
   "4" "$_MMConfUsr" \
   "5" "$_MMInstDE" \
   "6" "$_InstAccOpt" \
-  "7" "$_MMRunMkinit" \
-  "8" "$_SeeConfOpt" \
-  "9" "$_Done" 2>${ANSWER}
+  "7" "$_MMAddSoft" \
+  "8" "$_MMRunMkinit" \
+  "9" "$_SeeConfOpt" \
+  "10" "$_Done" 2>${ANSWER}
   HIGHLIGHT=$(cat ${ANSWER})
   # Depending on the answer, first check whether partition(s) are mounted and whether base has been installed
   if [[ $(cat ${ANSWER}) -eq 2 ]]; then
@@ -2500,9 +2567,12 @@ main_menu_online() {
     install_acc_menu
     ;;
     "7")
-    run_mkinitcpio
+    install_add_menu
     ;;
     "8")
+    run_mkinitcpio
+    ;;
+    "9")
     edit_configs
     ;;
     *)
