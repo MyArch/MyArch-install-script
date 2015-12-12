@@ -1984,27 +1984,35 @@ install_shell() {
   case $(cat ${ANSWER}) in
     "1")
     PACSTRAP ${MOUNTPOINT} bash
+    SH="bash"
     ;;
     "2")
     PACSTRAP ${MOUNTPOINT} dash
+    SH="dash"
     ;;
     "3")
     PACSTRAP ${MOUNTPOINT} fish
+    SH="fish"
     ;;
     "4")
     PACSTRAP ${MOUNTPOINT} mksh
+    SH="mksh"
     ;;
     "5")
     PACSTRAP ${MOUNTPOINT} tcsh
+    SH="tcsh"
     ;;
     "6")
     PACSTRAP ${MOUNTPOINT} zsh
+    SH="zsh"
     ;;
     *)
     install_add_menu
     ;;
   esac
-  DIALOG
+  if DIALOG --yesno "$_InstShellChsh" 0 0 ; then
+    arch _chroot "chsh ${USER} /bin/${SH}"
+  fi
   check_for_error
 }
 
