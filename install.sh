@@ -90,6 +90,7 @@ DIALOG() {
 
 # Redefine pacstrap for asking during installation
 PACSTRAP() {
+  clear
   if [[ AUTO -eq 0 ]]; then
     pacstrap -i "$@"
   else
@@ -1270,24 +1271,20 @@ install_base() {
   case $(cat ${ANSWER}) in
     "1")
     # Latest Kernel
-    clear
     PACSTRAP ${MOUNTPOINT} base btrfs-progs ntp sudo f2fs-tools
     ;;
     "2")
     # Latest Kernel and base-devel
-    clear
     PACSTRAP ${MOUNTPOINT} base base-devel btrfs-progs ntp sudo f2fs-tools
     ;;
     "3")
     # LTS Kernel
-    clear
     PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/')\
      btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1
     ;;
     "4")
     # LTS Kernel and base-devel
-    clear
     PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/')\
      base-devel btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1
@@ -1304,7 +1301,6 @@ install_base() {
   if [[ $(lspci | grep -i "Network Controller") != "" ]]; then
     DIALOG --title "$_InstWirTitle" --infobox "$_InstWirBody" 0 0
     sleep 2
-    clear
     PACSTRAP ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant\
      dialog
     check_for_error
@@ -1320,7 +1316,6 @@ install_bootloader() {
     "1" $"Grub2" \
     "2" $"Syslinux [MBR]" \
     "3" $"Syslinux [/]" 2>${ANSWER}
-    clear
     case $(cat ${ANSWER}) in
       "1")
       # Grub
@@ -1384,7 +1379,6 @@ install_bootloader() {
     case $(cat ${ANSWER}) in
       "1")
       # Grub2
-      clear
       PACSTRAP ${MOUNTPOINT} grub os-prober efibootmgr dosfstools
       check_for_error
       DIALOG --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
@@ -1408,7 +1402,6 @@ install_bootloader() {
       # Ensure that UEFI partition has been mounted to /boot/efi due to bug in script. Could "fix" it for installation, but
       # This could result in unknown consequences should the script be updated at some point.
       if [[ $UEFI_MOUNT == "/boot/efi" ]]; then
-        clear
         PACSTRAP ${MOUNTPOINT} refind-efi efibootmgr dosfstools
         check_for_error
         DIALOG --title "$_SetRefiDefTitle" --yesno "$_SetRefiDefBody ${UEFI_MOUNT}/EFI/boot $_SetRefiDefBody2" 0 0
@@ -1434,7 +1427,6 @@ install_bootloader() {
       ;;
       "3")
       # systemd-boot
-      clear
       PACSTRAP ${MOUNTPOINT} efibootmgr dosfstools
       arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>>/tmp/.errlog
       check_for_error
@@ -1499,32 +1491,26 @@ install_wireless_firmware() {
     ;;
     "2")
     # Broadcom
-    clear
     PACSTRAP ${MOUNTPOINT} b43-fwcutter
     ;;
     "3")
     # Bluetooth
-    clear
     PACSTRAP ${MOUNTPOINT} bluez-firmware
     ;;
     "4")
     # Intel 2100
-    clear
     PACSTRAP ${MOUNTPOINT} ipw2100-fw
     ;;
     "5")
     # Intel 2200
-    clear
     PACSTRAP ${MOUNTPOINT} ipw2200-fw
     ;;
     "6")
     # ZyDAS
-    clear
     PACSTRAP ${MOUNTPOINT} zd1211-firmware
     ;;
     "7")
     # All
-    clear
     PACSTRAP ${MOUNTPOINT} b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw\
      zd1211-firmware
     ;;
@@ -1540,7 +1526,6 @@ install_wireless_firmware() {
 # This will run only once.
 install_alsa_xorg_input() {
   DIALOG --title "$_AXITitle" --msgbox "$_AXIBody" 0 0
-  clear
   PACSTRAP ${MOUNTPOINT} alsa-utils xorg-server xorg-server-utils xorg-xinit\
    xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
   check_for_error
@@ -1668,7 +1653,6 @@ setup_graphics_card() {
     "8")
     # VirtualBox
     DIALOG --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
-    clear
     [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules  \
     || PACSTRAP ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules-lts
     # Load modules and enable vboxservice whatever the kernel
@@ -1740,40 +1724,33 @@ install_de_wm() {
   case $(cat ${ANSWER}) in
     "1")
     # Cinnamon
-    clear
     PACSTRAP ${MOUNTPOINT} cinnamon xterm
     ;;
     "2")
     # Enlightement
-    clear
     PACSTRAP ${MOUNTPOINT} enlightenment terminology polkit-gnome xterm
     ;;
     "3")
     # Gnome-Shell
-    clear
     PACSTRAP ${MOUNTPOINT} gnome-shell gdm xterm
     GNOME_INSTALLED=1
     ;;
     "4")
     # Gnome
-    clear
     PACSTRAP ${MOUNTPOINT} gnome rp-pppoe xterm
     GNOME_INSTALLED=1
     ;;
     "5")
     # Gnome + Extras
-    clear
     PACSTRAP ${MOUNTPOINT} gnome gnome-extra rp-pppoe xterm
     GNOME_INSTALLED=1
     ;;
     "6")
     # KDE5 BASE
-    clear
     PACSTRAP ${MOUNTPOINT} plasma-desktop xdg-utils rp-pppoe xterm
     ;;
     "7")
     # KDE5
-    clear
     PACSTRAP ${MOUNTPOINT} plasma xdg-user-dirs xdg-utils rp-pppoe xterm
     if [[ $NM_INSTALLED -eq 0 ]]; then
       arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
@@ -1783,69 +1760,56 @@ install_de_wm() {
     ;;
     "8")
     # LXDE
-    clear
     PACSTRAP ${MOUNTPOINT} lxde xterm
     LXDE_INSTALLED=1
     ;;
     "9")
     # LXQT
-    clear
     PACSTRAP ${MOUNTPOINT} lxqt oxygen-icons xterm
     LXQT_INSTALLED=1
     ;;
     "10")
     # MATE
-    clear
     PACSTRAP ${MOUNTPOINT} mate xterm
     ;;
     "11")
     # MATE + Extras
-    clear
     PACSTRAP ${MOUNTPOINT} mate mate-extra xterm
     ;;
     "12")
     # Xfce
-    clear
     PACSTRAP ${MOUNTPOINT} xfce4 polkit-gnome xterm
     ;;
     "13")
     # Xfce + Extras
-    clear
     PACSTRAP ${MOUNTPOINT} xfce4 xfce4-goodies polkit-gnome xterm
     ;;
     "14")
     # Awesome
-    clear
     PACSTRAP ${MOUNTPOINT} awesome vicious polkit-gnome xterm
     ;;
     "15")
     #Fluxbox
-    clear
     PACSTRAP ${MOUNTPOINT} fluxbox fbnews polkit-gnome xterm
     ;;
     "16")
     #i3
-    clear
     PACSTRAP ${MOUNTPOINT} i3-wm i3lock i3status dmenu polkit-gnome xterm
     ;;
     "17")
     #IceWM
-    clear
     PACSTRAP ${MOUNTPOINT} icewm icewm-themes polkit-gnome xterm
     ;;
     "18")
     #Openbox
-    clear
     PACSTRAP ${MOUNTPOINT} openbox openbox-themes polkit-gnome xterm
     ;;
     "19")
     #PekWM
-    clear
     PACSTRAP ${MOUNTPOINT} pekwm pekwm-themes polkit-gnome xterm
     ;;
     "20")
     #WindowMaker
-    clear
     PACSTRAP ${MOUNTPOINT} windowmaker polkit-gnome xterm
     ;;
     *)
@@ -1857,7 +1821,6 @@ install_de_wm() {
   if [[ $COMMON_INSTALLED -eq 0 ]]; then
     DIALOG --title "$_InstComTitle" --yesno "$_InstComBody" 0 0
     if [[ $? -eq 0 ]]; then
-      clear
       PACSTRAP ${MOUNTPOINT} gksu gnome-keyring polkit xdg-user-dirs xdg-utils gamin gvfs gvfs-afc gvfs-smb ttf-dejavu gnome-icon-theme python2-xdg bash-completion ntfs-3g
       check_for_error
     fi
@@ -1880,21 +1843,18 @@ install_dm() {
     case $(cat ${ANSWER}) in
       "1")
       # LXDM
-      clear
       PACSTRAP ${MOUNTPOINT} lxdm
       arch_chroot "systemctl enable lxdm.service" >/dev/null 2>>/tmp/.errlog
       DM="LXDM"
       ;;
       "2")
       # LIGHTDM
-      clear
       PACSTRAP ${MOUNTPOINT} lightdm lightdm-gtk-greeter
       arch_chroot "systemctl enable lightdm.service" >/dev/null 2>>/tmp/.errlog
       DM="LightDM"
       ;;
       "3")
       # SDDM
-      clear
       PACSTRAP ${MOUNTPOINT} sddm
       arch_chroot "sddm --example-config > /etc/sddm.conf"
       arch_chroot "systemctl enable sddm.service" >/dev/null 2>>/tmp/.errlog
@@ -1902,7 +1862,6 @@ install_dm() {
       ;;
       "4")
       # SLiM
-      clear
       PACSTRAP ${MOUNTPOINT} slim
       arch_chroot "systemctl enable slim.service" >/dev/null 2>>/tmp/.errlog
       DM="SLiM"
@@ -1928,8 +1887,8 @@ install_dm() {
       arch_chroot "systemctl enable gdm.service" >/dev/null 2>/tmp/.errlog
       DM="GDM"
       # Gnome with KDE
-    elif [[ $GNOME_INSTALLED -eq 1 ]] && [[ $KDE_INSTALLED -eq 1 ]]; then
       DIALOG --title "$_DmChTitle" \
+    elif [[ $GNOME_INSTALLED -eq 1 ]] && [[ $KDE_INSTALLED -eq 1 ]]; then
       --menu "$_DmChBody" 12 45 2 \
       "1" $"GDM  (Gnome)" \
       "2" $"SDDM (KDE)" 2>${ANSWER}
@@ -1982,24 +1941,20 @@ install_nm() {
     case $(cat ${ANSWER}) in
       "1")
       # connman
-      clear
       PACSTRAP ${MOUNTPOINT} connman
       arch_chroot "systemctl enable connman.service" 2>>/tmp/.errlog
       ;;
       "2")
       # dhcpcd
-      clear
       arch_chroot "systemctl enable dhcpcd.service" 2>/tmp/.errlog
       ;;
       "3")
       # Network Manager
-      clear
       PACSTRAP ${MOUNTPOINT} networkmanager network-manager-applet rp-pppoe
       arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
       ;;
       "4")
       # WICD
-      clear
       PACSTRAP ${MOUNTPOINT} wicd-gtk
       arch_chroot "systemctl enable wicd.service" 2>>/tmp/.errlog
       ;;
@@ -2029,6 +1984,7 @@ install_shell() {
   case $(cat ${ANSWER}) in
     "1")
     PACSTRAP ${MOUNTPOINT} bash
+    ;;
     "2")
     PACSTRAP ${MOUNTPOINT} dash
     ;;
@@ -2048,6 +2004,7 @@ install_shell() {
     install_add_menu
     ;;
   esac
+  DIALOG
   check_for_error
 }
 
@@ -2310,82 +2267,66 @@ install_acc_menu() {
   case $(cat ${ANSWER}) in
     "1")
     # accerciser
-    clear
     PACSTRAP ${MOUNTPOINT} accerciser
     ;;
     "2")
     # at-spi2-atk
-    clear
     PACSTRAP ${MOUNTPOINT} at-spi2-atk
     ;;
     "3")
     # at-spi2-core
-    clear
     PACSTRAP ${MOUNTPOINT} at-spi2-core
     ;;
     "4")
     # brltty
-    clear
     PACSTRAP ${MOUNTPOINT} brltty
     ;;
     "5")
     # caribou
-    clear
     PACSTRAP ${MOUNTPOINT} caribou
     ;;
     "6")
     # dasher
-    clear
     PACSTRAP ${MOUNTPOINT} dasher
     ;;
     "7")
     # espeak
-    clear
     PACSTRAP ${MOUNTPOINT} espeak
     ;;
     "8")
     # espeakup
-    clear
     PACSTRAP ${MOUNTPOINT} espeakup
     ;;
     "9")
     # festival
-    clear
     PACSTRAP ${MOUNTPOINT} festival
     ;;
     "10")
     # java-access-bridge
-    clear
     PACSTRAP ${MOUNTPOINT} java-access-bridge
     ;;
     "11")
     # java-atk-wrapper
-    clear
     PACSTRAP ${MOUNTPOINT} java-atk-wrapper
     ;;
     "12")
     # julius
-    clear
     PACSTRAP ${MOUNTPOINT} julius
     ;;
     "13")
     # orca
-    clear
     PACSTRAP ${MOUNTPOINT} orca
     ;;
     "14")
     # qt-at-spi
-    clear
     PACSTRAP ${MOUNTPOINT} qt-at-spi
     ;;
     "15")
     # speech-dispatcher
-    clear
     PACSTRAP ${MOUNTPOINT} speech-dispatcher
     ;;
     "16")
     # install all
-    clear
     PACSTRAP ${MOUNTPOINT} accerciser at-spi2-atk at-spi2-core brltty dasher espeak espeakup festival java-access-bridge caribou julius orca qt-at-spi speech-dispatcher
     ;;
     *)
