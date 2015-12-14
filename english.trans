@@ -447,6 +447,13 @@ _ConfBseHWC="Set Hardware Clock"
 _ConfBseSysLoc="Set System Locale"
 _ConfBseVirtCon="Set Virtual Console"
 
+# AUR halper menu
+_InstAur="Install AUR helper"
+_NeedBaseDevelTitle="base-devel dependency"
+_NeedBaseDevelBody="To install packages from AUR, you need the base-devel group. Do you want to install it ?"
+_InstAurTitle=" Install AUR helpes "
+_InstAurBody="\nChoose an AUR helper."
+
 # User Menu
 _ConfUsrTitle=" Configure User(s)"
 _ConfUsrBody="\nRoot is the default 'super-user' or 'admin' account. The same password can be set for both Root and any personal user accounts created."

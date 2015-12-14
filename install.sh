@@ -20,6 +20,7 @@ ANSWER="/tmp/.install"
 # Save retyping
 VERSION="Installation script for Archlinux"
 # Installation
+BASE_DEVEL=0            # Has base-devel group been installed ?
 KDE_INSTALLED=0         # Has KDE been installed?
 GNOME_INSTALLED=0       # Has Gnome been installed?
 LXDE_INSTALLED=0        # Has LXDE been installed?
@@ -64,7 +65,7 @@ LVM_LV_NAME=""          # Name of LV to create
 LV_SIZE_INVALID=0       # Is LVM LV size entered valid?
 VG_SIZE_TYPE=""         # Is VG in Gigabytes or Megabytes?
 # Installation
-AUTO=-1
+AUTO=-1                 # Option for confirmation with pacstrap
 MOUNTPOINT="/mnt"       # Installation
 MOUNT_TYPE=""           # "/dev/" for standard partitions, "/dev/mapper" for LVM
 BTRFS=0                 # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
@@ -1276,6 +1277,7 @@ install_base() {
     "2")
     # Latest Kernel and base-devel
     PACSTRAP ${MOUNTPOINT} base base-devel btrfs-progs ntp sudo f2fs-tools
+    [[ $? -eq 0 ]] && BASE_DEVEL=1
     ;;
     "3")
     # LTS Kernel
@@ -1287,7 +1289,7 @@ install_base() {
     # LTS Kernel and base-devel
     PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/')\
      base-devel btrfs-progs ntp sudo f2fs-tools
-    [[ $? -eq 0 ]] && LTS=1
+    [[ $? -eq 0 ]] && LTS=1 && BASE_DEVEL=1
     ;;
     *)
     install_base_menu
@@ -1305,6 +1307,40 @@ install_base() {
      dialog
     check_for_error
   fi
+}
+
+
+install_aur() {
+  local archfrrepo="[archlinuxfr]
+  SigLevel = Never
+  Server = http:/:repo.archlinux.fr/\$arch"
+  if [[ $BASE_DEVEL -eq 0 ]] ; then
+    DIALOG --title "$_NeedBaseDevelTitle" \
+    --yesno "$_NeedBaseDevelBody" 0 0
+    if [[ $? == 0 ]]; then
+      PACSTRAP ${MOUNTPOINT} base-devel
+      [[ $? -eq 0 ]] && BASE_DEVEL=1
+      check_for_error
+    else
+      install_base_menu
+    fi
+  fi
+  DIALOG --title "$_InstAurTitle" \
+  --menu "$_InstAurBody" 0 0 10 \
+  "1" "Yaourt" \
+  "99" "$_Back" 2>${ANSWER}
+  case $(cat ${ANSWER}) in
+    "1")
+    arch_chroot "echo ${archfrrepo} >> /etc/pacman.conf" 2>/tmp/.errlog
+    arch_chroot "pacman -Syy" 2>>/tmp/.errlog
+    check_for_error
+    PACSTRAP ${MOUNTPOINT} yaourt
+    ;;
+    *)
+    install_base_menu
+    ;;
+  esac
+  check_for_error
 }
 
 # Adapted from AIS. Integrated the configuration elements.
@@ -1887,8 +1923,8 @@ install_dm() {
       arch_chroot "systemctl enable gdm.service" >/dev/null 2>/tmp/.errlog
       DM="GDM"
       # Gnome with KDE
-      DIALOG --title "$_DmChTitle" \
     elif [[ $GNOME_INSTALLED -eq 1 ]] && [[ $KDE_INSTALLED -eq 1 ]]; then
+      DIALOG --title "$_DmChTitle" \
       --menu "$_DmChBody" 12 45 2 \
       "1" $"GDM  (Gnome)" \
       "2" $"SDDM (KDE)" 2>${ANSWER}
@@ -2137,7 +2173,7 @@ install_base_menu() {
     SUB_MENU="install_base_menu"
     HIGHLIGHT_SUB=1
   else
-    if [[ $HIGHLIGHT_SUB != 5 ]]; then
+    if [[ $HIGHLIGHT_SUB != 6 ]]; then
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
@@ -2146,12 +2182,14 @@ install_base_menu() {
   elif [ $AUTO == -1 ]; then
     AUTO=1
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstBsMenuTitle" --menu "$_InstBseMenuBody" 0 0 5 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstBsMenuTitle" \
+  --menu "$_InstBseMenuBody" 0 0 5 \
   "1" "$_PrepPacKey" \
   "2" "$_InstBse" \
-  "3" "$_InstBootldr" \
-  "4" "$_InstWirelessFirm" \
-  "5" "$_Back" 2>${ANSWER}
+  "3" "$_InstAur" \
+  "4" "$_InstBootldr" \
+  "5" "$_InstWirelessFirm" \
+  "6" "$_Back" 2>${ANSWER}
   HIGHLIGHT_SUB=$(cat ${ANSWER})
   case $(cat ${ANSWER}) in
     "1")
@@ -2164,9 +2202,12 @@ install_base_menu() {
     install_base
     ;;
     "3")
-    install_bootloader
+    install_aur
     ;;
     "4")
+    install_bootloader
+    ;;
+    "5")
     install_wireless_firmware
     ;;
     *)

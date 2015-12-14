@@ -441,6 +441,13 @@ _ConfBseHWC="Définir l'horloge matérielle"
 _ConfBseSysLoc="Définir les paramètres régionaux"
 _ConfBseVirtCon="Configurer la console virtuelle"
 
+# Menu d'installation de AUR
+_InstAur="Installer gestionnaire AUR"
+_NeedBaseDevelTitle="Dépendance base-devel"
+_NeedBaseDevelBody="Pour utiliser un gestionnaire AUR, vous avez besoin d'installer le groupe base-devel. Voulez-vous l'installer ?"
+_InstAurTitle=" Installer gestionnaire AUR "
+_InstAurBody="\nChoisissez un gestionnaire pour les paquets venant de AUR."
+
 # Menu utilisateur
 _ConfUsrTitle=" Configurer le ou les utilisateurs"
 _ConfUsrBody="\nRoot est le compte « super-utilisateur » ou « admin » par défaut. Le même mot de passe peut être appliqué pour Root ou pour tout autre compte utilisateur."
