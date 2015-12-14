@@ -1980,7 +1980,7 @@ install_shell() {
   "4" "mksh" \
   "5" "tcsh" \
   "6" "zsh" \
-  "7" "$_Back" 2>${ANSWER}
+  "99" "$_Back" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
     PACSTRAP ${MOUNTPOINT} bash
@@ -2013,6 +2013,30 @@ install_shell() {
   if DIALOG --yesno "$_InstShellChsh" 0 0 ; then
     arch _chroot "chsh ${USER} /bin/${SH}"
   fi
+  check_for_error
+}
+
+install_editor() {
+  DIALOG --title "$_InstEditorTitle" \
+  --menu "$_InstEditorBody" 0 0 10 \
+  "1" "emacs" \
+  "2" "emacs without X" \
+  "3" "vim" \
+  "99" "$_Back" 2>${ANSWER}
+  case $(cat ${ANSWER}) in
+    "1")
+    PACSTRAP ${MOUNTPOINT} emacs
+    ;;
+    "2")
+    PACSTRAP ${MOUNTPOINT} emacs-nox
+    ;;
+    "3")
+    PACSTRAP ${MOUNTPOINT} vim
+    ;;
+    *)
+    install_add_menu
+    ;;
+  esac
   check_for_error
 }
 
@@ -2351,7 +2375,7 @@ install_add_menu() {
     SUB_MENU="install_add_menu"
     HIGHLIGHT_SUB=1
   else
-    if [[ $HIGHLIGHT_SUB != 7 ]]; then
+    if [[ $HIGHLIGHT_SUB != 99 ]]; then
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
@@ -2364,6 +2388,12 @@ install_add_menu() {
   case $(cat ${ANSWER}) in
     "1")
     install_shell
+    ;;
+    "2")
+    #install_editor TODO
+    ;;
+    "3")
+    #install_browser TODO
     ;;
     *)
     main_menu_online
@@ -2492,7 +2522,7 @@ main_menu_online() {
   if [[ $(cat ${ANSWER}) -eq 2 ]]; then
     check_mount
   fi
-  if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 7 ]]; then
+  if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 8 ]]; then
     check_mount
     check_base
   fi
