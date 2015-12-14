@@ -409,6 +409,14 @@ _InstNMErrBody="\nA network connection manager has already been installed and en
 _InstShellTitle=" Choose a shell "
 _InstShellBody="\nChoose a shell to install."
 
+# Editor install menu
+_InstEditorTitle=" Choose an editor "
+_InstEditorBody="\nChoose an editor to install."
+
+# Browser install menu
+_InstBrowserTitle=" Choose a browser "
+_InstBrowserBody="\nChoose a browser to install."
+
 # Welcome
 _WelTitle=" Welcome to"
 _WelBody="\nThis installer will download the latest packages from the Arch repositories. Installations are vanilla, so only the minimal necessary configuration is undertaken.\n\nHighlight options by pressing their numbers or by using the up/down arrow keys before pressing [enter] to confirm.\n\nSwitch between buttons by using [Tab] or the left/right arrow keys before pressing [enter] to confirm.\n"

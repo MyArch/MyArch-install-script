@@ -2040,6 +2040,30 @@ install_editor() {
   check_for_error
 }
 
+install_browser() {
+  DIALOG --title "$_InstBrowserTitle" \
+  --menu "$_InstBrowserBody" 0 0 10 \
+  "1" "Chromium" \
+  "2" "Firefox" \
+  "3" "Opera" \
+  "99" "$_Back" 2>${ANSWER}
+  case $(cat ${ANSWER}) in
+    "1")
+    PACSTRAP ${MOUNTPOINT} chromium
+    ;;
+    "2")
+    PACSTRAP ${MOUNTPOINT} firefox
+    ;;
+    "3")
+    PACSTRAP ${MOUNTPOINT} opera
+    ;;
+    *)
+    install_add_menu
+    ;;
+  esac
+  check_for_error
+}
+
 test() {
   ping -c 3 google.com > /tmp/.outfile &
   DIALOG --title "checking" --no-kill --tailboxbg /tmp/.outfile 20 60
@@ -2393,7 +2417,7 @@ install_add_menu() {
     install_editor
     ;;
     "3")
-    #install_browser TODO
+    install_browser
     ;;
     *)
     main_menu_online

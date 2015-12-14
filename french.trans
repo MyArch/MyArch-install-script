@@ -403,6 +403,14 @@ _InstNMErrBody="\nUn gestionnaire de connexion réseau a déjà été installé 
 _InstShellTitle=" Choisissez un shell "
 _InstShellBody="\nChoisissez un shell à installer."
 
+# Menu d'installation editeur
+_InstEditorTitle=" Choisissez un editeur "
+_InstEditorBody="\nChoisissez un editeur à installer."
+
+# Menu d'installation navigateur
+_InstBrowserTitle=" Choisissez un navigateur "
+_InstBrowserBody="\nChoisissez un navigateur à installer."
+
 # Bienvenue
 _WelTitle=" Bienvenue dans"
 _WelBody="\nCet installateur va télécharger les derniers paquets provenant des dépôts Arch. Seule la configuration nécessaire sera téléchargée.\n\nSurligner les options en pressant sur leur numéro respectif, ou en utilisant les flèches haut/bas avant d'appuyer sur [entrée] pour confirmer.\n\nNaviguer entre les boutons en utilisant [Tab] ou les flèches gauche/droite avant d'appuyer sur [entrée] pour confirmer.\n"
