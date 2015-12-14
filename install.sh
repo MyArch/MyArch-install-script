@@ -2390,7 +2390,7 @@ install_add_menu() {
     install_shell
     ;;
     "2")
-    #install_editor TODO
+    install_editor
     ;;
     "3")
     #install_browser TODO
