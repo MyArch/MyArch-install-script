@@ -127,7 +127,6 @@ _LvmLvDoneTitle=" LVM - Logical Volume Created "
 _LvmCompTitle=" LVM - Process Complete "
 _LvmCompBody="\nDone! All Logical Volumes have been created for the Volume Group.\n\nDo you wish to view the new LVM scheme?\n\n"
 
-
 # Show devices and partitions
 _DevShowTitle=" Devices / Partitions "
 _DevShowOpt="List Devices (optional)"
@@ -201,10 +200,6 @@ _FstabBody="\nThe FSTAB file (File System TABle) sets what storage devices and p
 _FstabDev="Dev (partition code)"
 _FstabLabel="Label (user defined)"
 _FstabUUID="UUID/PARTUUID (unique code)"
-
-# Check FSTAB - remove
-#_FstabChkTitle=" Check FSTAB "
-#_FstabChkBody="\nPlease check the FSTAB file, before closing it to continue.\n\n"
 
 # Set Hostname
 _HostNameTitle=" Configure Host Name "
@@ -365,11 +360,6 @@ _GCUnknOpt="Unknown / Generic"
 _NvidiaConfTitle=" NVIDIA Configuration Check "
 _NvidiaConfBody="\nA basic NVIDIA configuration file has been created. Please check it before closing to continue.\n"
 
-# Graphics Card Detection
-_GCDetTitle="Detected"
-_GCDetBody="\nIs your graphics card or virtualisation software"
-_GCDetBody2="-Select 'Yes' to install its OPEN-SOURCE driver.\n\n-Select 'No' to open the graphics card menu, which includes proprietary NVIDIA drivers."
-
 #  Install DE Info
 _DEInfoTitle=" Install Desktop Environments "
 _DEInfoBody="\nThis option can be repeated to install multiple environments.\n\nGnome, KDE (full), and LXDE come with a display manager.\n\nCinnamon, Gnome and KDE come with a Network Manager.\n\n"
@@ -447,11 +437,11 @@ _ConfBseHWC="Set Hardware Clock"
 _ConfBseSysLoc="Set System Locale"
 _ConfBseVirtCon="Set Virtual Console"
 
-# AUR halper menu
+# AUR helper menu
 _InstAur="Install AUR helper"
 _NeedBaseDevelTitle="base-devel dependency"
 _NeedBaseDevelBody="To install packages from AUR, you need the base-devel group. Do you want to install it ?"
-_InstAurTitle=" Install AUR helpes "
+_InstAurTitle=" Install AUR helper "
 _InstAurBody="\nChoose an AUR helper."
 
 # User Menu

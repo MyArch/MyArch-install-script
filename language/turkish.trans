@@ -2,34 +2,33 @@
 ##
 ## Turkish Translation File
 ##
-##
 ## Written by "Erkan Erdem / ErkanMDR" (02th February 2015)
 ## Edited by Arda Ünlü -- 2 - 4 Aug 2015 & 6th Sept 2015
 ## Edited by gran daevus -- 5 Sep 2015
 ##
 
-# Accessibility
-_InstAccOpt="Accessibility Packages (optional)"
-_InstAccTitle=" Install Accessibility Packages "
-_InstAccBody="Select desired accessibility packages."
+# Accessibility TODO
+#_InstAccOpt=
+#_InstAccTitle=
+#_InstAccBody=
 
-# btrfs
-_btrfsSVTitle=" btrfs Subvolumes "
-_btrfsSVBody="Create btrfs subvolumes?\n\nAn initial subvolume will be created and then mounted. Other subvolumes branching from this may then be created.\n\nOtherwise you can skip directly to the mounting options.\n"
-_btrfsSVTitle=" btrfs Subvolume Name "
-_btrfsMSubBody1="Enter the name of the initial subvolume to mount (e.g. ROOT). Mounting options may then be selected. Once mounted, all other subvolumes created for "
-_btrfsMSubBody2="will branch from it."
-_btrfsSVErrTitle=" btrfs Subvolume Name Error "
-_btrfsSVErrBody="Blanks or spaces are not permitted. Please try again.\n"
-_btrfsSVBody1="Enter the name of subvolume"
-_btrfsSVBody2="to create within"
-_btrfsSVBody3="\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name.\n\nCreated Subvols:"
-_btrfsMntTitle=" btrfs Mount Options "
-_btrfsMntBody="Use [Space] to de/select the desired mount options and review carefully. Please do not select multiple versions of the same option."
-_btrfsMntConfBody="Confirm the following mount options:\n\n"
+# btrfs TODO
+#_btrfsSVTitle=
+#_btrfsSVBody=
+#_btrfsSVTitle=
+#_btrfsMSubBody1=
+#_btrfsMSubBody2=
+# _btrfsSVErrTitle=
+# _btrfsSVErrBody=
+# _btrfsSVBody1=
+# _btrfsSVBody2=
+# _btrfsSVBody3=
+# _btrfsMntTitle=
+# _btrfsMntBody=
+# _btrfsMntConfBody=
 
-# Done!
-_DoneMsg="\nDone!\n\n"
+# Done! TODO
+#_DoneMsg=
 
 # Autopartition
 _AutoPartBody1="Dikkat: "
@@ -86,7 +85,6 @@ _LvmNameVgBody="\nBölüm Grubu (VG) oluşturmak için isim giriniz.\n\nVG sonra
 _LvmNameVgErrTitle=" LVM - VG Adı Hatası "
 _LvmNameVgErr="\nGerçersiz ad girdiniz. Bölüm Grubu sadece alfa-numerik karakterler kabul eder, boşluk içeremez, '/' ile başlayamaz.\n\n"
 
-
 _LvmPvSelTitle=" LVM - Bölüm Seç "
 _LvmPvSelBody="\nFiziksel bölüm için (PV) bölüm seçiniz.\n"
 _LvmPvCreateTitle=" LVM - Bölümü Eklendi "
@@ -128,7 +126,6 @@ _LvmLvDoneTitle=" LVM - Mantıksal Bölüm Oluşturuldu "
 
 _LvmCompTitle=" LVM - Tüm İşlemler Tamamlandı "
 _LvmCompBody="\nBitti! Hacim Grubu için tüm Mantıksal Bölümler oluşturuldu.\n\nYeni LVM planını görmek ister misiniz?\n\n"
-
 
 # Show devices and partitions
 _DevShowTitle=" Cihazlar / Bölümler "
@@ -204,10 +201,6 @@ _FstabDev="Dev (partition kodu)"
 _FstabLabel="Etiket (kullanıcı belirler)"
 _FstabUUID="UUID/PARTUUID (benzersiz kod)"
 
-# Check FSTAB
-_FstabChkTitle=" FSTAB'ı Kontrol Et "
-_FstabChkBody="\nLütfen FSTAB dosyasını kontrol ediniz, ardından pencereyi kapatarak devam edin.\n\n"
-
 # Set Hostname
 _HostNameTitle=" Makine Adı Oluştur "
 _HostNameBody="\nMakine adı bağlı oldunuz ağda makinenizin kimliğini belirler.\n"
@@ -253,7 +246,6 @@ _DevSelBody="\nAygıtlar (/dev) kurulabilecek hard diskler ve USB çubuklarıdı
 
 # Select Device (Grub) - seperate body text is not required (uses standard device selection text)
 _DevSelGrubTitle=" Grub Aygıtı Seçin "
-
 
 # Partitioning Tool
 _PartToolTitle=" Bölümlendirme Aracı "
@@ -333,10 +325,6 @@ _InstGrubDevTitle=" Grub Aygıtı Seçin "
 _InstGrubDevBody="\nGrub'u ROot ile aynı aygıta/hard diske kur"
 _InstGrubDevBody2="\n\nSadece bir aygıta kuruyorsanız 'evet' e basın."
 
-# Syslinux Installation
-_InstSysTitle=" Syslinux Yapılandırma Denetimi "
-_InstSysBody="\nLütfen syslinux yapılandırma dosyasını kontrol ediniz.\n\nŞunu içermeli:\n"
-
 # Install UEFI Bootloader
 _InstUefiBtTitle=" UEFI Açıcı Kur "
 _InstUefiBtBody="\nrEFInd /boot/efi gerektirir. systemd-boot /boot gerektirir.\n\nNOT: rEFInd ve LVM desteklenmez."
@@ -346,15 +334,10 @@ _SetGrubDefTitle=" Grub'u Öntanımlı Önyükleyici Yap? "
 _SetGrubDefBody="\nBazı üretici yazılımları Grub öntanımlı değilse algılayamayabilir, bazı durumlarda bunun sonucu olarak da sistem açılamayabilir.\n\nGrub'u öntanımlı yapmak ister misiniz?\n\n'Evet' i seçmeniz önerilir, özellikle yeni kullanıcıysanız. Bu, grubx64.efi'yi "
 _SetGrubDefBody2="'e kopyalayacak ve adını bootx64.efi yapacak.\n\nÖzellikle başka bir önyükleyici varsa ve/veya birden çok önyükleyici kullanacaksanız 'hayır' ı seçin."
 
-# Gummiboot Configuration Check
-_ChkGumTitle=" Gummiboot Yapılandırma Kontrolü "
-_ChkGumBody="\nLütfen kapatıp devam etmeden önce arch ve loader yapılandırma dosyalarını kontrol edin.\n"
-
 # Set rEFInd as default
 _SetRefiDefTitle=" rEFInd'i Öntanımlı Önyükleyici yap? "
 _SetRefiDefBody="\nBazı üretici yazılımları rEFInd öntanımlı değilse algılayamayabilir, bazı durumlarda bunun sonucu olarak da sistem açılamayabilir.\n\nrEFInd'i öntanımlı yapmak ister misiniz?\n\n'Evet'i seçmeniz önerilir, özellikle yeni kullanıcıysanız. Bu, bootx64.efi'yi "
 _SetRefiDefBody2="'e kopyalayacak ve adını bootx64.efi yapacak.\n\nÖzellikle başka bir önyükleyici varsa ve/veya birden çok önyükleyici kullanacaksanız 'hayır'ı seçin."
-
 
 # efi file set for Grub or Refind
 _SetDefDoneTitle=" UEFI Dosyası Kopyalandı "
@@ -370,17 +353,11 @@ _AXIBody="\nGrafik kartı veya masaüstü ortamı kurulumundan önce şu paketle
 
 # Graphics Card Menu
 _GCtitle=" Grafik Kart Menüsü "
-_GCBody="Eski NVIDIA kartları için Nouveau'yu seçin. Kartınız listede yoksa Bilinmeyen / Genel i seçin.\n"
 _GCUnknOpt="Unknown / Generic"
 
 # NVIDIA Configruation Check
 _NvidiaConfTitle=" NVIDIA Yapılandırma Kontrolü "
 _NvidiaConfBody="\nBasit NVIDIA yapılandırma dosyası oluşturuldu. Devam etmeden önce kontrol edin.\n"
-
-# Graphics Card Detection
-_GCDetTitle="Algılandı"
-_GCDetBody="\ngrafik kartınız"
-_GCDetBody2="-AÇIK KAYNAKLI sürücüyü endirmek için 'evet' i seçin.\n\n-Tescilli NVIDIA sürücüsünü bulunduran grafik kartı menüsü için 'hayır' ı seçin."
 
 #  Install DE Info
 _DEInfoTitle=" Masaüstü Ortamları Kur "
@@ -394,29 +371,13 @@ _InstDEBody="\nÜstlerdeki masaüstü ortamlarının birden fazla indirme ayarı
 _InstComTitle=" Genel Paketleri Kur? "
 _InstComBody="\nBazı ortamlar bazı genel dosyalara ihtiyaç duyarlar, özellikle izinlerde, ev klasörü yapmada ve dosya yöneticisinin işlevselliğinde.\n\nPaketler: xterm, xdg-user-dirs, gksu, gnome-keyring, polkit, gvfs, gnome-icon-theme, vb. Yalnızca KDE kuranların bunlara ihtiyacı yoktur.\n\nKurmak ister misiniz? Bu seçenek karşınıza BİR kere çıkacak.\n\n"
 
-# KDM
-_DmKdeTitle=" KDM Etkin "
-_DmKdeBody="\nKDE kurulduğu için onun görüntü yöneticisi KDM etkinleştirildi.\n\n"
-
-# GDM
-_DmGdmTitle=" GDM Etkin "
-_DmGdmBody="\nGNOME kurulduğu için onun görüntü yöneticisi GDM etkinleştirildi.\n\n"
-
-# KDM and GDM Installed
-_DmChTitle=" GDM veya KDM arasında seçim yapın "
-_DmChBody="\nGNOME ve KDE kuruldu. Bir görüntü yöneticisi seçin.\n\n"
-
-# KDM or GDM Choice Made
+# DM enabled
 _DmDoneTitle=" Etkin"
 _DMDoneBody=" etkinleştirildi.\n\n"
 
-# LXDM
-_DmLxdmTitle=" LXDM Etkin "
-_DmLxdmBody="\nLXDE kurulduğu için onun görüntü yöneticisi LXDM etkinleştirildi.\n\n"
-
 # LXDM or LightDM
 _DmChoiceTitle=" Görüntü YÖneticisi Seçin "
-_DmChoiceBody="\nLXDM ve LightDM arasında seçim yapın. Yeni başlayanlara LXDM önerilir.\n"
+#_DmChoiceBody= TODO
 
 # DM Already Installed
 _DmInstTitle=" Görüntü YÖneticisi Kuruldu "
@@ -433,6 +394,18 @@ _InstNMDoneBody="\nAğ yöneticisi zaten kuruldu ve etkinleştirildi."
 # Network Manager Already Installed (no need for seperate title)
 _InstNMErrBody="\nBir ağ yöneticisi zaten kuruldu ve etkinleştirildi."
 
+# Shell install menu TODO
+#_InstShellTitle=
+#_InstShellBody=
+
+# Editor install menu TODO
+#_InstEditorTitle=
+#_InstEditorBody=
+
+# Browser install menu TODO
+#_InstBrowserTitle=
+#_InstBrowserBody=
+
 # Welcome
 _WelTitle=" Hoşgeldiniz: "
 _WelBody="\nBu kurucu Arch depolarından en yeni paketleri kuracak. Kurulum saftır, en basit gerekli ayarlar yapılmaktadır.\n\nSeçenekleri sayıyla veya üst/alt tuşuyla seçin ve [enter] tuşuna basın.\n\na basıp onaylamadan önce, seçenekler arasında, [Tab] veya sol/sağ ok tuşlarıyla gezinebilirsiniz.\n"﻿
@@ -447,6 +420,7 @@ _PrepMntPart="Bölümleri Bağla"
 _Back="Geri"
 
 # Install Base Menu
+#_InstAskPac= TODO
 _InstBsMenuTitle=" Tabanı Kur "
 _InstBseMenuBody="\nGrub kullanan bir Linux dağıtımının yanına kuruyorsanız önyükleyiciyi tekrar kurmanıza gerek yoktur, sadece Grubu güncelleştirmeniz yeterlidir."
 _InstBse="Tabanı Kur"
@@ -462,6 +436,13 @@ _ConfBseHWC="Donanım Saati Ayarla"
 _ConfBseSysLoc="Sistem locale"
 _ConfBseVirtCon="Sanal Konsol Ayarla"
 
+# AUR helper menu TODO
+#_InstAur=
+#_NeedBaseDevelTitle=
+#_NeedBaseDevelBody=
+#_InstAurTitle=
+#_InstAurBody=
+
 # User Menu
 _ConfUsrTitle=" Kullanıcı(lar)ı Ayarla "
 _ConfUsrBody="\nRoot öntanımlı 'super-user' veya 'admin' hesaptır. Root ve başka bir kişisel kullanıcı için aynı şifre ayarlanabilir."
@@ -476,6 +457,10 @@ _InstDEMenuDE="Masaüstü Ortam(lar)ı Kur"
 _InstDEMenuNM="Ağ Bağlantı Yöneticisi Kur"
 _InstDEMenuDM="Görüntü Yöneticisi / Giriş Ekranı Kur"
 
+# Additional Software Menu TODO
+#_InstAddMenuTitle=
+#_InstAddMenuBody=
+
 # Main Menu
 _MMTitle=" Ana Menü "
 _MMBody="\nHer aşama SIRAYLA çalıştırılmalıdır. Bitince kurulumu düzgünce sonuçlandırmak için 'Tamamlandı' yı seçin.\n"
@@ -484,6 +469,7 @@ _MMInstBse="Taban Sistemi Kur"
 _MMConfBse="Taban Sistemi Ayarla"
 _MMConfUsr="Kullanıcı Hesap(lar)ını Ayarla"
 _MMInstDE="Masaüst(leri)ni Kur"
+#_MMAddSoft= TODO
 _MMRunMkinit="mkinitcpio Çalıştır"
 _Done="Tamamlandı"
 

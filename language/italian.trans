@@ -127,7 +127,6 @@ _LvmLvDoneTitle=" LVM - Volume Logico creato "
 _LvmCompTitle=" LVM - Operazione completata "
 _LvmCompBody="\nFatto! Sono stati creati tutti i Volumi Logici per il Gruppo di Volumi.\n\nVuoi visionare la nuova struttura del LVM?\n\n"
 
-
 # Mostra dispositivi e partizioni
 _DevShowTitle=" Dispositivi / Partizioni "
 _DevShowOpt="Elenca i dispositivi (opzionale)"
@@ -201,10 +200,6 @@ _FstabBody="\nIl file FSTAB (File System TABle) permette di specificare quali di
 _FstabDev="Dev (identificativo della partizione)"
 _FstabLabel="Etichetta (definita dall'utente)"
 _FstabUUID="UUID/PARTUUID (identificativo univoco)"
-
-# Verifica FSTAB - rimuovere
-#_FstabChkTitle=" Verifica FSTAB "
-#_FstabChkBody="\nSi prema di contrallare il file di configurazione di FSTAB, prima di chiuderlo per continuare.\n\n"
 
 # Impostazione Hostname
 _HostNameTitle=" Configura l'hostname "
@@ -399,6 +394,18 @@ _InstNMDoneBody="\nIl gestore delle connessioni di rete è stato installato ed a
 # Network Manager Already Installed (no need for seperate title)
 _InstNMErrBody="\nE' già stato installato ed abilitato un gestore delle connessioni di rete."
 
+# Shell install menu TODO
+#_InstShellTitle=
+#_InstShellBody=
+
+# Editor install menu TODO
+#_InstEditorTitle=
+#_InstEditorBody=
+
+# Browser install menu TODO
+#_InstBrowserTitle=
+#_InstBrowserBody=
+
 # Welcome
 _WelTitle=" Benvenuto su"
 _WelBody="\nQuesto installer scaricherà i pacchetti più aggiornati dai repositories do Arch. Dato che le installazioni sono 'vanilla', solo la configurazione minima necessaria sarà intrapresa.\n\nEvidenzia le opzioni premendone il numero corrispondente o utilizzando i tasti con le frecce Su/Giù, infine premi [Invio] per confermarle.\n\nNaviga tra i pulsanti utilizzando il tasto [Tab] o le frecce sinistra/destra, infine premi [Invio] per confermarli.\n"
@@ -413,6 +420,7 @@ _PrepMntPart="Montaggio partizioni"
 _Back="Indietro"
 
 # Install Base Menu
+#_InstAskPac= TODO
 _InstBsMenuTitle=" Installa il sistema di base "
 _InstBseMenuBody="\nNon sarà necessario installare un bootloader qualora si affiancasse l'installazione a quella di un'altra distribuzione Linux preesistente che utilizza Grub; è sufficiente aggiornare la configurazione Grub di quest'ultima."
 _InstBse="Installa il sistema di base"
@@ -428,6 +436,13 @@ _ConfBseHWC="Imposta l'Orologio Hardware"
 _ConfBseSysLoc="Imposta il linguaggio del sistema"
 _ConfBseVirtCon="Imposta la tastiera"
 
+# AUR helper menu TODO
+#_InstAur=
+#_NeedBaseDevelTitle=
+#_NeedBaseDevelBody=
+#_InstAurTitle=
+#_InstAurBody=
+
 # User Menu
 _ConfUsrTitle=" Configura gli Utenti"
 _ConfUsrBody="\nRoot rappresenta l'account 'super-utente' o 'amministratore'. E' possibile impostare la stessa password sia per Root che per tutti gli utenti."
@@ -442,6 +457,10 @@ _InstDEMenuDE="Installare Ambiente/i Desktop"
 _InstDEMenuNM="Installare gestore di connessione di rete"
 _InstDEMenuDM="Installare Display Manager / Schermata di accesso"
 
+# Additional Software Menu TODO
+#_InstAddMenuTitle=
+#_InstAddMenuBody=
+
 # Menu Principale
 _MMTitle=" Menu Principale "
 _MMBody="\nOgni passaggio deve essere eseguito IN ORDINE. Una volta completati, selezionare 'Fatto' per finalizzare correttamente l'installazione.\n"
@@ -450,6 +469,7 @@ _MMInstBse="Installare la Base"
 _MMConfBse="Configurare la Base"
 _MMConfUsr="Configurare l'account utente(i)"
 _MMInstDE="Installare uno o più desktop"
+#_MMAddSoft= TODO
 _MMRunMkinit="Eseguire Mkinitcpio"
 _Done="Fatto"
 

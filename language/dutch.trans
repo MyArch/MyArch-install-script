@@ -127,7 +127,6 @@ _LvmLvDoneTitle=" LVM - Logical Volume aangemaakt "
 _LvmCompTitle=" LVM - Proces voltooid "
 _LvmCompBody="\nKlaar! Alle Logical Volumes van de Volume Groep zijn aangemaakt.\n\nWens je een overzicht van het LVM schema?\n\n"
 
-
 # Toon opslagmedia en partities.
 _DevShowTitle=" Opslagmedia / Partities "
 _DevShowOpt="Lijst opslagmedia (optioneel)"
@@ -201,10 +200,6 @@ _FstabBody="\nHet FSTAB bestand (File System TABle) bepaalt waar en welke opslag
 _FstabDev="Dev (partitie code)"
 _FstabLabel="Label (bepaald door gebruiker)"
 _FstabUUID="UUID/PARTUUID (unieke code)"
-
-# Controle FSTAB  - verwijder
-# FstabChkTitle=" Controle FSTAB "
-# FstabChkBody="\nSluit dit venster na de controle van het FSTAB bestand om verder te gaan.\n\n"
 
 # Stel Host-naam in
 _HostNameTitle=" Configureer Host-Naam "
@@ -365,11 +360,6 @@ _GCUnknOpt="Onbekend / Generic"
 _NvidiaConfTitle=" Controle NVIDIA Configuratie "
 _NvidiaConfBody="\nEen eenvoudig NVIDIA configuratiebestand is aangemaakt. Graag nazien vooraleer te sluiten om verder te gaan.\n"
 
-# Grafische kaart Detectie
-_GCDetTitle="Gedetecteerd"
-_GCDetBody="\nIs dit uw grafische kaart of is dit virtualisatiesofware?"
-_GCDetBody2="-Selecteer 'Yes' om het OPEN-SOURCE stuurprogramma te installeren.\n\n-Selecteer 'No' om het grafische kaart-menu te openen, waarin uw NVIDIA stuurprogramma voor komt."
-
 #Info Desktopsuites
 _DEInfoTitle=" Installeer Desktop-Suites "
 _DEInfoBody="\nDeze optie kan herhaald worden om meerdere Desktop-Suites te installeren.\n\nGnome, KDE, en LXDE komen met een Loginmanager.\n\nCinnamon, Gnome en KDE komen met een Netwerkmanager.\n\n"
@@ -405,6 +395,18 @@ _InstNMDoneBody="\nDe netwerkmanager werd geïnstalleerd en ingesteld."
 # Network Manager is reeds ingesteld (geen aparte titel nodig)
 _InstNMErrBody="\nEr werd reeds een netwerkmanager geïnstalleerd en ingesteld."
 
+# Shell install menu TODO
+#_InstShellTitle=
+#_InstShellBody=
+
+# Editor install menu TODO
+#_InstEditorTitle=
+#_InstEditorBody=
+
+# Browser install menu TODO
+#_InstBrowserTitle=
+#_InstBrowserBody=
+
 #  Welkom
 _WelTitle=" Welkom! bij "
 _WelBody="\nDeze Installer zal de nieuwste pakketten downloaden van de Arch repositories. De meeste bestanden zijn Puur of vanilla. Noodzakelijke configuratie-aanpassingen werden tot een minimum herleid.\n\nSelecteer door het nummer van de gewenste optie in te tikken of door de pijltjestoetsen [op]/[neer] te gebruiken. Bevestig door op [enter] te drukken.\n\nSchakel tussen de knoppen door de [Tab] toets of de pijltjestoets [links]/[rechts] te gebruiken. Bevestig door op [enter] te drukken.\n"
@@ -419,6 +421,7 @@ _PrepMntPart="Koppel de Partities aan"
 _Back="Terug"
 
 # Menu: installeren van het Basissysteem
+#_InstAskPac= TODO
 _InstBsMenuTitle=" Installeer het Basissysteem "
 _InstBseMenuBody="\nHet is niet nodig een Bootlader te installeren indien je deze installatie naast een bestaande linuxdistro zet, die reeds Grub gebruikt. Je hoeft enkel het bestaande GRUB-bestanden up te daten."
 _InstBse="Installeer het Basissysteem"
@@ -434,6 +437,13 @@ _ConfBseHWC="Stel Hardware-klok in"
 _ConfBseSysLoc="Stel de Systeemtaal in"
 _ConfBseVirtCon="Stel Virtuele Console in"
 
+# AUR helper menu TODO
+#_InstAur=
+#_NeedBaseDevelTitle=
+#_NeedBaseDevelBody=
+#_InstAurTitle=
+#_InstAurBody=
+
 # Gebruikersmenu
 _ConfUsrTitle=" Configureer Gebruiker(s)"
 _ConfUsrBody="\nRoot is de Standaard 'super-user' of 'beheerder'van de ROOT account. U kunt hetzelfde paswoord instellen voor zowel ROOT als het persoonlijke gebruikersaccount."
@@ -448,6 +458,10 @@ _InstDEMenuDE="Installeer Desktop-Suite(s)"
 _InstDEMenuNM="Installeer Netwerkmanager"
 _InstDEMenuDM="Installeer Loginmanager"
 
+# Additional Software Menu TODO
+#_InstAddMenuTitle=
+#_InstAddMenuBody=
+
 # Hoofdmenu
 _MMTitle=" HoofdMenu "
 _MMBody="\nElke stap moet IN VOLGORDE uitgevoerd worden. Eenmaal alles is afgewerkt, selecteer 'Afsluiten' om zo de installatie correct af te sluiten.\n"
@@ -456,6 +470,7 @@ _MMInstBse="Installeer het Basissysteem"
 _MMConfBse="Configureer het Basissysteem"
 _MMConfUsr="Configureer de Gebruikerbestand(en)"
 _MMInstDE="Installeer Desktop-Suite(s)"
+#_MMAddSoft= TODO
 _MMRunMkinit="Voer Mkinitcpio uit"
 _Done="Klaar"
 

@@ -5,29 +5,30 @@
 ##
 ##
 ##
+##
 
-# Accessibility
-_InstAccOpt="Accessibility Packages (optional)"
-_InstAccTitle=" Install Accessibility Packages "
-_InstAccBody="Select desired accessibility packages."
+# Accessibility TODO
+#_InstAccOpt=
+#_InstAccTitle=
+#_InstAccBody=
 
-# btrfs
-_btrfsSVTitle=" btrfs Subvolumes "
-_btrfsSVBody="Create btrfs subvolumes?\n\nAn initial subvolume will be created and then mounted. Other subvolumes branching from this may then be created.\n\nOtherwise you can skip directly to the mounting options.\n"
-_btrfsSVTitle=" btrfs Subvolume Name "
-_btrfsMSubBody1="Enter the name of the initial subvolume to mount (e.g. ROOT). Mounting options may then be selected. Once mounted, all other subvolumes created for "
-_btrfsMSubBody2="will branch from it."
-_btrfsSVErrTitle=" btrfs Subvolume Name Error "
-_btrfsSVErrBody="Blanks or spaces are not permitted. Please try again.\n"
-_btrfsSVBody1="Enter the name of subvolume"
-_btrfsSVBody2="to create within"
-_btrfsSVBody3="\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name.\n\nCreated Subvols:"
-_btrfsMntTitle=" btrfs Mount Options "
-_btrfsMntBody="Use [Space] to de/select the desired mount options and review carefully. Please do not select multiple versions of the same option."
-_btrfsMntConfBody="Confirm the following mount options:\n\n"
+# btrfs TODO
+#_btrfsSVTitle=
+#_btrfsSVBody=
+#_btrfsSVTitle=
+#_btrfsMSubBody1=
+#_btrfsMSubBody2=
+#_btrfsSVErrTitle=
+#_btrfsSVErrBody=
+#_btrfsSVBody1=
+#_btrfsSVBody2=
+#_btrfsSVBody3=
+#_btrfsMntTitle=
+#_btrfsMntBody=
+#_btrfsMntConfBody=
 
-# Done!
-_DoneMsg="\nDone!\n\n"
+# Done! TODO
+#_DoneMsg=
 
 # Αυτόματη Κατάτμηση
 _AutoPartBody1="Προειδοποίηση: ΟΛΑ τα δεδομένα"
@@ -84,7 +85,6 @@ _LvmNameVgBody="\nΠληκτρολογείστε το όνομα για την �
 _LvmNameVgErrTitle=" LVM - Σφάλμα ονόματος VG "
 _LvmNameVgErr="\nΕισήχθη μη έγκυρο όνομα. Το όνομα του Volume Group μπορεί να αποτελείται από αλφαριθμητικούς χαρακτήρες, δεν μπορεί όμως να περιέχει κενά, να ξεκινά με '/', ή να είναι ήδη σε χρήση.\n\n"
 
-
 _LvmPvSelTitle=" LVM - Επιλογή κατατμήσεων "
 _LvmPvSelBody="\nΕπιλέξτε την/τις κατάτμηση/κατατμήσεις προς χρήση για το Physical Volume (PV).\n"
 _LvmPvCreateTitle=" LVM - Η κατάτμηση προστέθηκε "
@@ -126,7 +126,6 @@ _LvmLvDoneTitle=" LVM - Δημιουργήθηκε το Logical Volume  "
 
 _LvmCompTitle=" LVM - Η διαδικασία ολοκληρώθηκε "
 _LvmCompBody="\nΟλοκληρώθηκε! Όλα τα Logical Volumes έχουν δημιουργηθεί για το Logical Group.\n\nΘέλετε να δείτε τον νέο συνδυασμό LVM;\n\n"
-
 
 # Εμφάνιση συσκευών και κατατμήσεων
 _DevShowTitle=" Συσκευές / Κατατμήσεις "
@@ -202,10 +201,6 @@ _FstabDev="Dev (κωδικός κατάτμησης)"
 _FstabLabel="Ετικέτα (ορισμένη από τον χρήστη)"
 _FstabUUID="UUID/PARTUUID (μοναδικό αναγωριστικό)"
 
-# Έλεγχος FSTAB - αφαίρεση
-#_FstabChkTitle=" Έλεγχος FSTAB "
-#_FstabChkBody="\nΠαρακαλώ ελέγξτε το αρχείο FSTAB, πριν το αποθηκεύσετε, ώστε να συνεχίσετε.\n\n"
-
 # Ρύθμιση Κεντρικού Ονόματος Υπολογιστή
 _HostNameTitle=" Ρύθμιση κεντρικού ονόματος υπολογιστή "
 _HostNameBody="\nΤο κεντρικό όνομα υπολογιστή χρησιμοποιείται ώστε να αναγνωριστεί το σύστημα σε ένα δίκτυο.\n\nΤο όνομα περιορίζεται σε αλφαριθμητικούς χαρακτήρες, μπορεί να περιέχει παύλα (-) - αλλά όχι στην αρχή ή στο τέλος - και δεν πρέπει να είναι μεγαλύτερο από 63 χαρακτήρες.\n"
@@ -251,7 +246,6 @@ _DevSelBody="\nΟι συσκευές (/dev) είναι διαθέσιμοι δί
 
 # Επιλογή συσκευής (Grub) - δεν απαιτείται ξεχωριστό σώμα κειμένου (χρησιμοποιεί το τυποποιημένο κείμενο επιλογής συσκευής)
 _DevSelGrubTitle=" Επιλογή συσκευής για τον GRUB "
-
 
 # Εργαλείο κατατμήσεων
 _PartToolTitle=" Εργαλείο κατατμήσεων "
@@ -331,10 +325,6 @@ _InstGrubDevTitle=" Επιλογή συσκευής GRUB "
 _InstGrubDevBody="\nΕγκατάσταση του GRUB στην ίδια συσκευή/σκληρό-δίσκο με το Root"
 _InstGrubDevBody2="\n\nΕπιλέξτε 'Ναι' εάν κάνετε εγκατάσταση σε μια μόνο συσκευή."
 
-# Εγκατάσταση Syslinux
-_InstSysTitle=" Έλεγχος Ρυθμίσεων Syslinux "
-_InstSysBody="\nΠαρακαλώ κάντε έλεγχο στο αρχείο ρυθμίσεων του syslinux.\n\nΘα πρέπει να περιέχει την εντολή:\n"
-
 # Εγκατάσταση φορτωτή εκκίνησης UEFI
 _InstUefiBtTitle=" Εγκατάσταση φορτωτή εκκίνησης UEFI "
 _InstUefiBtBody="\nΟ rEFInd απαιτεί προσάρτηση στο /boot/efi. O systemd-boot απαιτεί προσάρτηση στο /boot. Grub2 δεν έχει καμία προτίμηση.\n\nΣΗΜΕΙΩΣΗ: Ο rEFInd σε συνδυασμό με LVM δεν υποστηρίζεται."
@@ -344,15 +334,10 @@ _SetGrubDefTitle=" Ορισμός του UEFI GRUB ως προεπιλογή; "
 _SetGrubDefBody="\nΟρισμένα υλικολογισμικά UEFI ίσως να μην ανιχνέυσουν τον GRUB, εκτός και αν οριστεί ως ο προεπιλεγμένος φορτωτής εκκίνησης, με αποτέλεσμα ένα σύστημα που δεν εκκινεί.\n\nΘέλετε να ορίσετε τον GRUB ως τον προεπιλεγμένο φορτωτή εκκίνησης;\n\nΠροτείνεται να επιλέξετε 'Ναι', ειδικά για αρχάριους χρήστες. Αυτό θα αντιγράψει το αρχείο εκκίνησης grubx64.efi."
 _SetGrubDefBody2="και θα το μετονομάσει σε bootx64.efi, όπως απαιτείται.\n\nΔιαφορετικά επιλέξτε 'Οχι', ειδικά εάν υπάρχει ήδη προεπιλεγμένος φορτωτής εκκίνησης, και/ή σκοπεύετε να χρησιμοποιήσετε πολλαπλούς φορτωτές εκκίνησης."
 
-# Έλεγχος ρυθμίσεων Gummiboot  - Προς αφαίρεση
-#_ChkGumTitle=" 'Έλεγχος ρυθμίσεων Gummiboot "
-#_ChkGumBody="\nΠαρακαλώ ελέγξτε την αρχιτεκτονική και τα αρχεία ρυθμίσεων φόρτωσης πριν τα κλείσετε για να συνεχίσετε.\n"
-
 # Ορισμός του rEFInd ως προεπιλογή
 _SetRefiDefTitle=" Ορισμός του rEFInd ως προεπιλογή; "
 _SetRefiDefBody="\nΟρισμένα υλικολογισμικά UEFI ίσως να μην ανιχνεύσουν τον rEFInd, εκτός και αν οριστεί ως ο προεπιλεγμένος φορτωτής εκκίνησης, με αποτέλεσμα ένα σύστημα που δεν εκκινεί.\n\nΘέλετε να ορίσετε τον rEFInd ως τον προεπιλεγμένο φορτωτή εκκίνησης;\n\nΠροτείνεται να επιλέξετε 'Ναι', ειδικά για αρχάριους χρήστες. Αυτό θα εγκαταστήσει τον rEFInd με"
 _SetRefiDefBody2="το απαραίτητο αρχείο bootx64.efi.\n\nΔιαφορετικά επιλέξτε 'Οχι', ειδικά εάν υπάρχει ήδη προεπιλεγμένος φορτωτής εκκίνησης, και/ή σκοπεύετε να χρησιμοποιήσετε πολλαπλούς φορτωτές εκκίνησης."
-
 
 # Ορισμός αρχείου efi για τον GRUB ή τον rEFInd
 _SetDefDoneTitle=" Έγινε αντιγραφή του αρχείου UEFI "
@@ -374,11 +359,6 @@ _GCUnknOpt="Άγνωστη / Γενική"
 # Έλεγχος ρυθμίσεων NVIDIA
 _NvidiaConfTitle=" Έλεγχος ρυθμίσεων NVIDIA "
 _NvidiaConfBody="\nΈνα βασικό αρχείο ρυθμίσεων NVIDIA έχει δημιουργηθεί. Παρακαλώ ελέγξτε το πριν το κλείσετε για να συνεχίσετε.\n"
-
-# Ανίχνευση κάρτας γραφικών
-_GCDetTitle="Ανιχνεύτηκε"
-_GCDetBody="\nΕίναι η κάρτα γραφικών σας"
-_GCDetBody2="-Επιλέξτε 'Ναι' για εγκατάσταση του οδηγού ΑΝΟΙΧΤΟΥ-ΚΩΔΙΚΑ.\n\n-Επιλέξτε 'Όχι' ώστε να ανοίξει το μενού με τις κάρτες γραφικών, το οποίο περιέχει ιδιοταγείς οδηγούς NVIDIA."
 
 #  Πληροφορίες εγκατάστασης ΠΕ
 _DEInfoTitle=" Εγκατάσταση γραφικού περιβάλλοντος "
@@ -415,6 +395,18 @@ _InstNMDoneBody="\nΟ διαχειριστής δικτύου έχει εγκα�
 # Ο διαχειριστής δικτύου έχει ήδη εγκατασταθεί (δεν χρειάζεται ξεχωριστός τίτλος)
 _InstNMErrBody="\nΈνας διαχειριστής δικτύου έχει ήδη εγκατασταθεί και ενεργοποιηθεί."
 
+# Shell install menu TODO
+#_InstShellTitle=
+#_InstShellBody=
+
+# Editor install menu TODO
+#_InstEditorTitle=
+#_InstEditorBody=
+
+# Browser install menu TODO
+#_InstBrowserTitle=
+#_InstBrowserBody=
+
 # Καλώς ήλθατε
 _WelTitle=" Καλώς ήλθατε στο "
 _WelBody="\nΑυτό το πρόγραμμα εγκατάστασης θα κάνει λήψη των πιο πρόσφατων πακέτων από τα αποθετήρια του Arch. Πραγματοποιείται μόνον η ελάχιστη απαραίτητη ρύθμιση.\n\nΚάντε επισήμανση επιλογών πατώντας τους αντίστοιχους αριθμούς ή χρησιμοποιώντας τα πάνω/κάτω βελάκια πριν πατήσετε [enter] για επιβεβαίωση.\n\nΚάντε εναλλαγή μεταξύ κουμπιών χρησιμοποιώντας το [Tab] ή τα αριστερά/δεξιά βελάκια πριν πατήσετε [enter] για επιβεβαίωση.\n"
@@ -429,6 +421,7 @@ _PrepMntPart="Προσάρτηση κατατμήσεων"
 _Back="Πίσω"
 
 # Μενού Εγκατάστασης Βασικού Συστήματος
+#_InstAskPac= TODO
 _InstBsMenuTitle=" Εγκατάσταση βασικού συστήματος "
 _InstBseMenuBody="\nΔεν είναι απαραίτητο να κάνετε εγκατάσταση ενός φορτωτή εκκίνησης (bootloader) όταν κάνετε εγκατάσταση παράλληλα με ένα υπάρχον λειτουργικό σύστημα Linux, το οποίο χρησιμοποιεί τον GRUB. Αντί αυτού μπορείτε να κάνετε μια αναβάθμιση του υφιστάμενου GRUB."
 _InstBse="Εγκατάσταση βασικού συστήματος"
@@ -444,6 +437,13 @@ _ConfBseHWC="Ορισμός ρολογιού υλικού"
 _ConfBseSysLoc="Ορισμός τοπικών ρυθμίσεων"
 _ConfBseVirtCon="Ορισμός εικονικής κονσόλας"
 
+# AUR helper menu TODO
+#_InstAur=
+#_NeedBaseDevelTitle=
+#_NeedBaseDevelBody=
+#_InstAurTitle=
+#_InstAurBody=
+
 # Μενού χρήστη
 _ConfUsrTitle=" Ρύθμιση χρηστών"
 _ConfUsrBody="\nΟ χρήστης Root είναι ο προεπιλεγμένος 'υπέρ-χρήστης' ή 'διαχειριστής'. Μπορεί να οριστεί το ίδιο συνθηματικό τόσο για τον χρήστη Root, όσο και για οποιονδήποτε προσωπικό λογαριασμό δημιουργηθεί."
@@ -458,6 +458,10 @@ _InstDEMenuDE="Εγκατάσταση γραφικού περιβάλλοντο�
 _InstDEMenuNM="Εγκατάσταση διαχειριστή δικτύου"
 _InstDEMenuDM="Εγκατάσταση διαχειριστή οθόνης / οθόνη σύνδεσης"
 
+# Additional Software Menu TODO
+#_InstAddMenuTitle=
+#_InstAddMenuBody=
+
 # Κυρίως μενού
 _MMTitle=" Κυρίως μενού "
 _MMBody="\nΚάθε βήμα πρέπει να ακολουθηθεί ΜΕ ΤΗ ΣΕΙΡΑ. Όταν τελειώσετε με τα βήματα, επιλέξτε 'Εντάξει' για να ολοκληρωθεί σωστά η διαδικασία εγκατάστασης.\n"
@@ -466,6 +470,7 @@ _MMInstBse="Εγκατάσταση βασικού συστήματος"
 _MMConfBse="Ρύθμιση βασικού συστήματος"
 _MMConfUsr="Ρύθμιση λογαριασμών χρηστών"
 _MMInstDE="Εγκατάσταση επιφάνειας εργασίας"
+#_MMAddSoft= TODO
 _MMRunMkinit="Εκτέλεση Mkinitcpio"
 _Done="Εντάξει"
 

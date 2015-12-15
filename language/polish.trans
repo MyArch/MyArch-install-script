@@ -127,7 +127,6 @@ _LvmLvDoneTitle=" LVM - Wolumen logiczny utworzony "
 _LvmCompTitle=" LVM - Proces zakończony "
 _LvmCompBody="\nZrobione! Wszystkie wolumeny logiczne zostały utworzone w grupie wolumenów.\n\nCzy chcesz zobaczyć nowy schemat LVM?\n\n"
 
-
 # Pokaż urządzenia i partycje
 _DevShowTitle=" Urządzenia / Partycje "
 _DevShowOpt="Pokaż urządzenia (opcjonalne)"
@@ -201,10 +200,6 @@ _FstabBody="\nPlik FSTAB (File System TABle) dyecyduje które urządzenia pamię
 _FstabDev="Dev (kod partycji)"
 _FstabLabel="Etykieta (definiowana przez użytkownika)"
 _FstabUUID="UUID/PARTUUID (unikalny identyfikator)"
-
-# Sprawdź FSTAB - usunąć
-#_FstabChkTitle=" Sprawdź plik FSTAB "
-#_FstabChkBody="\nSprawdź plik FSTAB, przed zamknięciem aby kontynuować.\n\n"
 
 # Ustaw nazwę hosta
 _HostNameTitle=" Skonfiguruj nazwę hosta "
@@ -352,7 +347,7 @@ _SetDefDoneBody="został ustawiony jako domyślny program rozruchowy.\n\n"
 _RefiErrTitle=" punkt montowania rEFInd UEFI "
 _RefiErrBody="\nSkrypt instalacyjny rEFInd nie będzie działał baz partycji UEFI zamontowanej w /boot/efi. Proszę wybrać Gummiboot (polecany) lub Grub.\n\n"
 
-_AXITitle=" ALSA, Xorg, i urządzenia wprowadzania "
+# ALSA, Xorg, Input
 _AXITitle=" ALSA, Xorg, i urządzenia wprowadzania "
 _AXIBody="\nPrzed instalacją sterowników karty graficznej i programów pulpitu należy zainstalować inne oprogramowanie:\n\nalsa - system dźwięku\nxorg-* - otwarto-źródłowy system okien graficznych\nxf86-input-* - otwarto-źrodłowe sterowniki urządzeń wejściowych\n\n"
 
@@ -399,6 +394,18 @@ _InstNMDoneBody="\nMenedżer połączeń sieciowych został zainstalowany i wł�
 # Menedżer sieci został już zainstalowany
 _InstNMErrBody="\nMenedżer połączeń sieciowych został już zainstalowany i włączony."
 
+# Shell install menu TODO
+#_InstShellTitle=
+#_InstShellBody=
+
+# Editor install menu TODO
+#_InstEditorTitle=
+#_InstEditorBody=
+
+# Browser install menu TODO
+#_InstBrowserTitle=
+#_InstBrowserBody=
+
 # Witaj
 _WelTitle=" Witaj na"
 _WelBody="\nInstalator pobierze najnowsze pakiety z repozytoriów Arch. Instlacje są niezmodyfikowane, więc tylko mimalna konfiguracja jest wprowadzona.\n\nPodświetl opcje wciskając ich numer lub używając klawiszy strzałek góra/dół przed wciśnięciem [enter] aby potwierdzić.\n\nPrzełączaj między przyciskami za pomocą [Tab] lub klawiszami strzałek lewo/prawo  zanim wciśniesz [enter] aby potwierdzić.\n"
@@ -413,6 +420,7 @@ _PrepMntPart="Zamontuj partycje"
 _Back="Wstecz"
 
 # Munu instalacji bazowej
+#_InstAskPac= TODO
 _InstBsMenuTitle=" Instalacja bazowa "
 _InstBseMenuBody="\nNie jest konieczne instalowanie programu rozruchowego przy instalacji obok istniejącej dystrybucji linuksa która używa programu Grub; po prostu uaktualnij konfigurację Grub tamtej instalacji."
 _InstBse="Instalacjuj bazowy system"
@@ -428,6 +436,13 @@ _ConfBseHWC="Ustaw czas sprzętowy"
 _ConfBseSysLoc="Ustaw systemowe ustawienia regionalne (Locale)"
 _ConfBseVirtCon="Ustaw konsolę wirtualną"
 
+# AUR helper menu TODO
+#_InstAur=
+#_NeedBaseDevelTitle=
+#_NeedBaseDevelBody=
+#_InstAurTitle=
+#_InstAurBody=
+
 # Menu użytkownika
 _ConfUsrTitle=" Skonfiguruj użytkownika/ów"
 _ConfUsrBody="\nRoot to domyślne konto 'super-user' lub 'administratora'. Możesz ustawić to samo hasło dla Root-a co jakiegokolwiek innego użytkownika."
@@ -442,6 +457,10 @@ _InstDEMenuDE="Zainstaluj środowisko/a pulpitu"
 _InstDEMenuNM="Zainstaluj menedżer połączeń sieciowych"
 _InstDEMenuDM="Zainstaluj menedżer wyświetlania / Ekran logowania"
 
+# Additional Software Menu TODO
+#_InstAddMenuTitle=
+#_InstAddMenuBody=
+
 # Menu główne
 _MMTitle=" Menu główne "
 _MMBody="\nKażdy krok musi być ukończony PO KOLEI Po ukończeniu, wybierz 'Zrobione' aby poprawnie zakończyć instalację.\n"
@@ -450,6 +469,7 @@ _MMInstBse="Zainstaluj system bazowy"
 _MMConfBse="Skonfiguruj system bazowy"
 _MMConfUsr="Skonfiguruj konto/a użytkownika/ów"
 _MMInstDE="Zainstaluj Środowisko/a pulpitu"
+#_MMAddSoft= TODO
 _MMRunMkinit="Uruchom Mkinitcpio"
 _Done="Zrobione"
 

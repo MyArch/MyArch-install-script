@@ -65,7 +65,7 @@ LVM_LV_NAME=""          # Name of LV to create
 LV_SIZE_INVALID=0       # Is LVM LV size entered valid?
 VG_SIZE_TYPE=""         # Is VG in Gigabytes or Megabytes?
 # Installation
-AUTO=-1                 # Option for confirmation with pacstrap
+PACOPT=-1                 # Option for confirmation with pacstrap
 MOUNTPOINT="/mnt"       # Installation
 MOUNT_TYPE=""           # "/dev/" for standard partitions, "/dev/mapper" for LVM
 BTRFS=0                 # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
@@ -92,7 +92,7 @@ DIALOG() {
 # Redefine pacstrap for asking during installation
 PACSTRAP() {
   clear
-  if [[ AUTO -eq 0 ]]; then
+  if [[ PACOPT -eq 0 ]]; then
     pacstrap -i "$@"
   else
     pacstrap "$@"
@@ -2181,10 +2181,10 @@ install_base_menu() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  if [ $AUTO == -1 ] && DIALOG --yesno "$_InstAskPac" 0 0 ; then
-    AUTO=0
-  elif [ $AUTO == -1 ]; then
-    AUTO=1
+  if [ $PACOPT == -1 ] && DIALOG --yesno "$_InstAskPac" 0 0 ; then
+    PACOPT=0
+  elif [ $PACOPT == -1 ]; then
+    PACOPT=1
   fi
   DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstBsMenuTitle" \
   --menu "$_InstBseMenuBody" 0 0 5 \

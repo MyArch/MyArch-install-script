@@ -7,28 +7,33 @@
 ##
 ##
 
-# Accessibility
-_InstAccOpt="Accessibility Packages (optional)"
-_InstAccTitle=" Install Accessibility Packages "
-_InstAccBody="Select desired accessibility packages."
+# Accessibility TODO
+#_InstAccOpt=
+#_InstAccTitle=
+#_InstAccBody=
 
-# btrfs
-_btrfsSVTitle=" btrfs Subvolumes "
-_btrfsSVBody="Create btrfs subvolumes?\n\nAn initial subvolume will be created and then mounted. Other subvolumes branching from this may then be created.\n\nOtherwise you can skip directly to the mounting options.\n"
-_btrfsSVTitle=" btrfs Subvolume Name "
-_btrfsMSubBody1="Enter the name of the initial subvolume to mount (e.g. ROOT). Mounting options may then be selected. Once mounted, all other subvolumes created for "
-_btrfsMSubBody2="will branch from it."
-_btrfsSVErrTitle=" btrfs Subvolume Name Error "
-_btrfsSVErrBody="Blanks or spaces are not permitted. Please try again.\n"
-_btrfsSVBody1="Enter the name of subvolume"
-_btrfsSVBody2="to create within"
-_btrfsSVBody3="\n\nThis process will be repeated until an asterisk (*) is entered as the subvolume name.\n\nCreated Subvols:"
-_btrfsMntTitle=" btrfs Mount Options "
-_btrfsMntBody="Use [Space] to de/select the desired mount options and review carefully. Please do not select multiple versions of the same option."
-_btrfsMntConfBody="Confirm the following mount options:\n\n"
+# btrfs TODO
+#_btrfsSVTitle=
+#_btrfsSVBody=
+#_btrfsSVTitle=
+#_btrfsMSubBody1=
+#_btrfsMSubBody2=
+# _btrfsSVErrTitle=
+# _btrfsSVErrBody=
+# _btrfsSVBody1=
+# _btrfsSVBody2=
+# _btrfsSVBody3=
+# _btrfsMntTitle=
+# _btrfsMntBody=
+# _btrfsMntConfBody=
 
-# Done!
-_DoneMsg="\nDone!\n\n"
+# Done! TODO
+#_DoneMsg=
+
+#Autopartition TODO
+#_AutoPartBody1=
+#_AutoPartBIOSBody2=
+#_AutoPartUEFIBody2=
 
 # Please wait...
 _PlsWaitBody="\nKérlek várj...\n\n"
@@ -80,7 +85,6 @@ _LvmNameVgBody="\nAdja meg a kötetcsoport nevét, amit létre akar hozni.\n\nA 
 _LvmNameVgErrTitle=" LVM - Kötetcsoport elnevezési hiba "
 _LvmNameVgErr="\nÉrvénytelen beírt név. A csoport neve alfa-numerikus karakterkészletből állhat, de nem kezdődhet '/' -jellel, és nem tartalmazhat szóközt, vagy a kiválasztott név már használatban van.\n\n"
 
-
 _LvmPvSelTitle=" LVM - Válassz partíciót "
 _LvmPvSelBody="\nVálassz partíciókat a fizikai kötet számára(PV).\n"
 _LvmPvCreateTitle=" LVM - Partíció hozzáadva "
@@ -122,7 +126,6 @@ _LvmLvDoneTitle=" LVM - Logikai kötet készítés "
 
 _LvmCompTitle=" LVM - A folyamat véget ért "
 _LvmCompBody="\nKész! Az összes logikai kötet létrehozva a kötetcsoportban.\n\nSzeretnéd megtekinteni az új LWM rendszert?\n\n"
-
 
 # Show devices and partitions
 _DevShowTitle=" Eszközök / Partíciók "
@@ -198,10 +201,6 @@ _FstabDev="Eszköz (Dev) (partíció kód)"
 _FstabLabel="Címke (Label) (felhasználó által definiált)"
 _FstabUUID="UUID/PARTUUID (egyedi azonosító)"
 
-# Check FSTAB
-_FstabChkTitle=" FSTAB áttekintése"
-_FstabChkBody="\nKérlek ellenőrizd az fstab fájlt , mielőtt bezárnád ezt a folytatáshoz.\n\n"
-
 # Set Hostname
 _HostNameTitle=" Hosztnév beállítása "
 _HostNameBody="\nA hoszt nevet a rendszer azonosítására használják a hálózaton.\n\nA hosztnév betűkből és számokból állhat, tartalmazhat kötőjelet (-) - de nem az elején és a végén- és nem lehet hoszabb 63 karakternél\n"
@@ -247,7 +246,6 @@ _DevSelBody="\nEszközök, (/dev) a telepítés számára elérhető merevlemeze
 
 # Select Device (Grub) - seperate body text is not required (uses standard device selection text)
 _DevSelGrubTitle=" Válassz rendszerindító eszközt "
-
 
 # Partitioning Tool
 _PartToolTitle=" Particionáló eszköz "
@@ -327,10 +325,6 @@ _InstGrubDevTitle=" Válassz Grub eszközt "
 _InstGrubDevBody="\nGrub telepítése ugyanarra az eszközre/merevlemezre rendszergazdaként"
 _InstGrubDevBody2="\n\nVálaszd az 'igen' -t ha csak egy eszközre telepíted"
 
-# Syslinux Installation
-_InstSysTitle=" Syslinux konfiguráció ellenőrzése "
-_InstSysBody="\nKérlek ellenőrizd a syslinux konfigurációs fájlt.\n\nTartalmazza a parancsot:\n"
-
 # Install UEFI Bootloader
 _InstUefiBtTitle=" UEFI rendszertöltő telepítése "
 _InstUefiBtBody="\nA rEFInd -nak szükséges /boot/efi mappa felcsatolása. systemd-boot-nak szükséges /boot mappa felcsatolása. Grub2 működik akár.\n\nNOTE: A rEFInd az LVM -et nem támogatja."
@@ -340,15 +334,10 @@ _SetGrubDefTitle=" Beállítod a Grub-ot alapértelmezett rendszertöltőnek? "
 _SetGrubDefBody="\nA Grub néhány UEFI firmware-t nem érzékel, ha csak ez az alapértelmezett rendszertöltő, nem bootoló rendszert eredményezhet\n\nSzeretnéd a Grub -ot beállítani alapértelmezett rendszertöltőnek?\n\nJavasoljuk válaszd az  'Igen' -t, főként kezdőknek. Ez bemásolja a bootolható grubx64.efi -t ,"
 _SetGrubDefBody2="amit nevezz át bootx64.efi -nek, ha szükséges.\n\nEgyébként válaszd a  'Nem' -et, különösen akkor, ha már van egy alapértelmezett rendszertöltő, és/vagy ha több rendszertöltőt akarsz használni."
 
-# Gummiboot Configuration Check
-_ChkGumTitle=" Gummiboot konfiguráció ellenőrzése  "
-_ChkGumBody="\nKérlek ellenőrizd az Arch és a rendszertöltő konfigurációs fájlait mielőtt bezárnád a folytatáshoz.\n"
-
 # Set rEFInd as default
 _SetRefiDefTitle=" Beállítod a rEFInd -ot alapértelmezett renszertöltőnek? "
 _SetRefiDefBody="\nNéhány UEFI firmware -t nem érzékel a rEFInd, ha csak ez az alapértelmezett rendszertöltő, nem bootoló rendszert eredményezhet\n\nSzeretnéd a rEFInd -ot beállítani alapértelmezett rendszertöltőnek?\n\nJavasoljuk válaszd az  'Igen' -t, főként kezdőknek. Ez telepíteni fogja a rEFInd -ot"
 _SetRefiDefBody2="a szükséges bootx64.efi -vel.\n\nEgyébként válaszd a  'Nem' -et, különösen akkor, ha már van egy alapértelmezett rendszertöltő, és/vagy ha több rendszertöltőt akarsz használni."
-
 
 # efi file set for Grub or Refind
 _SetDefDoneTitle=" UEFI fájlok átmásolva "
@@ -371,11 +360,6 @@ _GCUnknOpt="Ismeretlen / általános"
 _NvidiaConfTitle=" NVIDIA konfiguráció ellenőrzés "
 _NvidiaConfBody="\nAz alapvető NVIDIA konfigurációs fájl létrehozva. Kérlek ellenőrizd, mielőtt bezárnád a folytatáshoz.\n"
 
-# Graphics Card Detection
-_GCDetTitle="Érzékelve"
-_GCDetBody="\nEz a grafikus kártya"
-_GCDetBody2="-Válassz 'Igen' -t a nyílt forráskódú driver telepítéséhez.\n\n-Válassz 'Nem' -et a grafikus kártya menü megnyitásához, amely magában foglalja a zárt NVIDIA meghajtóprogramokat."
-
 #  Install DE Info
 _DEInfoTitle=" Munkakörnyezetek telepítése "
 _DEInfoBody="\nEz a lehetőség megismételhető több munkakörnyezet telepítésére.\n\nGnome, KDE (full), és az LXDE  tartalmazza a bejelentkezés kezelőt.\n\nA Cinnamon, Gnome és a KDE tartalmazza a hálózatkezelőt.\n\n"
@@ -388,29 +372,13 @@ _InstDEBody="\nA munkakörnyezetek vannak listázva elöl, több telepítési le
 _InstComTitle=" Telepít közös csomagokat? "
 _InstComBody="\nEgyes aztali környezetekben közösek lehetnek a telepítendő csomagok, különösen a jogosultságok, a home mappa létrehozása, és a fájlkezelési funkcionalitás.\n\nCsomag tartalma: xterm, xdg-user-dirs, gksu, gnome-keyring, polkit, gvfs, és a gnome-icon-theme, stb. Ezeket egyedül a teljes KDE telepítésnél nem kell telepíteni\n\nTelepíted ezeket a csomagokat? Ez az opció csak most lehetséges a telepítés folyamán.\n\n"
 
-# KDM
-_DmKdeTitle=" KDM bekapcsolása "
-_DmKdeBody="\nMivel a KDE telepítve lett, a hozzá tartozó bejelentkezéskezelő a -KDM- be lett kapcsolva.\n\n"
-
-# GDM
-_DmGdmTitle=" GDM bekapcsolása "
-_DmGdmBody="\nMivel a  Gnome telepítve lett,  a hozzá tartozó bejelentkezéskezelő a -GDM- be lett kapcsolva..\n\n"
-
-# KDM and GDM Installed
-_DmChTitle=" Válassz GDM vagy KDM "
-_DmChBody="\nGnome és KDE telepítve. Kérlek válassz hozzá bejelentkezéskezelőt.\n\n"
-
-# KDM or GDM Choice Made
+# DM Enabled
 _DmDoneTitle="Bekapcsolás "
 _DMDoneBody="bekapcsolva.\n\n"
 
-# LXDM
-_DmLxdmTitle=" LXDM bekapcsolás "
-_DmLxdmBody="\nMivel az LXDE telepítve lett, a hozzá tartozó bejelentkezéskezelő az -LXDM- be lett kapcsolva.\n\n"
-
 # LXDM or LightDM
 _DmChoiceTitle=" Válassz bejelentkezéskezelőt "
-_DmChoiceBody="\nKérlek válassz LXDM vagy LightDM közül. LXDM az ajánlott a kezdőknek.\n"
+#_DmChoiceBody= TODO
 
 # DM Already Installed
 _DmInstTitle=" Bejelentkezéskezelő telepítése "
@@ -427,6 +395,18 @@ _InstNMDoneBody="\nA hálózatkezelő telepítve és bekapcsolva."
 # Network Manager Already Installed (no need for seperate title)
 _InstNMErrBody="\nA hálózatkezelő telepítve és bekapcsolva."
 
+# Shell install menu TODO
+#_InstShellTitle=
+#_InstShellBody=
+
+# Editor install menu TODO
+#_InstEditorTitle=
+#_InstEditorBody=
+
+# Browser install menu TODO
+#_InstBrowserTitle=
+#_InstBrowserBody=
+
 # Welcome
 _WelTitle=" Isten hozott "
 _WelBody="\nEz a telepítő letölti a legújabb csomagokat az Arch tárolókból. Az alap 'Vanília' telepítés, így csak minimális beállítást kell elvégezned.\n\nFontos: navigálni a számok leütésével, vagy a fel/le nyilak használatával tudsz, megerősítéshezz használd az [enter] billentyűt.\n\nA gombok közötti váltáshoz használd a [Tab] vagy a bal/jobb nyilakat, mielőtt  [enter]-t ütnél a megerősítéshez.\n"﻿
@@ -441,6 +421,7 @@ _PrepMntPart="Partíció csatolás"
 _Back="Vissza"
 
 # Install Base Menu
+#_InstAskPac= TODO
 _InstBsMenuTitle=" Alaprendszer telepítése "
 _InstBseMenuBody="\nNem szükséges telepíteni a renszerbetöltőt, ott ahol egy meglévő Linux Disztribúció mellé telepítettünk, ami Grub -ot használ; ehelyett csak frissítsd a Grub -ot."
 _InstBse="Alaprenszer telepítése"
@@ -456,6 +437,13 @@ _ConfBseHWC="Hardveres óra beállítása"
 _ConfBseSysLoc="Tartózkodási hely beállítása"
 _ConfBseVirtCon="Virtuális konzol beállítása"
 
+# AUR helper menu TODO
+#_InstAur=
+#_NeedBaseDevelTitle=
+#_NeedBaseDevelBody=
+#_InstAurTitle=
+#_InstAurBody=
+
 # User Menu
 _ConfUsrTitle=" Felhasználók beállítása"
 _ConfUsrBody="\nA Root az alapértelmezett 'szuper-felhasználó' vagy 'adminisztrátor' fiók. Ugyanaz a jelszó is beállítható Root és más személyes felhasználó fiókjához, de ez egyező jelszó használata biztonsági okokból nem javasolt."
@@ -470,6 +458,10 @@ _InstDEMenuDE="Munkakörnyezet(ek) telepítése"
 _InstDEMenuNM="Hálózat kezelő alakalmazás telepítése"
 _InstDEMenuDM="Megjelenítőkezelő / bejelentkezéskezelő telepítése"
 
+# Additional Software Menu TODO
+#_InstAddMenuTitle=
+#_InstAddMenuBody=
+
 # Main Menu
 _MMTitle=" Főmenü "
 _MMBody="\nA telepítő végigvezet a szükséges lépéseken. Miután elkészültél, válaszd a 'Kész' opciót a telepítés befejezéséhez.\n"
@@ -478,6 +470,7 @@ _MMInstBse="Alaprendszer telepítése"
 _MMConfBse="Alaprendszer beállítása"
 _MMConfUsr="Felhasználói fiókok beállítása"
 _MMInstDE="Munkakörnyezet telepítése"
+#_MMAddSoft= TODO
 _MMRunMkinit="Korai indítási környezet generálása"
 _Done="Kész"
 

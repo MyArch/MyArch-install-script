@@ -127,7 +127,6 @@ _LvmLvDoneTitle=" LVM - Volume logique créé "
 _LvmCompTitle=" LVM - Processus achevé "
 _LvmCompBody="\nTerminé ! Tous les volumes logiques ont été créés pour le groupe de volumes.\n\nSouhaitez-vous voir le nouveau schéma du LVM ?\n\n"
 
-
 # Afficher les périphériques et partitions
 _DevShowTitle=" Périphériques / Partitions "
 _DevShowOpt="Liste des périphériques (optionnel)"
@@ -201,10 +200,6 @@ _FstabBody="\nLe fichier FSTAB (File System TABle) définit les périphériques 
 _FstabDev="Dev (code de partition)"
 _FstabLabel="Étiquette (défini par l'utilisateur)"
 _FstabUUID="UUID/PARTUUID (code unique)"
-
-# Vérifier FSTAB
-#_FstabChkTitle=" Vérifier FSTAB "
-#_FstabChkBody="\nVeuillez vérifier le fichier FSTAB, avant de le fermer pour continuer.\n\n"
 
 # Définir le nom d'hôte
 _HostNameTitle=" Configurer le nom d'hôte "
@@ -358,6 +353,7 @@ _AXIBody="\nAvant l'installation de(s) pilote(s) de carte graphique ou d'environ
 
 # Menu des cartes graphiques
 _GCtitle=" Menu des cartes graphiques "
+_GCBody="Prenez le driver Nouveau pour les anciennes cartes NVIDIA. Si votre carte n'est pas dans la liste, choisissez 'Inconnue / Générique'.\n"
 _GCUnknOpt="Inconnue / Générique"
 
 # Vérification de la configuration NVIDIA
