@@ -102,7 +102,7 @@ PACSTRAP() {
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
   # Set english as base in case some language miss some translation
-  source ./english.trans
+  source ./language/english.trans
   DIALOG --title " Select Language " \
   --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 12 \
   "1" $"English		(en)" \
@@ -122,51 +122,51 @@ select_language() {
     CURR_LOCALE="en_US.UTF-8"
     ;;
     "2")
-    source ./italian.trans
+    source ./language/italian.trans
     CURR_LOCALE="it_IT.UTF-8"
     ;;
     "3")
-    source ./russian.trans
+    source ./language/russian.trans
     CURR_LOCALE="ru_RU.UTF-8"
     FONT="LatKaCyrHeb-14.psfu"
     ;;
     "4")
-    source ./turkish.trans
+    source ./language/turkish.trans
     CURR_LOCALE="tr_TR.UTF-8"
     FONT="LatKaCyrHeb-14.psfu"
     ;;
     "5")
-    source ./dutch.trans
+    source ./language/dutch.trans
     CURR_LOCALE="nl_NL.UTF-8"
     ;;
     "6")
-    source ./greek.trans
+    source ./language/greek.trans
     CURR_LOCALE="el_GR.UTF-8"
     FONT="iso07u-16.psfu"
     ;;
     "7")
-    source ./danish.trans
+    source ./language/danish.trans
     CURR_LOCALE="da_DK.UTF-8"
     ;;
     "8")
-    source ./hungarian.trans
+    source ./language/hungarian.trans
     CURR_LOCALE="hu_HU.UTF-8"
     FONT="lat2-16.psfu"
     ;;
     "9")
-    source ./portuguese.trans
+    source ./language/portuguese.trans
     CURR_LOCALE="pt_BR.UTF-8"
     ;;
     "10")
-    source ./german.trans
+    source ./language/german.trans
     CURR_LOCALE="de_DE.UTF-8"
     ;;
     "11")
-    source ./french.trans
+    source ./language/french.trans
     CURR_LOCALE="fr_FR.UTF-8"
     ;;
     "12")
-    source ./polish.trans
+    source ./language/polish.trans
     CURR_LOCALE="pl_PL.UTF-8"
     FONT="latarcyrheb-sun16"
     ;;
@@ -1262,6 +1262,7 @@ create_lvm() {
 ##
 ################################################################################
 
+# Install necessary package to have a functional system
 install_base() {
   DIALOG --title "$_InstBseTitle" \
   --menu "$_InstBseBody" 0 0 4 \
@@ -1309,7 +1310,7 @@ install_base() {
   fi
 }
 
-
+# Install an AUR helper for managing AUR packages
 install_aur() {
   local archfrrepo="[archlinuxfr]
   SigLevel = Never
@@ -2006,7 +2007,7 @@ install_nm() {
   fi
 }
 
-# Install shell
+# Let the user choose a shell
 install_shell() {
   DIALOG --title "$_InstShellTitle" \
   --menu "$_InstShellBody" 0 0 10 \
@@ -2046,12 +2047,14 @@ install_shell() {
     install_add_menu
     ;;
   esac
+  # Ask the user if he want to set the new shell as a default shell
   if DIALOG --yesno "$_InstShellChsh" 0 0 ; then
     arch _chroot "chsh ${USER} /bin/${SH}"
   fi
   check_for_error
 }
 
+# Let the user install an editor
 install_editor() {
   DIALOG --title "$_InstEditorTitle" \
   --menu "$_InstEditorBody" 0 0 10 \
@@ -2076,6 +2079,7 @@ install_editor() {
   check_for_error
 }
 
+# Let the user install a browser
 install_browser() {
   DIALOG --title "$_InstBrowserTitle" \
   --menu "$_InstBrowserBody" 0 0 10 \

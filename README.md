@@ -11,6 +11,7 @@ You can try it first in a virtual machine. Use it at your own risk !
 
 ## Prerequisites
 
+- Obviously, an arch liveCD (original or based on)
 - A working internet connection.
 - Logged in as 'root'.
 - This package : `dialog`
