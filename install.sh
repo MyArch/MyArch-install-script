@@ -1282,14 +1282,14 @@ install_base() {
     ;;
     "3")
     # LTS Kernel
-    PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/')\
-     btrfs-progs ntp sudo f2fs-tools
+    PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/') \
+    btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1
     ;;
     "4")
     # LTS Kernel and base-devel
-    PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/')\
-     base-devel btrfs-progs ntp sudo f2fs-tools
+    PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/') \
+    base-devel btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1 && BASE_DEVEL=1
     ;;
     *)
@@ -1297,15 +1297,15 @@ install_base() {
     ;;
   esac
   # If the virtual console has been set, then copy config file to installation
-  [[ -e /tmp/vconsole.conf ]] && cp /tmp/vconsole.conf\
-   ${MOUNTPOINT}/etc/vconsole.conf 2>>/tmp/.errlog
+  [[ -e /tmp/vconsole.conf ]] && cp /tmp/vconsole.conf \
+  ${MOUNTPOINT}/etc/vconsole.conf 2>>/tmp/.errlog
   check_for_error
   #check for a wireless device
   if [[ $(lspci | grep -i "Network Controller") != "" ]]; then
     DIALOG --title "$_InstWirTitle" --infobox "$_InstWirBody" 0 0
     sleep 2
-    PACSTRAP ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant\
-     dialog
+    PACSTRAP ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant \
+    dialog
     check_for_error
   fi
 }
@@ -1548,8 +1548,8 @@ install_wireless_firmware() {
     ;;
     "7")
     # All
-    PACSTRAP ${MOUNTPOINT} b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw\
-     zd1211-firmware
+    PACSTRAP ${MOUNTPOINT} b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw \
+    zd1211-firmware
     ;;
     *)
     install_base_menu
@@ -1563,8 +1563,8 @@ install_wireless_firmware() {
 # This will run only once.
 install_alsa_xorg_input() {
   DIALOG --title "$_AXITitle" --msgbox "$_AXIBody" 0 0
-  PACSTRAP ${MOUNTPOINT} alsa-utils xorg-server xorg-server-utils xorg-xinit\
-   xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
+  PACSTRAP ${MOUNTPOINT} alsa-utils xorg-server xorg-server-utils xorg-xinit \
+  xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
   check_for_error
   # copy the keyboard configuration file, if generated
   [[ -e /tmp/00-keyboard.conf ]] && cp /tmp/00-keyboard.conf ${MOUNTPOINT}/etc/X11/xorg.conf.d/00-keyboard.conf
@@ -1616,18 +1616,28 @@ setup_graphics_card() {
     # If NVIDIA, first need to know the integrated GC
     [[ $(lscpu | grep -i "intel\|lenovo") != "" ]] && INTEGRATED_GC="Intel" || INTEGRATED_GC="ATI"
     # Second, identity the NVIDIA card and driver / menu entry
-    if [[ $(dmesg | grep -i 'chipset' | grep -i 'nvc\|nvd\|nve') != "" ]]; then HIGHLIGHT_SUB_GC=4
-    elif [[ $(dmesg | grep -i 'chipset' | grep -i 'nva\|nv5\|nv8\|nv9'﻿) != "" ]]; then HIGHLIGHT_SUB_GC=5
-    elif [[ $(dmesg | grep -i 'chipset' | grep -i 'nv4\|nv6') != "" ]]; then HIGHLIGHT_SUB_GC=6
-    else HIGHLIGHT_SUB_GC=3
+    if [[ $(dmesg | grep -i 'chipset' | grep -i 'nvc\|nvd\|nve') != "" ]]; then
+      HIGHLIGHT_SUB_GC=4
+    elif [[ $(dmesg | grep -i 'chipset' | grep -i 'nva\|nv5\|nv8\|nv9'﻿) != "" ]]; then
+      HIGHLIGHT_SUB_GC=5
+    elif [[ $(dmesg | grep -i 'chipset' | grep -i 'nv4\|nv6') != "" ]]; then
+      HIGHLIGHT_SUB_GC=6
+    else
+      HIGHLIGHT_SUB_GC=3
     fi
     # All non-NVIDIA cards / virtualisation
-  elif [[ $(echo $GRAPHIC_CARD | grep -i 'ati') != "" ]]; then HIGHLIGHT_SUB_GC=1
-  elif [[ $(echo $GRAPHIC_CARD | grep -i 'intel\|lenovo') != "" ]]; then HIGHLIGHT_SUB_GC=2
-  elif [[ $(echo $GRAPHIC_CARD | grep -i 'via') != "" ]]; then HIGHLIGHT_SUB_GC=7
-  elif [[ $(echo $GRAPHIC_CARD | grep -i 'virtualbox') != "" ]]; then HIGHLIGHT_SUB_GC=8
-  elif [[ $(echo $GRAPHIC_CARD | grep -i 'vmware') != "" ]]; then HIGHLIGHT_SUB_GC=9
-  else HIGHLIGHT_SUB_GC=10
+  elif [[ $(echo $GRAPHIC_CARD | grep -i 'ati') != "" ]]; then
+    HIGHLIGHT_SUB_GC=1
+  elif [[ $(echo $GRAPHIC_CARD | grep -i 'intel\|lenovo') != "" ]]; then
+    HIGHLIGHT_SUB_GC=2
+  elif [[ $(echo $GRAPHIC_CARD | grep -i 'via') != "" ]]; then
+    HIGHLIGHT_SUB_GC=7
+  elif [[ $(echo $GRAPHIC_CARD | grep -i 'virtualbox') != "" ]]; then
+    HIGHLIGHT_SUB_GC=8
+  elif [[ $(echo $GRAPHIC_CARD | grep -i 'vmware') != "" ]]; then
+    HIGHLIGHT_SUB_GC=9
+  else
+    HIGHLIGHT_SUB_GC=10
   fi
   DIALOG --default-item ${HIGHLIGHT_SUB_GC} --title "$_GCtitle" \
   --menu "$GRAPHIC_CARD\n" 0 0 10 \
@@ -2009,6 +2019,33 @@ install_nm() {
 
 # Let the user choose a shell
 install_shell() {
+
+  zsh_config() {
+    DIALOG --title "" \
+    --menu "" 0 0 10 \
+    "1" "Vanilla" \
+    "2" "ohMyZsh" \
+    "3" "antigen" 2>${ANSWER}
+    case $(cat ${A?SWER}) in
+      "2")
+      # TODO modify for language and check install with pacman -Qs
+      if DIALOG --yesno "install git and curl ?" 0 0 ; then
+        PACSTRAP ${MOUNTPOINT} git curl
+        arch_chroot "sh -c \"$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)\"" 2>/tmp/.errlog
+        check_for_error
+      fi
+      ;;
+      "3")
+      # TODO clone in user home
+      arch_chroot "git clone https://github.com/zsh-users/antigen.git"
+      ;;
+      *)
+      install_add_menu
+      ;;
+    esac
+    install_add_menu
+  }
+
   DIALOG --title "$_InstShellTitle" \
   --menu "$_InstShellBody" 0 0 10 \
   "1" "bash" \
@@ -2041,17 +2078,19 @@ install_shell() {
     ;;
     "6")
     PACSTRAP ${MOUNTPOINT} zsh
+    #zsh_config TODO
     SH="zsh"
     ;;
     *)
     install_add_menu
     ;;
   esac
+  check_for_error
   # Ask the user if he want to set the new shell as a default shell
   if DIALOG --yesno "$_InstShellChsh" 0 0 ; then
     arch _chroot "chsh ${USER} /bin/${SH}"
+    check_for_error
   fi
-  check_for_error
 }
 
 # Let the user install an editor
