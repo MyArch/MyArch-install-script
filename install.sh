@@ -569,7 +569,7 @@ confirm_mount_btrfs() {
 # mount_partitions function, when the Root is chosen.
 select_device() {
   DEVICE=""
-  devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme');
+  devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme\|mmc');
   for i in ${devices_list[@]}; do
     DEVICE="${DEVICE} ${i} -"
   done
