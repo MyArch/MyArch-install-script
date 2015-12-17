@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.6.2 - 02-Dec-2015)
+# Architect Installation Framework (version 1.6.3 - 17-Dec-2015)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.6.2"
+VERSION="Architect Installation Framework 1.6.3"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -620,7 +620,7 @@ confirm_mount_btrfs() {
 select_device() {
 	
     DEVICE=""
-    devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme');
+    devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme\|mmc');
     
     for i in ${devices_list[@]}; do
         DEVICE="${DEVICE} ${i} -"
