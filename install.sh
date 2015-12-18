@@ -65,7 +65,7 @@ LVM_LV_NAME=""          # Name of LV to create
 LV_SIZE_INVALID=0       # Is LVM LV size entered valid?
 VG_SIZE_TYPE=""         # Is VG in Gigabytes or Megabytes?
 # Installation
-PACOPT=-1                 # Option for confirmation with pacstrap
+PACOPT=-1               # Option for confirmation with pacstrap
 MOUNTPOINT="/mnt"       # Installation
 MOUNT_TYPE=""           # "/dev/" for standard partitions, "/dev/mapper" for LVM
 BTRFS=0                 # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
@@ -91,11 +91,13 @@ DIALOG() {
 
 # Redefine pacstrap for asking during installation
 PACSTRAP() {
-  clear
-  if [[ PACOPT -eq 0 ]]; then
-    pacstrap -i "$@"
-  else
-    pacstrap "$@"
+  if ! arch_chroot "pacman -Q $@" > /dev/null ; then
+    clear
+    if [[ PACOPT == 0 ]] ; then
+      pacstrap -i ${MOUNTPOINT} "$@"
+    else
+      pacstrap ${MOUNTPOINT} "$@"
+    fi
   fi
 }
 
@@ -259,6 +261,14 @@ check_base() {
 show_devices() {
   lsblk -o NAME,MODEL,TYPE,FSTYPE,SIZE,MOUNTPOINT | grep -v "loop" | grep -v "rom" | grep -v "arch_airootfs" > /tmp/.devlist
   DIALOG --title "$_DevShowTitle" --textbox /tmp/.devlist 0 0
+}
+
+checklist_of_user() {
+  USER_LIST=""
+  user_list=$(ls ${MOUNTPOINT}/home/ | sed "s/lost+found//")
+  for i in ${user_list[@]}; do
+    USER_LIST="${USER_LIST} ${i} - off"
+  done
 }
 
 ################################################################################
@@ -1273,22 +1283,22 @@ install_base() {
   case $(cat ${ANSWER}) in
     "1")
     # Latest Kernel
-    PACSTRAP ${MOUNTPOINT} base btrfs-progs ntp sudo f2fs-tools
+    PACSTRAP base btrfs-progs ntp sudo f2fs-tools
     ;;
     "2")
     # Latest Kernel and base-devel
-    PACSTRAP ${MOUNTPOINT} base base-devel btrfs-progs ntp sudo f2fs-tools
+    PACSTRAP base base-devel btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && BASE_DEVEL=1
     ;;
     "3")
     # LTS Kernel
-    PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/') \
+    PACSTRAP $(pacman -Sqg base | sed 's/^linux$/&-lts/') \
     btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1
     ;;
     "4")
     # LTS Kernel and base-devel
-    PACSTRAP ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/') \
+    PACSTRAP $(pacman -Sqg base | sed 's/^linux$/&-lts/') \
     base-devel btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1 && BASE_DEVEL=1
     ;;
@@ -1304,7 +1314,7 @@ install_base() {
   if [[ $(lspci | grep -i "Network Controller") != "" ]]; then
     DIALOG --title "$_InstWirTitle" --infobox "$_InstWirBody" 0 0
     sleep 2
-    PACSTRAP ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant \
+    PACSTRAP iw wireless_tools wpa_actiond wpa_supplicant \
     dialog
     check_for_error
   fi
@@ -1319,7 +1329,7 @@ install_aur() {
     DIALOG --title "$_NeedBaseDevelTitle" \
     --yesno "$_NeedBaseDevelBody" 0 0
     if [[ $? == 0 ]]; then
-      PACSTRAP ${MOUNTPOINT} base-devel
+      PACSTRAP base-devel
       [[ $? -eq 0 ]] && BASE_DEVEL=1
       check_for_error
     else
@@ -1332,10 +1342,11 @@ install_aur() {
   "99" "$_Back" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
+    clear
     arch_chroot "echo ${archfrrepo} >> /etc/pacman.conf" 2>/tmp/.errlog
     arch_chroot "pacman -Syy" 2>>/tmp/.errlog
     check_for_error
-    PACSTRAP ${MOUNTPOINT} yaourt
+    PACSTRAP yaourt
     ;;
     *)
     install_base_menu
@@ -1356,7 +1367,7 @@ install_bootloader() {
     case $(cat ${ANSWER}) in
       "1")
       # Grub
-      PACSTRAP ${MOUNTPOINT} grub os-prober
+      PACSTRAP grub os-prober
       check_for_error
       # An LVM VG/LV can consist of multiple devices. Where LVM used, user must select the device manually.
       if [[ $LVM_ROOT -eq 1 ]]; then
@@ -1383,7 +1394,7 @@ install_bootloader() {
       ;;
       "2"|"3")
       # Syslinux
-      PACSTRAP ${MOUNTPOINT} syslinux
+      PACSTRAP syslinux
       # Install to MBR or root partition, accordingly
       [[ $(cat ${ANSWER}) == "2" ]] && arch_chroot "syslinux-install_update -iam" 2>>/tmp/.errlog
       [[ $(cat ${ANSWER}) == "3" ]] && arch_chroot "syslinux-install_update -i" 2>>/tmp/.errlog
@@ -1416,7 +1427,7 @@ install_bootloader() {
     case $(cat ${ANSWER}) in
       "1")
       # Grub2
-      PACSTRAP ${MOUNTPOINT} grub os-prober efibootmgr dosfstools
+      PACSTRAP grub os-prober efibootmgr dosfstools
       check_for_error
       DIALOG --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
       sleep 1
@@ -1439,7 +1450,7 @@ install_bootloader() {
       # Ensure that UEFI partition has been mounted to /boot/efi due to bug in script. Could "fix" it for installation, but
       # This could result in unknown consequences should the script be updated at some point.
       if [[ $UEFI_MOUNT == "/boot/efi" ]]; then
-        PACSTRAP ${MOUNTPOINT} refind-efi efibootmgr dosfstools
+        PACSTRAP refind-efi efibootmgr dosfstools
         check_for_error
         DIALOG --title "$_SetRefiDefTitle" --yesno "$_SetRefiDefBody ${UEFI_MOUNT}/EFI/boot $_SetRefiDefBody2" 0 0
         if [[ $? -eq 0 ]]; then
@@ -1464,7 +1475,7 @@ install_bootloader() {
       ;;
       "3")
       # systemd-boot
-      PACSTRAP ${MOUNTPOINT} efibootmgr dosfstools
+      PACSTRAP efibootmgr dosfstools
       arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>>/tmp/.errlog
       check_for_error
       # Deal with LVM Root
@@ -1528,27 +1539,27 @@ install_wireless_firmware() {
     ;;
     "2")
     # Broadcom
-    PACSTRAP ${MOUNTPOINT} b43-fwcutter
+    PACSTRAP b43-fwcutter
     ;;
     "3")
     # Bluetooth
-    PACSTRAP ${MOUNTPOINT} bluez-firmware
+    PACSTRAP bluez-firmware
     ;;
     "4")
     # Intel 2100
-    PACSTRAP ${MOUNTPOINT} ipw2100-fw
+    PACSTRAP ipw2100-fw
     ;;
     "5")
     # Intel 2200
-    PACSTRAP ${MOUNTPOINT} ipw2200-fw
+    PACSTRAP ipw2200-fw
     ;;
     "6")
     # ZyDAS
-    PACSTRAP ${MOUNTPOINT} zd1211-firmware
+    PACSTRAP zd1211-firmware
     ;;
     "7")
     # All
-    PACSTRAP ${MOUNTPOINT} b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw \
+    PACSTRAP b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw \
     zd1211-firmware
     ;;
     *)
@@ -1563,7 +1574,7 @@ install_wireless_firmware() {
 # This will run only once.
 install_alsa_xorg_input() {
   DIALOG --title "$_AXITitle" --msgbox "$_AXIBody" 0 0
-  PACSTRAP ${MOUNTPOINT} alsa-utils xorg-server xorg-server-utils xorg-xinit \
+  PACSTRAP alsa-utils xorg-server xorg-server-utils xorg-xinit \
   xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
   check_for_error
   # copy the keyboard configuration file, if generated
@@ -1581,7 +1592,7 @@ setup_graphics_card() {
 
   # Save repetition
   install_intel(){
-    PACSTRAP ${MOUNTPOINT} xf86-video-intel libva-intel-driver intel-ucode
+    PACSTRAP xf86-video-intel libva-intel-driver intel-ucode
     sed -i 's/MODULES=""/MODULES="i915"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
     # Intel microcode (Grub, Syslinux and systemd-boot). rEFInd is yet to be added.
     # Done as seperate if statements in case of multiple bootloaders.
@@ -1603,7 +1614,7 @@ setup_graphics_card() {
 
   # Save repetition
   install_ati(){
-    PACSTRAP ${MOUNTPOINT} xf86-video-ati
+    PACSTRAP xf86-video-ati
     sed -i 's/MODULES=""/MODULES="radeon"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
   }
 
@@ -1663,7 +1674,7 @@ setup_graphics_card() {
     "3")
     # Nouveau / NVIDIA
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
-    PACSTRAP ${MOUNTPOINT} xf86-video-nouveau
+    PACSTRAP xf86-video-nouveau
     sed -i 's/MODULES=""/MODULES="nouveau"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
     ;;
     "4")
@@ -1671,8 +1682,8 @@ setup_graphics_card() {
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
     arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
     # Now deal with kernel installed
-    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} nvidia nvidia-libgl nvidia-utils pangox-compat \
-    || PACSTRAP ${MOUNTPOINT} nvidia-lts nvidia-libgl nvidia-utils pangox-compat
+    [[ $LTS == 0 ]] && PACSTRAP nvidia nvidia-libgl nvidia-utils pangox-compat \
+    || PACSTRAP nvidia-lts nvidia-libgl nvidia-utils pangox-compat
     NVIDIA_INST=1
     ;;
     "5")
@@ -1680,8 +1691,8 @@ setup_graphics_card() {
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
     arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
     # Now deal with kernel installed
-    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} nvidia-340xx nvidia-340xx-libgl nvidia-340xx-utils  \
-    || PACSTRAP ${MOUNTPOINT} nvidia-340xx-lts nvidia-340xx-libgl nvidia-340xx-utils
+    [[ $LTS == 0 ]] && PACSTRAP nvidia-340xx nvidia-340xx-libgl nvidia-340xx-utils  \
+    || PACSTRAP nvidia-340xx-lts nvidia-340xx-libgl nvidia-340xx-utils
     NVIDIA_INST=1
     ;;
     "6")
@@ -1689,19 +1700,19 @@ setup_graphics_card() {
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
     arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
     # Now deal with kernel installed
-    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} nvidia-304xx nvidia-304xx-libgl nvidia-304xx-utils  \
-    || PACSTRAP ${MOUNTPOINT}  nvidia-304xx-lts nvidia-304xx-libgl nvidia-304xx-utils
+    [[ $LTS == 0 ]] && PACSTRAP nvidia-304xx nvidia-304xx-libgl nvidia-304xx-utils  \
+    || PACSTRAP  nvidia-304xx-lts nvidia-304xx-libgl nvidia-304xx-utils
     NVIDIA_INST=1
     ;;
     "7")
     # Via
-    PACSTRAP ${MOUNTPOINT} xf86-video-openchrome
+    PACSTRAP xf86-video-openchrome
     ;;
     "8")
     # VirtualBox
     DIALOG --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
-    [[ $LTS == 0 ]] && PACSTRAP ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules  \
-    || PACSTRAP ${MOUNTPOINT} virtualbox-guest-utils virtualbox-guest-modules-lts
+    [[ $LTS == 0 ]] && PACSTRAP virtualbox-guest-utils virtualbox-guest-modules  \
+    || PACSTRAP virtualbox-guest-utils virtualbox-guest-modules-lts
     # Load modules and enable vboxservice whatever the kernel
     arch_chroot "modprobe -a vboxguest vboxsf vboxvideo"
     arch_chroot "systemctl enable vboxservice"
@@ -1709,11 +1720,11 @@ setup_graphics_card() {
     ;;
     "9")
     # VMWare
-    PACSTRAP ${MOUNTPOINT} xf86-video-vmware xf86-input-vmmouse
+    PACSTRAP xf86-video-vmware xf86-input-vmmouse
     ;;
     "10")
     # Generic / Unknown
-    PACSTRAP ${MOUNTPOINT} xf86-video-fbdev
+    PACSTRAP xf86-video-fbdev
     ;;
     *)
     install_desktop_menu
@@ -1771,34 +1782,34 @@ install_de_wm() {
   case $(cat ${ANSWER}) in
     "1")
     # Cinnamon
-    PACSTRAP ${MOUNTPOINT} cinnamon xterm
+    PACSTRAP cinnamon xterm
     ;;
     "2")
     # Enlightement
-    PACSTRAP ${MOUNTPOINT} enlightenment terminology polkit-gnome xterm
+    PACSTRAP enlightenment terminology polkit-gnome xterm
     ;;
     "3")
     # Gnome-Shell
-    PACSTRAP ${MOUNTPOINT} gnome-shell gdm xterm
+    PACSTRAP gnome-shell gdm xterm
     GNOME_INSTALLED=1
     ;;
     "4")
     # Gnome
-    PACSTRAP ${MOUNTPOINT} gnome rp-pppoe xterm
+    PACSTRAP gnome rp-pppoe xterm
     GNOME_INSTALLED=1
     ;;
     "5")
     # Gnome + Extras
-    PACSTRAP ${MOUNTPOINT} gnome gnome-extra rp-pppoe xterm
+    PACSTRAP gnome gnome-extra rp-pppoe xterm
     GNOME_INSTALLED=1
     ;;
     "6")
     # KDE5 BASE
-    PACSTRAP ${MOUNTPOINT} plasma-desktop xdg-utils rp-pppoe xterm
+    PACSTRAP plasma-desktop xdg-utils rp-pppoe xterm
     ;;
     "7")
     # KDE5
-    PACSTRAP ${MOUNTPOINT} plasma xdg-user-dirs xdg-utils rp-pppoe xterm
+    PACSTRAP plasma xdg-user-dirs xdg-utils rp-pppoe xterm
     if [[ $NM_INSTALLED -eq 0 ]]; then
       arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
       NM_INSTALLED=1
@@ -1807,57 +1818,57 @@ install_de_wm() {
     ;;
     "8")
     # LXDE
-    PACSTRAP ${MOUNTPOINT} lxde xterm
+    PACSTRAP lxde xterm
     LXDE_INSTALLED=1
     ;;
     "9")
     # LXQT
-    PACSTRAP ${MOUNTPOINT} lxqt oxygen-icons xterm
+    PACSTRAP lxqt oxygen-icons xterm
     LXQT_INSTALLED=1
     ;;
     "10")
     # MATE
-    PACSTRAP ${MOUNTPOINT} mate xterm
+    PACSTRAP mate xterm
     ;;
     "11")
     # MATE + Extras
-    PACSTRAP ${MOUNTPOINT} mate mate-extra xterm
+    PACSTRAP mate mate-extra xterm
     ;;
     "12")
     # Xfce
-    PACSTRAP ${MOUNTPOINT} xfce4 polkit-gnome xterm
+    PACSTRAP xfce4 polkit-gnome xterm
     ;;
     "13")
     # Xfce + Extras
-    PACSTRAP ${MOUNTPOINT} xfce4 xfce4-goodies polkit-gnome xterm
+    PACSTRAP xfce4 xfce4-goodies polkit-gnome xterm
     ;;
     "14")
     # Awesome
-    PACSTRAP ${MOUNTPOINT} awesome vicious polkit-gnome xterm
+    PACSTRAP awesome vicious polkit-gnome xterm
     ;;
     "15")
     #Fluxbox
-    PACSTRAP ${MOUNTPOINT} fluxbox fbnews polkit-gnome xterm
+    PACSTRAP fluxbox fbnews polkit-gnome xterm
     ;;
     "16")
     #i3
-    PACSTRAP ${MOUNTPOINT} i3-wm i3lock i3status dmenu polkit-gnome xterm
+    PACSTRAP i3-wm i3lock i3status dmenu polkit-gnome xterm
     ;;
     "17")
     #IceWM
-    PACSTRAP ${MOUNTPOINT} icewm icewm-themes polkit-gnome xterm
+    PACSTRAP icewm icewm-themes polkit-gnome xterm
     ;;
     "18")
     #Openbox
-    PACSTRAP ${MOUNTPOINT} openbox openbox-themes polkit-gnome xterm
+    PACSTRAP openbox openbox-themes polkit-gnome xterm
     ;;
     "19")
     #PekWM
-    PACSTRAP ${MOUNTPOINT} pekwm pekwm-themes polkit-gnome xterm
+    PACSTRAP pekwm pekwm-themes polkit-gnome xterm
     ;;
     "20")
     #WindowMaker
-    PACSTRAP ${MOUNTPOINT} windowmaker polkit-gnome xterm
+    PACSTRAP windowmaker polkit-gnome xterm
     ;;
     *)
     install_desktop_menu
@@ -1868,7 +1879,7 @@ install_de_wm() {
   if [[ $COMMON_INSTALLED -eq 0 ]]; then
     DIALOG --title "$_InstComTitle" --yesno "$_InstComBody" 0 0
     if [[ $? -eq 0 ]]; then
-      PACSTRAP ${MOUNTPOINT} gksu gnome-keyring polkit xdg-user-dirs xdg-utils gamin gvfs gvfs-afc gvfs-smb ttf-dejavu gnome-icon-theme python2-xdg bash-completion ntfs-3g
+      PACSTRAP gksu gnome-keyring polkit xdg-user-dirs xdg-utils gamin gvfs gvfs-afc gvfs-smb ttf-dejavu gnome-icon-theme python2-xdg bash-completion ntfs-3g
       check_for_error
     fi
   fi
@@ -1890,26 +1901,26 @@ install_dm() {
     case $(cat ${ANSWER}) in
       "1")
       # LXDM
-      PACSTRAP ${MOUNTPOINT} lxdm
+      PACSTRAP lxdm
       arch_chroot "systemctl enable lxdm.service" >/dev/null 2>>/tmp/.errlog
       DM="LXDM"
       ;;
       "2")
       # LIGHTDM
-      PACSTRAP ${MOUNTPOINT} lightdm lightdm-gtk-greeter
+      PACSTRAP lightdm lightdm-gtk-greeter
       arch_chroot "systemctl enable lightdm.service" >/dev/null 2>>/tmp/.errlog
       DM="LightDM"
       ;;
       "3")
       # SDDM
-      PACSTRAP ${MOUNTPOINT} sddm
+      PACSTRAP sddm
       arch_chroot "sddm --example-config > /etc/sddm.conf"
       arch_chroot "systemctl enable sddm.service" >/dev/null 2>>/tmp/.errlog
       DM="SDDM"
       ;;
       "4")
       # SLiM
-      PACSTRAP ${MOUNTPOINT} slim
+      PACSTRAP slim
       arch_chroot "systemctl enable slim.service" >/dev/null 2>>/tmp/.errlog
       DM="SLiM"
       # Amend the xinitrc file accordingly for all user accounts
@@ -1988,7 +1999,7 @@ install_nm() {
     case $(cat ${ANSWER}) in
       "1")
       # connman
-      PACSTRAP ${MOUNTPOINT} connman
+      PACSTRAP connman
       arch_chroot "systemctl enable connman.service" 2>>/tmp/.errlog
       ;;
       "2")
@@ -1997,12 +2008,12 @@ install_nm() {
       ;;
       "3")
       # Network Manager
-      PACSTRAP ${MOUNTPOINT} networkmanager network-manager-applet rp-pppoe
+      PACSTRAP networkmanager network-manager-applet rp-pppoe
       arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
       ;;
       "4")
       # WICD
-      PACSTRAP ${MOUNTPOINT} wicd-gtk
+      PACSTRAP wicd-gtk
       arch_chroot "systemctl enable wicd.service" 2>>/tmp/.errlog
       ;;
       *)
@@ -2021,23 +2032,53 @@ install_nm() {
 install_shell() {
 
   zsh_config() {
+    # TODO translation
     DIALOG --title "" \
     --menu "" 0 0 10 \
     "1" "Vanilla" \
     "2" "ohMyZsh" \
     "3" "antigen" 2>${ANSWER}
-    case $(cat ${A?SWER}) in
+    case $(cat ${ANSWER}) in
       "2")
-      # TODO modify for language and check install with pacman -Qs
-      if DIALOG --yesno "install git and curl ?" 0 0 ; then
-        PACSTRAP ${MOUNTPOINT} git curl
-        arch_chroot "sh -c \"$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)\"" 2>/tmp/.errlog
-        check_for_error
+      arch_chroot "pacman -Q git curl" 2>/tmp/.errlog
+      check_for_error
+      if [ $? == 1 ] ; then
+        if DIALOG --yesno "" 0 0 ; then
+          PACSTRAP git curl
+        else
+          install_add_menu
+        fi
+      fi
+      checklist_of_user
+      if [[ -n $USER_LIST ]] ; then
+        DIALOG --title "" --checklist "" 0 0 10 \
+        ${USER_LIST} 2>${ANSWER} || install_add_menu
+        for i in $(cat ${ANSWER}); do
+          arch_chroot "git clone git://github.com/robbyrussell/oh-my-zsh.git /home/${i}/.oh-my-zsh" 2>/tmp/.errlog
+          arch_chroot "cp /home/${i}/.oh-my-zsh/templates/zshrc.zsh-template /home/${i}/.zshrc" 2>>/tmp/.errlog
+          check_for_error
+        done
       fi
       ;;
       "3")
-      # TODO clone in user home
-      arch_chroot "git clone https://github.com/zsh-users/antigen.git"
+      arch_chroot "pacman -Q git" 2>/tmp/.errlog
+      check_for_error
+      if [ $? == 1 ] ; then
+        if DIALOG --yesno "" 0 0 ; then
+          PACSTRAP git
+        else
+          install_add_menu
+        fi
+      fi
+      checklist_of_user
+      if [[ -n $USER_LIST ]] ; then
+        DIALOG --title "" --checklist "" 0 0 10 \
+        ${USER_LIST} 2>${ANSWER} || install_add_menu
+        for i in $(cat ${ANSWER}); do
+          arch_chroot "git clone https://github.com/zsh-users/antigen.git /home/${i}/.antigen" 2>/tmp/.errlog
+          check_for_error
+        done
+      fi
       ;;
       *)
       install_add_menu
@@ -2057,28 +2098,28 @@ install_shell() {
   "99" "$_Back" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
-    PACSTRAP ${MOUNTPOINT} bash
+    PACSTRAP bash
     SH="bash"
     ;;
     "2")
-    PACSTRAP ${MOUNTPOINT} dash
+    PACSTRAP dash
     SH="dash"
     ;;
     "3")
-    PACSTRAP ${MOUNTPOINT} fish
+    PACSTRAP fish
     SH="fish"
     ;;
     "4")
-    PACSTRAP ${MOUNTPOINT} mksh
+    PACSTRAP mksh
     SH="mksh"
     ;;
     "5")
-    PACSTRAP ${MOUNTPOINT} tcsh
+    PACSTRAP tcsh
     SH="tcsh"
     ;;
     "6")
-    PACSTRAP ${MOUNTPOINT} zsh
-    #zsh_config TODO
+    PACSTRAP zsh
+    zsh_config
     SH="zsh"
     ;;
     *)
@@ -2086,10 +2127,16 @@ install_shell() {
     ;;
   esac
   check_for_error
-  # Ask the user if he want to set the new shell as a default shell
-  if DIALOG --yesno "$_InstShellChsh" 0 0 ; then
-    arch _chroot "chsh ${USER} /bin/${SH}"
-    check_for_error
+  # Ask for changing user's shell
+  checklist_of_user
+  if [[ -n $USER_LIST ]] && DIALOG --yesno "$_InstShellChsh" 0 0 ; then
+    # TODO trans
+    DIALOG --title "$_ChangeShTitle" --checklist "$_ChangeShBody" 0 0 10 \
+    ${USER_LIST} 2>${ANSWER} || install_add_menu
+    for i in $(cat ${ANSWER}); do
+      arch_chroot "chsh -s /bin/${SH} ${i}" 2>/tmp/.errlog
+      check_for_error
+    done
   fi
 }
 
@@ -2103,13 +2150,13 @@ install_editor() {
   "99" "$_Back" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
-    PACSTRAP ${MOUNTPOINT} emacs
+    PACSTRAP emacs
     ;;
     "2")
-    PACSTRAP ${MOUNTPOINT} emacs-nox
+    PACSTRAP emacs-nox
     ;;
     "3")
-    PACSTRAP ${MOUNTPOINT} vim
+    PACSTRAP vim
     ;;
     *)
     install_add_menu
@@ -2128,13 +2175,13 @@ install_browser() {
   "99" "$_Back" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
-    PACSTRAP ${MOUNTPOINT} chromium
+    PACSTRAP chromium
     ;;
     "2")
-    PACSTRAP ${MOUNTPOINT} firefox
+    PACSTRAP firefox
     ;;
     "3")
-    PACSTRAP ${MOUNTPOINT} opera
+    PACSTRAP opera
     ;;
     *)
     install_add_menu
@@ -2407,67 +2454,67 @@ install_acc_menu() {
   case $(cat ${ANSWER}) in
     "1")
     # accerciser
-    PACSTRAP ${MOUNTPOINT} accerciser
+    PACSTRAP accerciser
     ;;
     "2")
     # at-spi2-atk
-    PACSTRAP ${MOUNTPOINT} at-spi2-atk
+    PACSTRAP at-spi2-atk
     ;;
     "3")
     # at-spi2-core
-    PACSTRAP ${MOUNTPOINT} at-spi2-core
+    PACSTRAP at-spi2-core
     ;;
     "4")
     # brltty
-    PACSTRAP ${MOUNTPOINT} brltty
+    PACSTRAP brltty
     ;;
     "5")
     # caribou
-    PACSTRAP ${MOUNTPOINT} caribou
+    PACSTRAP caribou
     ;;
     "6")
     # dasher
-    PACSTRAP ${MOUNTPOINT} dasher
+    PACSTRAP dasher
     ;;
     "7")
     # espeak
-    PACSTRAP ${MOUNTPOINT} espeak
+    PACSTRAP espeak
     ;;
     "8")
     # espeakup
-    PACSTRAP ${MOUNTPOINT} espeakup
+    PACSTRAP espeakup
     ;;
     "9")
     # festival
-    PACSTRAP ${MOUNTPOINT} festival
+    PACSTRAP festival
     ;;
     "10")
     # java-access-bridge
-    PACSTRAP ${MOUNTPOINT} java-access-bridge
+    PACSTRAP java-access-bridge
     ;;
     "11")
     # java-atk-wrapper
-    PACSTRAP ${MOUNTPOINT} java-atk-wrapper
+    PACSTRAP java-atk-wrapper
     ;;
     "12")
     # julius
-    PACSTRAP ${MOUNTPOINT} julius
+    PACSTRAP julius
     ;;
     "13")
     # orca
-    PACSTRAP ${MOUNTPOINT} orca
+    PACSTRAP orca
     ;;
     "14")
     # qt-at-spi
-    PACSTRAP ${MOUNTPOINT} qt-at-spi
+    PACSTRAP qt-at-spi
     ;;
     "15")
     # speech-dispatcher
-    PACSTRAP ${MOUNTPOINT} speech-dispatcher
+    PACSTRAP speech-dispatcher
     ;;
     "16")
     # install all
-    PACSTRAP ${MOUNTPOINT} accerciser at-spi2-atk at-spi2-core brltty dasher espeak espeakup festival java-access-bridge caribou julius orca qt-at-spi speech-dispatcher
+    PACSTRAP accerciser at-spi2-atk at-spi2-core brltty dasher espeak espeakup festival java-access-bridge caribou julius orca qt-at-spi speech-dispatcher
     ;;
     *)
     main_menu_online

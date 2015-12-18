@@ -392,12 +392,15 @@ _InstNMBody="\nNetwork Manager is recommended, especially for wireless and PPPoE
 _InstNMDoneTitle=" Network Manager Installed "
 _InstNMDoneBody="\nThe network connection manager has been installed and enabled."
 
-# Network Manager Already Installed (no need for seperate title)
+# Network Manager Already Installed (no need for separate title)
 _InstNMErrBody="\nA network connection manager has already been installed and enabled."
 
 # Shell install menu
 _InstShellTitle=" Choose a shell "
 _InstShellBody="\nChoose a shell to install."
+_InstShellChsh="Set this shell the default shell of an user ?"
+_ChangeShTitle=" Choose users "
+_ChangeShBody="Choose the user you want to change their default shell."
 
 # Editor install menu
 _InstEditorTitle=" Choose an editor "
