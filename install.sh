@@ -2032,18 +2032,17 @@ install_nm() {
 install_shell() {
 
   zsh_config() {
-    # TODO translation
-    DIALOG --title "" \
-    --menu "" 0 0 10 \
+    DIALOG --title "$_ZshConfMenuTitle" \
+    --menu "$_ZshConfMenuBody" 0 0 10 \
     "1" "Vanilla" \
     "2" "ohMyZsh" \
     "3" "antigen" 2>${ANSWER}
     case $(cat ${ANSWER}) in
-      "2")
+      "2" | "3")
       arch_chroot "pacman -Q git curl" 2>/tmp/.errlog
       check_for_error
       if [ $? == 1 ] ; then
-        if DIALOG --yesno "" 0 0 ; then
+        if DIALOG --yesno "$_ZshConfInstAdd" 0 0 ; then
           PACSTRAP git curl
         else
           install_add_menu
@@ -2051,31 +2050,15 @@ install_shell() {
       fi
       checklist_of_user
       if [[ -n $USER_LIST ]] ; then
-        DIALOG --title "" --checklist "" 0 0 10 \
+        DIALOG --title "$_ZshConfUserTitle" --checklist "$_ZshConfUserBody" 0 0 10 \
         ${USER_LIST} 2>${ANSWER} || install_add_menu
         for i in $(cat ${ANSWER}); do
-          arch_chroot "git clone git://github.com/robbyrussell/oh-my-zsh.git /home/${i}/.oh-my-zsh" 2>/tmp/.errlog
-          arch_chroot "cp /home/${i}/.oh-my-zsh/templates/zshrc.zsh-template /home/${i}/.zshrc" 2>>/tmp/.errlog
-          check_for_error
-        done
-      fi
-      ;;
-      "3")
-      arch_chroot "pacman -Q git" 2>/tmp/.errlog
-      check_for_error
-      if [ $? == 1 ] ; then
-        if DIALOG --yesno "" 0 0 ; then
-          PACSTRAP git
-        else
-          install_add_menu
-        fi
-      fi
-      checklist_of_user
-      if [[ -n $USER_LIST ]] ; then
-        DIALOG --title "" --checklist "" 0 0 10 \
-        ${USER_LIST} 2>${ANSWER} || install_add_menu
-        for i in $(cat ${ANSWER}); do
-          arch_chroot "git clone https://github.com/zsh-users/antigen.git /home/${i}/.antigen" 2>/tmp/.errlog
+          if [[ $(cat ${ANSWER}) == "2" ]]; then
+            arch_chroot "git clone git://github.com/robbyrussell/oh-my-zsh.git /home/${i}/.oh-my-zsh" 2>/tmp/.errlog
+            arch_chroot "cp /home/${i}/.oh-my-zsh/templates/zshrc.zsh-template /home/${i}/.zshrc" 2>>/tmp/.errlog
+          else
+            arch_chroot "git clone https://github.com/zsh-users/antigen.git /home/${i}/.antigen" 2>/tmp/.errlog
+          fi
           check_for_error
         done
       fi
@@ -2130,7 +2113,6 @@ install_shell() {
   # Ask for changing user's shell
   checklist_of_user
   if [[ -n $USER_LIST ]] && DIALOG --yesno "$_InstShellChsh" 0 0 ; then
-    # TODO trans
     DIALOG --title "$_ChangeShTitle" --checklist "$_ChangeShBody" 0 0 10 \
     ${USER_LIST} 2>${ANSWER} || install_add_menu
     for i in $(cat ${ANSWER}); do

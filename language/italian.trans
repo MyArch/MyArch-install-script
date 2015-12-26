@@ -397,6 +397,14 @@ _InstNMErrBody="\nE' già stato installato ed abilitato un gestore delle conness
 # Shell install menu TODO
 #_InstShellTitle=
 #_InstShellBody=
+#_InstShellChsh=
+#_ChangeShTitle=
+#_ChangeShBody=
+#_ZshConfMenuTitle=
+#_ZshConfMenuBody=
+#_ZshConfInstAdd=
+#_ZshConfUserTitle=
+#_ZshConfUserBody=
 
 # Editor install menu TODO
 #_InstEditorTitle=

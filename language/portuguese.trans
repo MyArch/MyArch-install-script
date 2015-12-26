@@ -397,6 +397,14 @@ _InstNMErrBody="\nO gerente de rede (Network Manager) já foi instalado e ativad
 # Shell install menu TODO
 #_InstShellTitle=
 #_InstShellBody=
+#_InstShellChsh=
+#_ChangeShTitle=
+#_ChangeShBody=
+#_ZshConfMenuTitle=
+#_ZshConfMenuBody=
+#_ZshConfInstAdd=
+#_ZshConfUserTitle=
+#_ZshConfUserBody=
 
 # Editor install menu TODO
 #_InstEditorTitle=

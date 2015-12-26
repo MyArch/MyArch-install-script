@@ -400,7 +400,12 @@ _InstShellTitle=" Choose a shell "
 _InstShellBody="\nChoose a shell to install."
 _InstShellChsh="Set this shell the default shell of an user ?"
 _ChangeShTitle=" Choose users "
-_ChangeShBody="Choose the user you want to change their default shell."
+_ChangeShBody="Choose wich users are gonna have this shell"
+_ZshConfMenuTitle=" Choose a zsh configuration"
+_ZshConfMenuBody="Choose a zsh configuration to use with zsh."
+_ZshConfInstAdd="You need to install git and curl to use this configuration. Install them ?"
+_ZshConfUserTitle=" Choose users "
+_ZshConfUserBody="Choose which users are gonna have this configuration"
 
 # Editor install menu
 _InstEditorTitle=" Choose an editor "

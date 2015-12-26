@@ -398,6 +398,14 @@ _InstNMErrBody="\nUn gestionnaire de connexion réseau a déjà été installé 
 # Menu d'installation shell
 _InstShellTitle=" Choisissez un shell "
 _InstShellBody="\nChoisissez un shell à installer."
+_InstShellChsh="Voulez vous définir ce shell par défault pour des utilisateurs ?"
+_ChangeShTitle=" Sélection d'utilisateurs "
+_ChangeShBody="Choisissez les utilisateurs dont vous allez changer le shell :"
+_ZshConfMenuTitle=" Choix de configuration "
+_ZshConfMenuBody="Choisissez une configuration pour zsh"
+_ZshConfInstAdd="Pour utilisez cette configuration, vous avez besoin de git et curl. Voulez vous les installez ?"
+_ZshConfUserTitle=" Sélection d'ultilisateurs "
+_ZshConfUserBody="Choisissez quels utilisateurs vont bénéficier de cette configuration :"
 
 # Menu d'installation editeur
 _InstEditorTitle=" Choisissez un editeur "
