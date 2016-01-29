@@ -1637,10 +1637,10 @@ setup_graphics_card() {
       HIGHLIGHT_SUB_GC=3
     fi
     # All non-NVIDIA cards / virtualisation
-  elif [[ $(echo $GRAPHIC_CARD | grep -i 'ati') != "" ]]; then
-    HIGHLIGHT_SUB_GC=1
   elif [[ $(echo $GRAPHIC_CARD | grep -i 'intel\|lenovo') != "" ]]; then
     HIGHLIGHT_SUB_GC=2
+  elif [[ $(echo $GRAPHIC_CARD | grep -i 'ati') != "" ]]; then
+    HIGHLIGHT_SUB_GC=1
   elif [[ $(echo $GRAPHIC_CARD | grep -i 'via') != "" ]]; then
     HIGHLIGHT_SUB_GC=7
   elif [[ $(echo $GRAPHIC_CARD | grep -i 'virtualbox') != "" ]]; then
