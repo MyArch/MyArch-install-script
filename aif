@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.6.4 - 29-Jan-2016)
+# Architect Installation Framework (version 1.6.5 - 31-Jan-2016)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.6.4"
+VERSION="Architect Installation Framework 1.6.5"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -1897,57 +1897,67 @@ install_de_wm() {
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstDETitle" \
     --menu "$_InstDEBody" 0 0 11 \
  	"1" $"Cinnamon" \
-	"2" $"Enlightenment" \
-	"3" $"Gnome-Shell (minimal)" \
-	"4" $"Gnome" \
-	"5" $"Gnome + Extras" \
-    "6" $"KDE 5 Base (minimal)" \
-    "7" $"KDE 5" \
-    "8" $"LXDE" \
-    "9" $"LXQT" \
-    "10" $"MATE" \
-    "11" $"MATE + Extras" \
-    "12" $"Xfce" \
-    "13" $"Xfce + Extras" \
-    "14" $"Awesome WM" \
-    "15" $"Fluxbox WM" \
-	"16" $"i3 WM" \
-    "17" $"Ice WM" \
-    "18" $"Openbox WM" \
-    "19" $"Pek WM" \
-    "20" $"WindowMaker WM" 2>${ANSWER}
+ 	"2" $"Deepin (minimal)" \
+ 	"3" $"Deepin + Extras" \
+	"4" $"Enlightenment" \
+	"5" $"Gnome-Shell (minimal)" \
+	"6" $"Gnome" \
+	"7" $"Gnome + Extras" \
+    "8" $"KDE 5 Base (minimal)" \
+    "9" $"KDE 5" \
+    "10" $"LXDE" \
+    "11" $"LXQT" \
+    "12" $"MATE" \
+    "13" $"MATE + Extras" \
+    "14" $"Xfce" \
+    "15" $"Xfce + Extras" \
+    "16" $"Awesome WM" \
+    "17" $"Fluxbox WM" \
+	"18" $"i3 WM" \
+    "19" $"Ice WM" \
+    "20" $"Openbox WM" \
+    "21" $"Pek WM" \
+    "22" $"WindowMaker WM" 2>${ANSWER}
 
    case $(cat ${ANSWER}) in
         "1") # Cinnamon
              clear
              pacstrap ${MOUNTPOINT} cinnamon xterm 2>/tmp/.errlog
              ;;
-        "2") # Enlightement
+        "2") # Deepin (minimal)
+             clear
+             pacstrap ${MOUNTPOINT} deepin xterm 2>/tmp/.errlog
+             ;;            
+        "3") # Deepin + Extras
+             clear
+             pacstrap ${MOUNTPOINT} deepin deepin-extra xterm 2>/tmp/.errlog
+             ;;            
+        "4") # Enlightement
              clear
              pacstrap ${MOUNTPOINT} enlightenment terminology polkit-gnome xterm 2>/tmp/.errlog
              ;;
-        "3") # Gnome-Shell
+        "5") # Gnome-Shell
              clear
              pacstrap ${MOUNTPOINT} gnome-shell gdm xterm 2>/tmp/.errlog
              GNOME_INSTALLED=1
              ;;
-        "4") # Gnome
+        "6") # Gnome
              clear
              pacstrap ${MOUNTPOINT} gnome rp-pppoe xterm 2>/tmp/.errlog
            
              GNOME_INSTALLED=1
              ;;            
-        "5") # Gnome + Extras
+        "7") # Gnome + Extras
              clear
              pacstrap ${MOUNTPOINT} gnome gnome-extra rp-pppoe xterm 2>/tmp/.errlog
            
              GNOME_INSTALLED=1
              ;;
-        "6") # KDE5 BASE
+        "8") # KDE5 BASE
              clear
              pacstrap ${MOUNTPOINT} plasma-desktop xdg-utils rp-pppoe xterm 2>/tmp/.errlog
              ;;
-        "7") # KDE5 
+        "9") # KDE5 
              clear
              pacstrap ${MOUNTPOINT} plasma xdg-user-dirs xdg-utils rp-pppoe xterm 2>/tmp/.errlog
 
@@ -1958,57 +1968,57 @@ install_de_wm() {
                
              KDE_INSTALLED=1
              ;;
-         "8") # LXDE
+         "10") # LXDE
               clear
               pacstrap ${MOUNTPOINT} lxde xterm 2>/tmp/.errlog
               LXDE_INSTALLED=1
              ;;
-         "9") # LXQT
+         "11") # LXQT
               clear
               pacstrap ${MOUNTPOINT} lxqt oxygen-icons xterm 2>/tmp/.errlog
               LXQT_INSTALLED=1
               ;;
-         "10") # MATE
+         "12") # MATE
               clear
               pacstrap ${MOUNTPOINT} mate xterm 2>/tmp/.errlog
              ;;
-        "11") # MATE + Extras
+        "13") # MATE + Extras
                clear
                pacstrap ${MOUNTPOINT} mate mate-extra xterm 2>/tmp/.errlog
              ;;                 
-        "12") # Xfce
+        "14") # Xfce
               clear
               pacstrap ${MOUNTPOINT} xfce4 polkit-gnome xterm 2>/tmp/.errlog
              ;;            
-        "13") # Xfce + Extras
+        "15") # Xfce + Extras
               clear
               pacstrap ${MOUNTPOINT} xfce4 xfce4-goodies polkit-gnome xterm 2>/tmp/.errlog
              ;;
-        "14") # Awesome
+        "16") # Awesome
               clear
               pacstrap ${MOUNTPOINT} awesome vicious polkit-gnome xterm 2>/tmp/.errlog
              ;;
-        "15") #Fluxbox
+        "17") #Fluxbox
               clear 
               pacstrap ${MOUNTPOINT} fluxbox fbnews polkit-gnome xterm 2>/tmp/.errlog
              ;; 
-        "16") #i3
+        "18") #i3
               clear
               pacstrap ${MOUNTPOINT} i3-wm i3lock i3status dmenu polkit-gnome xterm 2>/tmp/.errlog
              ;; 
-        "17") #IceWM
+        "19") #IceWM
               clear
               pacstrap ${MOUNTPOINT} icewm icewm-themes polkit-gnome xterm 2>/tmp/.errlog
              ;; 
-        "18") #Openbox
+        "20") #Openbox
               clear
               pacstrap ${MOUNTPOINT} openbox openbox-themes polkit-gnome xterm 2>/tmp/.errlog
              ;; 
-        "19") #PekWM
+        "21") #PekWM
               clear
               pacstrap ${MOUNTPOINT} pekwm pekwm-themes polkit-gnome xterm 2>/tmp/.errlog
              ;;
-        "20") #WindowMaker
+        "22") #WindowMaker
              clear
              pacstrap ${MOUNTPOINT} windowmaker polkit-gnome xterm 2>/tmp/.errlog
              ;;        
