@@ -1760,54 +1760,65 @@ install_de_wm() {
   DIALOG --title "$_InstDETitle" \
   --menu "$_InstDEBody" 0 0 11 \
   "1" $"Cinnamon" \
-  "2" $"Enlightenment" \
-  "3" $"Gnome-Shell (minimal)" \
-  "4" $"Gnome" \
-  "5" $"Gnome + Extras" \
-  "6" $"KDE 5 Base (minimal)" \
-  "7" $"KDE 5" \
-  "8" $"LXDE" \
-  "9" $"LXQT" \
-  "10" $"MATE" \
-  "11" $"MATE + Extras" \
-  "12" $"Xfce" \
-  "13" $"Xfce + Extras" \
-  "14" $"Awesome WM" \
-  "15" $"Fluxbox WM" \
-  "16" $"i3 WM" \
-  "17" $"Ice WM" \
-  "18" $"Openbox WM" \
-  "19" $"Pek WM" \
-  "20" $"WindowMaker WM" 2>${ANSWER}
+  "2" $"Deepin (minimal)" \
+  "3" $"Deepin + Extras" \
+  "4" $"Enlightenment" \
+  "5" $"Gnome-Shell (minimal)" \
+  "6" $"Gnome" \
+  "7" $"Gnome + Extras" \
+  "8" $"KDE 5 Base (minimal)" \
+  "9" $"KDE 5" \
+  "10" $"LXDE" \
+  "11" $"LXQT" \
+  "12" $"MATE" \
+  "13" $"MATE + Extras" \
+  "14" $"Xfce" \
+  "15" $"Xfce + Extras" \
+  "16" $"Awesome WM" \
+  "17" $"Fluxbox WM" \
+  "18" $"i3 WM" \
+  "19" $"Ice WM" \
+  "20" $"Openbox WM" \
+  "21" $"Pek WM" \
+  "22" $"WindowMaker WM" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
     # Cinnamon
     PACSTRAP cinnamon xterm
     ;;
     "2")
+    # Deepin (minimal)
+    PACSTRAP deepin xterm
+    ;;
+    "3")
+    # Deepin + Extras
+    clear
+    PACSTRAP deepin deepin-extra xterm
+    ;;
+    "4")
     # Enlightement
     PACSTRAP enlightenment terminology polkit-gnome xterm
     ;;
-    "3")
+    "5")
     # Gnome-Shell
     PACSTRAP gnome-shell gdm xterm
     GNOME_INSTALLED=1
     ;;
-    "4")
+    "6")
     # Gnome
     PACSTRAP gnome rp-pppoe xterm
     GNOME_INSTALLED=1
     ;;
-    "5")
+    "7")
     # Gnome + Extras
     PACSTRAP gnome gnome-extra rp-pppoe xterm
     GNOME_INSTALLED=1
     ;;
-    "6")
+    "8")
     # KDE5 BASE
     PACSTRAP plasma-desktop xdg-utils rp-pppoe xterm
     ;;
-    "7")
+    "9")
     # KDE5
     PACSTRAP plasma xdg-user-dirs xdg-utils rp-pppoe xterm
     if [[ $NM_INSTALLED -eq 0 ]]; then
@@ -1816,57 +1827,57 @@ install_de_wm() {
     fi
     KDE_INSTALLED=1
     ;;
-    "8")
+    "10")
     # LXDE
     PACSTRAP lxde xterm
     LXDE_INSTALLED=1
     ;;
-    "9")
+    "11")
     # LXQT
     PACSTRAP lxqt oxygen-icons xterm
     LXQT_INSTALLED=1
     ;;
-    "10")
+    "12")
     # MATE
     PACSTRAP mate xterm
     ;;
-    "11")
+    "13")
     # MATE + Extras
     PACSTRAP mate mate-extra xterm
     ;;
-    "12")
+    "14")
     # Xfce
     PACSTRAP xfce4 polkit-gnome xterm
     ;;
-    "13")
+    "15")
     # Xfce + Extras
     PACSTRAP xfce4 xfce4-goodies polkit-gnome xterm
     ;;
-    "14")
+    "16")
     # Awesome
     PACSTRAP awesome vicious polkit-gnome xterm
     ;;
-    "15")
+    "17")
     #Fluxbox
     PACSTRAP fluxbox fbnews polkit-gnome xterm
     ;;
-    "16")
+    "18")
     #i3
     PACSTRAP i3-wm i3lock i3status dmenu polkit-gnome xterm
     ;;
-    "17")
+    "19")
     #IceWM
     PACSTRAP icewm icewm-themes polkit-gnome xterm
     ;;
-    "18")
+    "20")
     #Openbox
     PACSTRAP openbox openbox-themes polkit-gnome xterm
     ;;
-    "19")
+    "21")
     #PekWM
     PACSTRAP pekwm pekwm-themes polkit-gnome xterm
     ;;
-    "20")
+    "22")
     #WindowMaker
     PACSTRAP windowmaker polkit-gnome xterm
     ;;
