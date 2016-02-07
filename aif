@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.6.5 - 31-Jan-2016)
+# Architect Installation Framework (version 1.6.6 - 07-Feb-2016)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.6.5"
+VERSION="Architect Installation Framework 1.6.6"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -614,16 +614,16 @@ confirm_mount_btrfs() {
     fi
 }
 
-# Adapted from AIS. However, this does not assume that the formatted device is the Root
-# installation device; more than one device may be formatted. This is now set in the
+# Revised to include device size in menu display. This function does not assume that the formatted device 
+# is the Root installation device as more than one device may be formatted. Root is set in the 
 # mount_partitions function, when the Root is chosen.
 select_device() {
 	
     DEVICE=""
-    devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme\|mmc');
+    devices_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'disk' | awk '{print "/dev/" $1 " " $2}' | sort -u);
     
     for i in ${devices_list[@]}; do
-        DEVICE="${DEVICE} ${i} -"
+        DEVICE="${DEVICE} ${i}"
     done
     
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevSelTitle" --menu "$_DevSelBody" 0 0 4 ${DEVICE} 2>${ANSWER} || prep_menu
@@ -748,16 +748,16 @@ delete_partitions(){
     esac  	
 }	
 
-# find all available partitions and generate a list of them
-# This also includes partitions on different devices.
+# Revised to include partition sizes. Finds all available partitions and generate a list 
+# of them. This also includes partitions on different devices.
 find_partitions() {
 
 	PARTITIONS=""
 	NUMBER_PARTITIONS=0
-    partition_list=$(lsblk -l | grep 'part\|lvm' | sed 's/[\t ].*//' | sort -u)
+	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm' | awk '{print $1 " " $2}' | sort -u)
 	
     for i in ${partition_list[@]}; do
-        PARTITIONS="${PARTITIONS} ${i} -"
+        PARTITIONS="${PARTITIONS} ${i}"
         NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
     done
     
@@ -1208,7 +1208,7 @@ find_lvm_partitions() {
 
     LVM_PARTITIONS=""
     NUMBER_LVM_PARTITIONS=0
-    lvm_partition_list=$(lvmdiskscan | grep -v 'LVM physical volume' | grep 'sd[a-z][1-99]' | sed 's/\/dev\///' | awk '{print $1}')
+    lvm_partition_list=$(lvmdiskscan | grep -v 'LVM physical volume' | grep 'sd\|hd\|vd\|nvme\|mmc' | sed 's/\/dev\///' | awk '{print $1}')
 	
     for i in ${lvm_partition_list[@]}; do
         LVM_PARTITIONS="${LVM_PARTITIONS} ${i} -"
