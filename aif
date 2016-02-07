@@ -593,7 +593,7 @@ confirm_mount() {
     if [[ $(mount | grep $1) ]]; then   
       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc" 0 0
       sleep 2
-      PARTITIONS="$(echo $PARTITIONS | sed s/${PARTITION}$' -'//)"
+      PARTITIONS="$(echo $PARTITIONS | sed s/${PARTITION}//)"
       NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
     else
       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusFail" 0 0
