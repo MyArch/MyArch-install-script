@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.6.5 - 07-Feb-2016)
+# Architect Installation Framework (version 1.6.6 - 07-Feb-2016)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.6.5"
+VERSION="Architect Installation Framework 1.6.6"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -588,12 +588,13 @@ umount_partitions(){
 
 }
 
-# Adapted from AIS
+# Revised to deal with partion sizes now being displayed to the user
 confirm_mount() {
     if [[ $(mount | grep $1) ]]; then   
       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusSucc" 0 0
       sleep 2
-      PARTITIONS="$(echo $PARTITIONS | sed s/${PARTITION}$' -'//)"
+      #PARTITIONS="$(echo $PARTITIONS | sed s/${PARTITION}$' -'//)"
+      PARTITIONS=$(echo $PARTITIONS | sed "s/${PARTITION} [0-9]*[G-M]//" | sed "s/${PARTITION} [0-9]*\.[0-9]*[G-M]//" | sed "s/${PARTITION} -")
       NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
     else
       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntStatusTitle" --infobox "$_MntStatusFail" 0 0
@@ -620,8 +621,8 @@ confirm_mount_btrfs() {
 select_device() {
 	
     DEVICE=""
-    devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme\|mmc');
-    #devices_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'disk' | awk '{print "/dev/" $1 " " $2}' | sort -u);
+    #devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme\|mmc');
+    devices_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'disk' | awk '{print "/dev/" $1 " " $2}' | sort -u);
     
     for i in ${devices_list[@]}; do
         DEVICE="${DEVICE} ${i} -"
@@ -755,8 +756,8 @@ find_partitions() {
 
 	PARTITIONS=""
 	NUMBER_PARTITIONS=0
-	partition_list=$(lsblk -l | grep 'part\|lvm' | sed 's/[\t ].*//' | sort -u)
-	#partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm' | awk '{print $1 " " $2}' | sort -u)
+	#partition_list=$(lsblk -l | grep 'part\|lvm' | sed 's/[\t ].*//' | sort -u)
+	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm' | awk '{print $1 " " $2}' | sort -u)
 	
     for i in ${partition_list[@]}; do
         PARTITIONS="${PARTITIONS} ${i} -"
