@@ -625,7 +625,7 @@ select_device() {
     devices_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'disk' | awk '{print "/dev/" $1 " " $2}' | sort -u);
     
     for i in ${devices_list[@]}; do
-        DEVICE="${DEVICE} ${i} -"
+        DEVICE="${DEVICE} ${i}"
     done
     
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevSelTitle" --menu "$_DevSelBody" 0 0 4 ${DEVICE} 2>${ANSWER} || prep_menu
@@ -760,7 +760,7 @@ find_partitions() {
 	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm' | awk '{print $1 " " $2}' | sort -u)
 	
     for i in ${partition_list[@]}; do
-        PARTITIONS="${PARTITIONS} ${i} -"
+        PARTITIONS="${PARTITIONS} ${i}"
         NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
     done
     
