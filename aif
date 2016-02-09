@@ -653,6 +653,30 @@ select_grub_device() {
  
   }
 
+# Securely destroy all data on a given device by filling it with zeros.
+secure_wipe(){
+	
+	# Warn the user. If they proceed, dd the selected device.
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PartOptWipe " --yesno "\nWARNING: ALL data on ${DEVICE} $_AutoPartWipeBody" 0 0
+	if [[ $? -eq 0 ]]; then
+	
+		clear
+		# Install pv where not already installed. Better to see progress than
+		# nothing!
+		if [[ $(pacman -Qs pv | grep pv) == "" ]]; then
+			pacman -S --noconfirm pv 2>/tmp/.errlog
+			check_for_error
+			clear
+		fi
+		
+		# dd command also disables buffering.
+		dd if=/dev/zero | pv | dd of=${DEVICE} iflag=nocache oflag=direct bs=4096 2>/tmp/.errlog
+		check_for_error
+    else
+		create_partitions
+    fi
+}
+
 # Originally adapted from AIS.
 create_partitions(){
 
@@ -721,28 +745,34 @@ delete_partitions(){
 }
 
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PartToolTitle" \
-    --menu "$_PartToolBody" 0 0 6 \
-    "1" $"Auto Partition (BIOS & UEFI)" \
- 	"2" $"Parted (BIOS & UEFI)" \
-	"3" $"CFDisk (BIOS/MBR)" \
-	"4" $"CGDisk (UEFI/GPT)" \
-	"5" $"FDisk  (BIOS & UEFI)" \
-	"6" $"GDisk  (UEFI/GPT)" 2>${ANSWER}	
+    --menu "$_PartToolBody" 0 0 8 \
+    "1" "$_PartOptWipe" \
+    "2" "$_PartOptAutoStandard" \
+    "3" "$_PartOptAutoLuks" \
+ 	"4" $"Parted (BIOS & UEFI)" \
+	"5" $"CFDisk (BIOS/MBR)" \
+	"6" $"CGDisk (UEFI/GPT)" \
+	"7" $"FDisk  (BIOS & UEFI)" \
+	"8" $"GDisk  (UEFI/GPT)" 2>${ANSWER}	
 
     case $(cat ${ANSWER}) in
-        "1") auto_partition
+        "1") secure_wipe
+             ;; 
+        "2") auto_partition
+             ;;   
+        "3") luks_auto_partition
              ;;
-        "2") clear
+        "4") clear
              parted ${DEVICE}
              ;;
-        "3") cfdisk ${DEVICE}
+        "5") cfdisk ${DEVICE}
              ;;
-        "4") cgdisk ${DEVICE}
+        "6") cgdisk ${DEVICE}
              ;;       
-        "5") clear
+        "7") clear
              fdisk ${DEVICE}
              ;;
-        "6") clear
+        "8") clear
              gdisk ${DEVICE}
              ;;
           *) prep_menu

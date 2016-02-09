@@ -3,9 +3,16 @@
 ## English Translation File		
 ##								
 ##
-## Written by Carl Duff (20-Nov-2015)
+## Written by Carl Duff (09-Feb-2016)
 ##
 ##
+
+# New Strings
+
+_PartOptAutoStandard="Standard Auto Partition (BIOS & UEFI)"
+_PartOptAutoLuks="Encrypted Auto partition (BIOS & UEFI)"
+_PartOptWipe="Securely Wipe Device (optional)"
+_AutoPartWipeBody="will be destroyed. This process may also take a long time, depending on the size of the device.\n\nDo you wish to continue?\n"
 
 # Accessibility
 _InstAccOpt="Accessibility Packages (optional)"
