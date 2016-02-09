@@ -670,11 +670,8 @@ secure_wipe(){
 		fi
 		
 		# dd command also disables buffering.
-		#(dd if=/dev/zero | pv | dd of=${DEVICE} iflag=nocache oflag=direct bs=4096) 2>&1 | dialog --gauge "Securely Wiping ${DEVICE}. Please wait..." 10 70 0
-		#echo -e "\n\nSecurly Wiping Device ${DEVICE}. Please be patient...\n\n"
-		dd if=/dev/zero | pv | dd of=${DEVICE} iflag=nocache oflag=direct bs=4096 > /tmp/.outfile & dialog --title "checking" --no-kill --tailboxbg /tmp/.outfile 20 60 
-		
-		#2>/tmp/.errlog
+		echo -e "\n\nSecurly Wiping Device ${DEVICE}. Please be patient...\n\n"
+		dd if=/dev/zero | pv | dd of=${DEVICE} iflag=nocache oflag=direct bs=4096 2>/tmp/.errlog
 		check_for_error
     else
 		create_partitions
