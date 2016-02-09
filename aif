@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 1.6.6 - 07-Feb-2016)
+# Architect Installation Framework (version 2.0 beta - 09-Feb-2016)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -21,7 +21,7 @@
 ANSWER="/tmp/.aif"
 
 # Save retyping
-VERSION="Architect Installation Framework 1.6.6"
+VERSION="Architect Installation Framework (beta)"
 
 # Installation
 KDE_INSTALLED=0      		# Has KDE been installed? Used for display manager option
@@ -94,62 +94,62 @@ FILE2=""					# Which second file is to be opened?
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 12 \
- 	"1" $"English		(en)" \
- 	"2" $"Italian 		(it)" \
- 	"3" $"Russian 		(ru)" \
- 	"4" $"Turkish 		(tr)" \
- 	"5" $"Dutch 		(nl)" \
- 	"6" $"Greek 		(el)" \
- 	"7" $"Danish 		(da)" \
- 	"8" $"Hungarian 	(hu)" \
- 	"9" $"Portuguese 	(pt)" \
-   "10" $"German	 	(de)" \
-   "11" $"French		(fr)" \
-   "12" $"Polish		(pl)" 2>${ANSWER}
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 4 \
+ 	"1" $"English		(en)" 2>${ANSWER}
+#	"2" $"Italian 		(it)" \
+# 	"3" $"Russian 		(ru)" \
+# 	"4" $"Turkish 		(tr)" \
+# 	"5" $"Dutch 		(nl)" \
+# 	"6" $"Greek 		(el)" \
+# 	"7" $"Danish 		(da)" \
+# 	"8" $"Hungarian 	(hu)" \
+# 	"9" $"Portuguese 	(pt)" \
+#   "10" $"German	 	(de)" \
+#   "11" $"French		(fr)" \
+#   "12" $"Polish		(pl)" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
         "1") source /aif-dev-master/english.trans
              CURR_LOCALE="en_US.UTF-8"
              ;;
-        "2") source /aif-dev-master/italian.trans
-             CURR_LOCALE="it_IT.UTF-8"
-             ;; 
-        "3") source /aif-dev-master/russian.trans
-             CURR_LOCALE="ru_RU.UTF-8"
-             FONT="LatKaCyrHeb-14.psfu"
-             ;;
-        "4") source /aif-dev-master/turkish.trans
-             CURR_LOCALE="tr_TR.UTF-8"
-             FONT="LatKaCyrHeb-14.psfu"
-             ;;
-        "5") source /aif-dev-master/dutch.trans
-             CURR_LOCALE="nl_NL.UTF-8"
-             ;;             
-        "6") source /aif-dev-master/greek.trans
-             CURR_LOCALE="el_GR.UTF-8"
-             FONT="iso07u-16.psfu"       
-             ;;
-        "7") source /aif-dev-master/danish.trans
-             CURR_LOCALE="da_DK.UTF-8"
-             ;;   
-        "8") source /aif-dev-master/hungarian.trans
-             CURR_LOCALE="hu_HU.UTF-8"
-             FONT="lat2-16.psfu"
-             ;;
-        "9") source /aif-dev-master/portuguese.trans
-             CURR_LOCALE="pt_BR.UTF-8"    
-             ;;      
-       "10") source /aif-dev-master/german.trans
-             CURR_LOCALE="de_DE.UTF-8"
-             ;;
-       "11") source /aif-dev-master/french.trans
-             CURR_LOCALE="fr_FR.UTF-8"
-             ;;
-       "12") source /aif-dev-master/polish.trans
-             CURR_LOCALE="pl_PL.UTF-8"
-             FONT="latarcyrheb-sun16"
-             ;;
+#        "2") source /aif-dev-master/italian.trans
+#             CURR_LOCALE="it_IT.UTF-8"
+#             ;; 
+#        "3") source /aif-dev-master/russian.trans
+#             CURR_LOCALE="ru_RU.UTF-8"
+#             FONT="LatKaCyrHeb-14.psfu"
+#             ;;
+#        "4") source /aif-dev-master/turkish.trans
+#             CURR_LOCALE="tr_TR.UTF-8"
+#             FONT="LatKaCyrHeb-14.psfu"
+#             ;;
+#        "5") source /aif-dev-master/dutch.trans
+#             CURR_LOCALE="nl_NL.UTF-8"
+#             ;;             
+#        "6") source /aif-dev-master/greek.trans
+#             CURR_LOCALE="el_GR.UTF-8"
+#             FONT="iso07u-16.psfu"       
+#             ;;
+#        "7") source /aif-dev-master/danish.trans
+#             CURR_LOCALE="da_DK.UTF-8"
+#             ;;   
+#        "8") source /aif-dev-master/hungarian.trans
+#             CURR_LOCALE="hu_HU.UTF-8"
+#             FONT="lat2-16.psfu"
+#             ;;
+#        "9") source /aif-dev-master/portuguese.trans
+#             CURR_LOCALE="pt_BR.UTF-8"    
+#             ;;      
+#       "10") source /aif-dev-master/german.trans
+#             CURR_LOCALE="de_DE.UTF-8"
+#             ;;
+#       "11") source /aif-dev-master/french.trans
+#             CURR_LOCALE="fr_FR.UTF-8"
+#             ;;
+#       "12") source /aif-dev-master/polish.trans
+#             CURR_LOCALE="pl_PL.UTF-8"
+#             FONT="latarcyrheb-sun16"
+#             ;;
           *) exit 0
              ;;
     esac
@@ -1198,7 +1198,7 @@ deactivate_lvm() {
         done
         
         # This step will remove old lvm metadata on partitions where identified.
-        LVM_PT=$(lvmdiskscan | grep 'LVM physical volume' | grep 'sd[a-z]' | sed 's/\/dev\///' | awk '{print $1}')
+        LVM_PT=$(lvmdiskscan | grep 'LVM physical volume' | grep 'sd\|hd\|vd\|nvme\|mmc' | sed 's/\/dev\///' | awk '{print $1}')
         for i in ${LVM_PT}; do
             dd if=/dev/zero bs=512 count=512 of=/dev/${i} >/dev/null 2>&1
         done
@@ -1296,6 +1296,7 @@ check_lv_size() {
     
     # add the partition to the temporary file for the vgcreate command
     # Remove selected partition from the list and deduct number of LVM viable partitions remaining
+    # FIX TO INCLUDE PARTITION SIZES
     sed -i "s/x/\/dev\/${LVM_PARTITION} x/" /tmp/.vgcreate
     LVM_PARTITIONS="$(echo $LVM_PARTITIONS | sed s/${LVM_PARTITION}$' -'//)"
     NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
@@ -2685,6 +2686,7 @@ main_menu_online() {
 ##																	##
 ######################################################################
 id_system
+dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Development Installer Warning " --msgbox "\nWARNING: This Development branch of the Architect installer is currently being re-coded. During this process functions may not work properly or even at all.\n\nPlease use the STABLE branch by closing the installer and rebooting, or by selecting the 'Virtual Console' option, and then entering /initialise at the command prompt to start again.\n\nOtherwise, proceed at your own risk.\n" 0 0
 select_language
 check_requirements
 greeting
