@@ -653,25 +653,26 @@ select_grub_device() {
  
   }
 
-# Securely destroy all data on a given device by filling it with zeros.
+# Securely destroy all data on a given device.
 secure_wipe(){
 	
-	# Warn the user. If they proceed, dd the selected device.
+	# Warn the user. If they proceed, wipe the selected device.
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PartOptWipe " --yesno "\nWARNING: ALL data on ${DEVICE} $_AutoPartWipeBody" 0 0
 	if [[ $? -eq 0 ]]; then
 	
 		clear
-		# Install pv where not already installed. Better to see progress than
-		# nothing!
-		if [[ $(pacman -Qs pv | grep pv) == "" ]]; then
-			pacman -S --noconfirm pv 2>/tmp/.errlog
+		# Install wipe where not already installed. Much faster than dd
+		if [[ $(pacman -Qs wipe) == "" ]]; then
+			pacman -Sy --noconfirm wipe 2>/tmp/.errlog
 			check_for_error
 			clear
 		fi
 		
-		# dd command also disables buffering.
 		echo -e "\n\nSecurly Wiping Device ${DEVICE}. Please be patient...\n\n"
-		dd if=/dev/zero | pv | dd of=${DEVICE} iflag=nocache oflag=direct bs=4096 2>/tmp/.errlog
+		wipe -Ifre ${DEVICE}
+		
+		# Alternate dd command - requires pv to be installed
+		#dd if=/dev/zero | pv | dd of=${DEVICE} iflag=nocache oflag=direct bs=4096 2>/tmp/.errlog
 		check_for_error
     else
 		create_partitions
