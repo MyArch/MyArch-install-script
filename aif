@@ -958,44 +958,26 @@ btrfs_mount_opts() {
 	echo "" > ${BTRFS_OPTS}
 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsMntTitle" --checklist "$_btrfsMntBody" 0 0 16 \
-	"1" "autodefrag" off \
-	"2" "compress=zlib" off \
-	"3" "compress=lzo" off \
-	"4" "compress=no" off \
-	"5" "compress-force=zlib" off \
-	"6" "compress-force=lzo" off \
-	"7" "discard" off \
-	"8" "noacl" off \
-    "9" "noatime" off \
-   "10" "nodatasum" off \
-   "11" "nospace_cache" off \
-   "12" "recovery" off \
-   "13" "skip_balance" off \
-   "14" "space_cache" off  \
-   "15" "ssd" off \
-   "16" "ssd_spread" off 2>${BTRFS_OPTS}
- 
-   # Double-digits first       
-   sed -i 's/10/nodatasum,/' ${BTRFS_OPTS}
-   sed -i 's/11/nospace_cache,/' ${BTRFS_OPTS}
-   sed -i 's/12/recovery,/' ${BTRFS_OPTS}
-   sed -i 's/13/skip_balance,/' ${BTRFS_OPTS}
-   sed -i 's/14/space_cache,/' ${BTRFS_OPTS}
-   sed -i 's/15/ssd,/' ${BTRFS_OPTS}
-   sed -i 's/16/ssd_spread,/' ${BTRFS_OPTS}
-   # then single digits
-   sed -i 's/1/autodefrag,/' ${BTRFS_OPTS}
-   sed -i 's/2/compress=zlib,/' ${BTRFS_OPTS}
-   sed -i 's/3/compress=lzo,/' ${BTRFS_OPTS}
-   sed -i 's/4/compress=no,/' ${BTRFS_OPTS}
-   sed -i 's/5/compress-force=zlib,/' ${BTRFS_OPTS}
-   sed -i 's/6/compress-force=lzo,/' ${BTRFS_OPTS}
-   sed -i 's/7/noatime,/' ${BTRFS_OPTS}
-   sed -i 's/8/noacl,/' ${BTRFS_OPTS}
-   sed -i 's/9/noatime,/' ${BTRFS_OPTS}
-   # Now clean up the file
-   sed -i 's/ //g' ${BTRFS_OPTS}
-   sed -i '$s/,$//' ${BTRFS_OPTS}
+	"autodefrag," "-" off \
+	"compress=zlib," "-" off \
+	"compress=lzo," "-" off \
+	"compress=no," "-" off \
+	"compress-force=zlib," "-" off \
+	"compress-force=lzo," "-" off \
+	"discard," "-" off \
+	"noacl," "-" off \
+    "noatime," "-" off \
+	"nodatasum," "-" off \
+	"nospace_cache," "-" off \
+	"recovery," "-" off \
+	"skip_balance," "-" off \
+	"space_cache," "-" off \
+	"ssd," "-" off \
+	"ssd_spread," "-" off 2>${BTRFS_OPTS}
+	
+	# Now clean up the file
+	sed -i 's/ //g' ${BTRFS_OPTS}
+	sed -i '$s/,$//' ${BTRFS_OPTS}
 
    
    if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
@@ -1448,7 +1430,7 @@ check_lv_size() {
 
 install_base() {
 
-# Total control of core packages installed
+# Option for total control of core packages installed
 install_custom_base() {
 	
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBaseCustTitle" --checklist "$_InstBaseCustBody" 0 50 14 \
