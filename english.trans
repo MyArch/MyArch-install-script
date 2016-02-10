@@ -57,7 +57,7 @@ _ErrNoKernel="\nA kernel (linux or linux-lts) must be selected.\n\n"
 _VBoxInstTitle=" VirtualBox Installation "
 _VBoxInstBody="\nIf for any reason the VirtualBox guest modules do not load for the installed system (e.g. low resolution and scrollbars after booting), a one-off series of commands will fix this:\n\n$ su\n# depmod -a\n# modprobe -a vboxvideo vboxguest vboxsf\n# reboot"
 
-# Select Wireless Firmware Driver(s)
+# Select Wireless Packages
 _WirelssOptTitle="Install Wireless Device Packages"
 _WirelessOptBody="\nSupplementary packages are required to use wireless devices. Some may also require additional firmware to function.\n\n"
 _WirelssBody="Key wifi packages have been pre-selected. Where unsure if any additional firmware is required, all packages can be installed."
@@ -364,7 +364,7 @@ _RefiErrBody="\nThe rEFInd installation script will not work unless the UEFI par
 
 # ALSA, Xorg, Input
 _AXITitle=" ALSA, Xorg, and Input "
-"Packages are first needed for sound (alsa), graphics (xorg), and input devices (xf86-input). Key packages have been pre-selected.\n\n"
+_AXIBody="Packages are first needed for sound (alsa), graphics (xorg), and input devices (xf86-input). Key packages have been pre-selected.\n\n"
 
 # Graphics Card Menu
 _GCtitle=" Graphics Card Menu "
