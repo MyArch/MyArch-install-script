@@ -13,6 +13,8 @@ _PartOptAutoStandard="Standard Auto Partition (BIOS & UEFI)"
 _PartOptAutoLuks="Encrypted Auto partition (BIOS & UEFI)"
 _PartOptWipe="Securely Wipe Device (optional)"
 _AutoPartWipeBody="will be destroyed. This process may also take a long time depending on the size of the device (approximately two minutes for every gigabyte).\n\nDo you wish to continue?\n"
+_UseSpaceBar="Use [Spacebar] to de/select packages listed."
+
 
 # Accessibility
 _InstAccOpt="Accessibility Packages (optional)"
@@ -327,7 +329,7 @@ _InstBaseLTS="LTS Kernel"
 _InstBaseLTSBD="LTS Kernel & base-devel"
 _InstBaseCustom="Custom Installation"
 _InstBaseCustTitle=" Custom Base Installation "
-_InstBaseCustBody="Suitable for experienced users only. Use [Spacebar] to de/select the packages listed."
+_InstBaseCustBody="Suitable for experienced users only."
 
 # Install Wireless Packages
 _InstWirTitle=" Wireless Device Detected "
@@ -366,7 +368,7 @@ _RefiErrBody="\nThe rEFInd installation script will not work unless the UEFI par
 
 # ALSA, Xorg, Input
 _AXITitle=" ALSA, Xorg, and Input "
-_AXIBody="\nBefore installing graphics card driver(s) or desktop environments, other packages are needed first:\n\nalsa - Advanced Linux Sound Architecture\nxorg-* - open-source X window system for graphics\nxf86-input-* - open-source drivers for input devices\n\n"
+"Packages are first needed for sound (alsa), graphics (xorg), and input devices (xf86-input). Core packages have been pre-selected.\n\n"
 
 # Graphics Card Menu
 _GCtitle=" Graphics Card Menu "
@@ -392,7 +394,7 @@ _InstDEBody="\nDesktop Environments are listed first, and may have multiple down
 
 # Install Common Packages
 _InstComTitle=" Install Common Packages? "
-_InstComBody="Some environments require additional packages to function better. Use [Spacebar] to de/select packages listed."
+_InstComBody="Some environments require additional packages to function better."
 
 # DM Enabled
 _DmDoneTitle="Enabled "

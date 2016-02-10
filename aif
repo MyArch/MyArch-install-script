@@ -1433,7 +1433,7 @@ install_base() {
 # Option for total control of core packages installed
 install_custom_base() {
 	
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBaseCustTitle" --checklist "$_InstBaseCustBody" 0 50 14 \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBaseCustTitle" --checklist "$_InstBaseCustBody $_UseSpaceBar" 0 50 14 \
 	"bash" "-" on \
 	"base-devel" on \
 	"btrfs-progs" "-" on \
@@ -1807,22 +1807,38 @@ install_wireless_firmware() {
 # This will run only once.
 install_alsa_xorg_input() {
 
-     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_AXITitle" --msgbox "$_AXIBody" 0 0
-     clear	
-     pacstrap ${MOUNTPOINT} alsa-utils xorg-server xorg-server-utils xorg-xinit xf86-input-synaptics xf86-input-keyboard xf86-input-mouse 2>/tmp/.errlog
-     check_for_error
+	echo "" > ${PACKAGES}
+
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_AXITitle" --checklist "$_AXIBody$_UseSpaceBar" 0 0 10 \
+	"alsa-utils" "-" on \
+	"xorg-server" "-" on \
+	"xorg-server-common" "-" off \
+	"xorg-server-utils" "-" on \
+	"xorg-xinit" "-" on \
+	"xf86-input-evdev" "-" off \
+	"xf86-input-joystick" "-" off \
+	"xf86-input-keyboard" "-" on \
+	"xf86-input-mouse" "-" on \
+	"xf86-input-synaptics" "-" on 2>${PACKAGES}
+
+	# If at least one package, install.
+	if [[ $(cat ${PACKAGES}) != "" ]]; then
+		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+		check_for_error
+	fi
      
-     # copy the keyboard configuration file, if generated
-     [[ -e /tmp/00-keyboard.conf ]] && cp /tmp/00-keyboard.conf ${MOUNTPOINT}/etc/X11/xorg.conf.d/00-keyboard.conf
+	# copy the keyboard configuration file, if generated
+	[[ -e /tmp/00-keyboard.conf ]] && cp /tmp/00-keyboard.conf ${MOUNTPOINT}/etc/X11/xorg.conf.d/00-keyboard.conf
   
-     # now copy across .xinitrc for all user accounts
-     user_list=$(ls ${MOUNTPOINT}/home/ | sed "s/lost+found//")
-	 for i in ${user_list[@]}; do
-	     cp -f ${MOUNTPOINT}/etc/X11/xinit/xinitrc ${MOUNTPOINT}/home/$i
-	     arch_chroot "chown -R ${i}:users /home/${i}"
-     done
-     
-     AXI_INSTALLED=1
+	# now copy across .xinitrc for all user accounts
+	user_list=$(ls ${MOUNTPOINT}/home/ | sed "s/lost+found//")
+	for i in ${user_list[@]}; do
+		cp -f ${MOUNTPOINT}/etc/X11/xinit/xinitrc ${MOUNTPOINT}/home/$i
+		arch_chroot "chown -R ${i}:users /home/${i}"
+	done
+    
+    # Ensure option is only shown once 
+	AXI_INSTALLED=1
 
 }
 
@@ -2135,7 +2151,7 @@ install_de_wm() {
 		# Clear the packages file
 		echo "" > ${PACKAGES}
 
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstComTitle" --checklist "$_InstComBody" 0 50 14 \
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstComTitle" --checklist "$_InstComBody $_UseSpaceBar" 0 50 14 \
 		"bash-completion" "-" on \
 		"gamin" "-" on \
 		"gksu" "-" on \
