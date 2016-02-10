@@ -1453,6 +1453,7 @@ install_custom_base() {
 	
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBaseCustTitle" --checklist "$_InstBaseCustBody" 0 50 14 \
 	"bash" "-" on \
+	"base-devel" on \
 	"btrfs-progs" "-" on \
 	"bzip2" "-" on \
 	"coreutils" "-" on \
