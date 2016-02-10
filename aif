@@ -1524,12 +1524,12 @@ install_custom_base() {
              clear
              pacstrap ${MOUNTPOINT} base base-devel btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
              ;;
-        "3") # LTS Kernel
+        "3") # LTS Kernel - improved coding thanks to Nandicre
              clear
              pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/') btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
              [[ $? -eq 0 ]] && LTS=1
              ;;
-        "4") # LTS Kernel and base-devel
+        "4") # LTS Kernel and base-devel - improved coding thanks to Nandicre
              clear
              pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/^linux$/&-lts/') base-devel btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
              [[ $? -eq 0 ]] && LTS=1
