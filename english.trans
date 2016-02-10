@@ -58,9 +58,9 @@ _VBoxInstTitle=" VirtualBox Installation "
 _VBoxInstBody="\nIf for any reason the VirtualBox guest modules do not load for the installed system (e.g. low resolution and scrollbars after booting), a one-off series of commands will fix this:\n\n$ su\n# depmod -a\n# modprobe -a vboxvideo vboxguest vboxsf\n# reboot"
 
 # Select Wireless Firmware Driver(s)
-_InstWirelessFirm="Install Wireless Device Firmware"
-_WirelssFirmTitle=" Select Wireless Device Firmware "
-_WirelssFirmBody="\nSome wireless devices require additional firmware to be installed in order to work.\n\nWhere unsure if additional firmware is required - or which to select - then all of them can be installed."
+_WirelssOptTitle="Install Wireless Device Packages"
+_WirelessOptBody="\nSupplementary packages are required to use wireless devices. Some may also require additional firmware to function.\n\n"
+_WirelssBody="Key wifi packages have been pre-selected. Where unsure if any additional firmware is required for a wireless device, all packages can be installed."
 _SeeWirelessDev="Display Wireless Device (optional)"
 _WirelessShowTitle=" Wireless Device "
 _WirelessErrBody="\nNone Detected.\n"
@@ -331,10 +331,6 @@ _InstBaseCustom="Custom Installation"
 _InstBaseCustTitle=" Custom Base Installation "
 _InstBaseCustBody="Suitable for experienced users only."
 
-# Install Wireless Packages
-_InstWirTitle=" Wireless Device Detected "
-_InstWirBody="\nInstalling supplementary wireless packages...\n\n"
-
 # Install BIOS Bootloader
 _InstBiosBtTitle=" Install BIOS Bootloader "
 _InstBiosBtBody="\nGrub2 is recommended for beginners. The installation device can also be selected.\n\nSyslinux is a lighter and simpler alternative that will only work with ext/btrfs filesystems."
@@ -368,7 +364,7 @@ _RefiErrBody="\nThe rEFInd installation script will not work unless the UEFI par
 
 # ALSA, Xorg, Input
 _AXITitle=" ALSA, Xorg, and Input "
-"Packages are first needed for sound (alsa), graphics (xorg), and input devices (xf86-input). Core packages have been pre-selected.\n\n"
+"Packages are first needed for sound (alsa), graphics (xorg), and input devices (xf86-input). Key packages have been pre-selected.\n\n"
 
 # Graphics Card Menu
 _GCtitle=" Graphics Card Menu "

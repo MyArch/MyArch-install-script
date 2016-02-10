@@ -1747,19 +1747,13 @@ uefi_bootloader() {
 }
 
 # Needed for broadcom and other network controllers
-install_wireless_firmware() {
+install_wireless_packages() {
     
     check_mount
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_WirelssFirmTitle" --menu "$_WirelssFirmBody" 0 0 8 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_WirelssOptTitle" --menu "$_WirelssOptBody" 0 0 2 \
  	"1" "$_SeeWirelessDev" \
- 	"2" $"Broadcom 802.11b/g/n" \
- 	"3" $"Broadcom BCM203x / STLC2300 Bluetooth" \
- 	"4" $"Intel PRO/Wireless 2100" \
- 	"5" $"Intel PRO/Wireless 2200" \
- 	"6" $"ZyDAS ZD1211(b) 802.11a/b/g USB WLAN" \
- 	"7" "$_All" \
- 	"8" "$_Back" 2>${ANSWER}
+ 	"2" $"_WirelssOptTitle" 2>${ANSWER}
 
     case $(cat ${ANSWER}) in
     "1") # Identify the Wireless Device 
@@ -1769,38 +1763,32 @@ install_wireless_firmware() {
         else
            dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_WirelessShowTitle" --msgbox "$_WirelessErrBody" 7 30
         fi
+        
+        install_wireless_packages
         ;;
-    "2") # Broadcom
-         clear
-         pacstrap ${MOUNTPOINT} b43-fwcutter 2>/tmp/.errlog
-        ;;
-    "3") # Bluetooth
-         clear
-         pacstrap ${MOUNTPOINT} bluez-firmware 2>/tmp/.errlog
-         ;;
-    "4") # Intel 2100
-         clear
-         pacstrap ${MOUNTPOINT} ipw2100-fw 2>/tmp/.errlog
-        ;;
-    "5") # Intel 2200
-         clear
-         pacstrap ${MOUNTPOINT} ipw2200-fw 2>/tmp/.errlog
-        ;;
-    "6") # ZyDAS
-         clear
-         pacstrap ${MOUNTPOINT} zd1211-firmware 2>/tmp/.errlog
-        ;;
-    "7") # All
-         clear
-         pacstrap ${MOUNTPOINT} b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw zd1211-firmware 2>/tmp/.errlog
+    "2") # Install Wireless Device Packages
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_WirelssOptTitle " --checklist "$_WirelssBody $_UseSpaceBar" 0 0 11 \
+		"dialog" "wifi" on \
+		"iw" "wifi" on \
+		"rp-pppoe" "wifi" on \
+		"wireless_tools" "wifi" on \
+		"wpa_actiond" "wifi" on \
+		"wpa_supplicant" "wifi" on \
+		"b43-fwcutter" "Broadcom 802.11b/g/n" off \
+		"bluez-firmware" "Broadcom BCM203x / STLC2300 Bluetooth" off \
+		"ipw2100-fw" "Intel PRO/Wireless 2100" off \
+		"ipw2200-fw" "Intel PRO/Wireless 2200" off \
+		"zd1211-firmware" "ZyDAS ZD1211(b) 802.11a/b/g USB WLAN" off 2>${PACKAGES}
+
+		# If at least one package, install.
+		if [[ $(cat ${PACKAGES}) != "" ]]; then
+			pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+			check_for_error
+		fi
         ;;
       *) install_base_menu
         ;;
     esac
-    
-    check_for_error
-    install_wireless_firmware
-
 }
 
 # Install alsa, xorg and input drivers. Also copy the xkbmap configuration file created earlier to the installed system
@@ -2307,7 +2295,7 @@ install_nm() {
            ;;
       "3") # Network Manager
            clear
-           pacstrap ${MOUNTPOINT} networkmanager network-manager-applet rp-pppoe 2>/tmp/.errlog
+           pacstrap ${MOUNTPOINT} networkmanager network-manager-applet 2>/tmp/.errlog
            arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
            ;;
       "4") # WICD
@@ -2416,7 +2404,7 @@ install_base_menu() {
  	"1" "$_PrepPacKey" \
  	"2" "$_InstBse" \
 	"3" "$_InstBootldr" \
-	"4" "$_InstWirelessFirm" \
+	"4" "$_WirelssOptTitle" \
 	"5" "$_Back" 2>${ANSWER}	
 	
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
@@ -2430,7 +2418,7 @@ install_base_menu() {
              ;;
         "3") install_bootloader
              ;;
-        "4") install_wireless_firmware
+        "4") install_wireless_packages
              ;;
           *) main_menu_online
              ;;
