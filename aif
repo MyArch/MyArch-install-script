@@ -1546,15 +1546,6 @@ install_custom_base() {
     [[ -e /tmp/vconsole.conf ]] && cp /tmp/vconsole.conf ${MOUNTPOINT}/etc/vconsole.conf 2>>/tmp/.errlog
     check_for_error
 
-  #check for a wireless device
-  if [[ $(lspci | grep -i "Network Controller") != "" ]]; then
-     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstWirTitle" --infobox "$_InstWirBody" 0 0 
-     sleep 2
-     clear
-     pacstrap ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant dialog 2>/tmp/.errlog
-     check_for_error
-  fi
-
 }
 
 # Adapted from AIS. Integrated the configuration elements.
