@@ -1742,9 +1742,9 @@ install_wireless_packages() {
     
     check_mount
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_WirelssOptTitle" --menu "$_WirelssOptBody" 0 0 2 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_WirelssOptTitle" --menu "$_WirelessOptBody" 0 0 2 \
  	"1" "$_SeeWirelessDev" \
- 	"2" $"_WirelssOptTitle" 2>${ANSWER}
+ 	"2" "$_WirelssOptTitle" 2>${ANSWER}
 
     case $(cat ${ANSWER}) in
     "1") # Identify the Wireless Device 

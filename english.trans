@@ -60,7 +60,7 @@ _VBoxInstBody="\nIf for any reason the VirtualBox guest modules do not load for 
 # Select Wireless Firmware Driver(s)
 _WirelssOptTitle="Install Wireless Device Packages"
 _WirelessOptBody="\nSupplementary packages are required to use wireless devices. Some may also require additional firmware to function.\n\n"
-_WirelssBody="Key wifi packages have been pre-selected. Where unsure if any additional firmware is required for a wireless device, all packages can be installed."
+_WirelssBody="Key wifi packages have been pre-selected. Where unsure if any additional firmware is required, all packages can be installed."
 _SeeWirelessDev="Display Wireless Device (optional)"
 _WirelessShowTitle=" Wireless Device "
 _WirelessErrBody="\nNone Detected.\n"
