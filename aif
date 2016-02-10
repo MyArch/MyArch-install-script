@@ -17,8 +17,10 @@
 ##																	##
 ######################################################################
 
-# Create a temporary file to store menu selections
-ANSWER="/tmp/.aif"
+# Temporary files to store menu selections
+ANSWER="/tmp/.aif"				# Basic menu selections
+PACKAGES="/tmp/.packages"		# Packages to install
+BTRFS_OPTS="/tmp/.btrfs_opts" 	#BTRFS mount options
 
 # Save retyping
 VERSION="Architect Installation Framework (beta)"
@@ -74,7 +76,6 @@ VG_SIZE_TYPE=""         	# Is VG in Gigabytes or Megabytes?
 MOUNTPOINT="/mnt"       	# Installation
 MOUNT_TYPE=""           	# "/dev/" for standard partitions, "/dev/mapper" for LVM
 BTRFS=0                     # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
-BTRFS_OPTS="/tmp/.btrfs_opts" #BTRFS Mount options
 BTRFS_MNT=""                # used for syslinux where /mnt is a btrfs subvolume
 
 # Language Support
@@ -637,7 +638,7 @@ select_device() {
 select_grub_device() {
 	
     GRUB_DEVICE=""
-    grub_devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd');
+    grub_devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep -i 'sd\|hd\|vd\|nvme\|mmc');
     
     for i in ${grub_devices_list[@]}; do
         GRUB_DEVICE="${GRUB_DEVICE} ${i} -"
@@ -1446,13 +1447,90 @@ check_lv_size() {
 ######################################################################	
 
 install_base() {
-    
+
+# Total control of core packages installed
+install_custom_base() {
+	
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBaseCustTitle" --checklist "$_InstBaseCustBody" 0 50 14 \
+	"bash" "-" on \
+	"btrfs-progs" "-" on \
+	"bzip2" "-" on \
+	"coreutils" "-" on \
+	"cryptsetup" "-" on \
+	"device-mapper" "-" on \
+	"dhcpcd" "-" on \
+	"diffutils" "-" on \
+	"e2fsprogs" "-" on \
+	"f2fs-tools" "-" on \
+	"file" "-" on \
+	"filesystem" "-" on \
+	"findutils" "-" on \
+	"gawk" "-" on \
+	"gcc-libs" "-" on \
+	"gettext" "-" on \
+	"glibc" "-" on \
+	"grep" "-" on \
+	"gzip" "-" on \
+	"inetutils" "-" on \
+	"iproute2" "-" on \
+	"iputils" "-" on \
+	"jfsutils" "-" on \
+	"less" "-" on \
+	"licenses" "-" on \
+	"linux" "-" on \
+	"linux-lts" "-" off \
+	"logrotate" "-" on \
+	"lvm2" "-" on \
+	"man-db" "-" on \
+	"man-pages" "-" on \
+	"mdadm" "-" on \
+	"nano" "-" on \
+	"netctl" "-" on \
+	"ntp" "-" on \
+	"pacman" "-" on \
+	"pciutils" "-" on \
+	"pcmciautils" "-" on \
+	"perl" "-" on \
+	"procps-ng" "-" on \
+	"psmisc" "-" on \
+	"reiserfsprogs" "-" on \
+	"s-nail" "-" on \
+	"sed" "-" on \
+	"shadow" "-" on \
+	"sysfsutils" "-" on \
+	"systemd-sysvcompat" "-" on \
+	"sudo" "-" on \
+	"tar" "-" on \
+	"texinfo" "-" on \
+	"usbutils" "-" on \
+	"util-linux" "-" on \
+	"vi" "-" on \
+	"which" "-" on \
+	"xfsprogs" "-" on 2>${PACKAGES}
+
+	# If at least one package, install.
+	if [[ $(cat ${PACKAGES}) != "" ]]; then
+		# Ensure a kernel has been selected at the very least
+		if [[ $(cat ${PACKAGES} | grep " linux \| linux-lts ") != "" ]]; then
+			pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+			check_for_error
+		else
+			# If no kernel selected, warn and show the menu again
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_ErrNoKernel" 0 0
+			install_custom_base
+		fi
+	fi
+
+}
+
+
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" \
-    --menu "$_InstBseBody" 0 0 4 \
+    --menu "$_InstBseBody" 0 0 5 \
  	"1" "$_InstBaseLK" \
 	"2" "$_InstBaseLKBD" \
 	"3" "$_InstBaseLTS" \
-	"4" "$_InstBaseLTSBD" 2>${ANSWER}	
+	"4" "$_InstBaseLTSBD" \
+	"5"	"$_InstBaseCustom" 2>${ANSWER}	
 
     case $(cat ${ANSWER}) in
         "1") # Latest Kernel
@@ -1473,6 +1551,10 @@ install_base() {
              pacstrap ${MOUNTPOINT} bash bzip2 coreutils cryptsetup device-mapper dhcpcd diffutils e2fsprogs file filesystem findutils gawk gcc-libs gettext glibc grep gzip inetutils iproute2 iputils jfsutils less licenses linux-lts logrotate lvm2 man-db man-pages mdadm nano netctl pacman pciutils pcmciautils perl procps-ng psmisc reiserfsprogs s-nail sed shadow sysfsutils systemd-sysvcompat tar texinfo usbutils util-linux vi which xfsprogs base-devel btrfs-progs ntp sudo f2fs-tools 2>/tmp/.errlog
              [[ $? -eq 0 ]] && LTS=1
              ;;
+        "5") # Custom (experienced users)
+			 clear
+			 install_custom_base
+			 ;;
           *) install_base_menu
              ;;
     esac  	
@@ -2066,19 +2148,35 @@ install_de_wm() {
     
     # Offer to install common packages
     if [[ $COMMON_INSTALLED -eq 0 ]]; then
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstComTitle" --yesno "$_InstComBody" 0 0
-       
-       if [[ $? -eq 0 ]]; then
-          clear
-          pacstrap ${MOUNTPOINT} gksu gnome-keyring polkit xdg-user-dirs xdg-utils gamin gvfs gvfs-afc gvfs-smb ttf-dejavu gnome-icon-theme python2-xdg bash-completion ntfs-3g 2>/tmp/.errlog
-          check_for_error
-       fi
-       
-    fi
-    
-    # Either way, the option will no longer be presented.
-    COMMON_INSTALLED=1
+		
+		# Clear the packages file
+		echo "" > ${PACKAGES}
 
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstComTitle" --checklist "$_InstComBody" 0 50 14 \
+		"bash-completion" "-" on \
+		"gamin" "-" on \
+		"gksu" "-" on \
+		"gnome-icon-theme" "-" on \
+		"gnome-keyring" "-" on \
+		"gvfs" "-" on \
+		"gvfs-afc" "-" on \
+		"gvfs-smb" "-" on \
+		"polkit" "-" on \
+		"python2-xdg" "-" on \
+		"ntfs-3g" "-" on \
+		"ttf-dejavu" "-" on \
+		"xdg-user-dirs" "-" on \
+		"xdg-utils" "-" on \
+		"xterm" "-" on 2>${PACKAGES}
+
+		# If at least one package, install.
+		if [[ $(cat ${PACKAGES}) != "" ]]; then
+			pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+			check_for_error
+		fi
+		
+		COMMON_INSTALLED=1  
+    fi
 }
 
 # Determine if LXDE, LXQT, Gnome, and/or KDE has been installed, and act accordingly.
