@@ -1459,8 +1459,8 @@ install_base() {
 		pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) 2>/tmp/.errlog
 		check_for_error
 	else
-		# message
-		# start again
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_ErrNoKernel" 0 0
+		install_base
 	fi
 
     # If the virtual console has been set, then copy config file to installation
