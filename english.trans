@@ -322,7 +322,7 @@ _ExtErrBody="\nPartition cannot be mounted. A name must be given after a forward
 
 # Install Base
 _InstBseTitle=" Install Base "
-_InstBseBody="\nThe latest kernel supports newer hardware. The LTS kernel is more stable, and is supported far longer.\n\nThe base-devel package group will be required to use the Arch User Repository (AUR)."
+_InstBseBody="\nThe latest (linux) or long term support (linux-lts) kernel must be selected. The base package group will be installed automatically. The base-devel package group is required to use the Arch User Repository (AUR).\n\n"
 _InstBaseLK="Latest Kernel"
 _InstBaseLKBD="Latest Kernel & base-devel"
 _InstBaseLTS="LTS Kernel"
