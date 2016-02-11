@@ -3,9 +3,16 @@
 ## English Translation File
 ##
 ##
-## Written by Carl Duff (20-Nov-2015)
+## Written by Carl Duff (09-Feb-2016)
+## Modified By Nandicre
 ##
-##
+
+# New Strings
+_PartOptAutoStandard="Standard Auto Partition (BIOS & UEFI)"
+_PartOptAutoLuks="Encrypted Auto partition (BIOS & UEFI)"
+_PartOptWipe="Securely Wipe Device (optional)"
+_AutoPartWipeBody="will be destroyed. This process may also take a long time depending on the size of the device (approximately two minutes for every gigabyte).\n\nDo you wish to continue?\n"
+_UseSpaceBar="Use [Spacebar] to de/select packages listed."
 
 # Accessibility
 _InstAccOpt="Accessibility Packages (optional)"
@@ -42,15 +49,16 @@ _PlsWaitBody="\nPlease wait...\n\n"
 _ErrTitle=" Error "
 _ErrNoMount="\nPartition(s) must be mounted first.\n\n"
 _ErrNoBase="\nThe Arch base must be installed first.\n\n"
+_ErrNoKernel="\nA kernel (linux or linux-lts) must be selected.\n\n"
 
 # Vbox Installations
 _VBoxInstTitle=" VirtualBox Installation "
 _VBoxInstBody="\nIf for any reason the VirtualBox guest modules do not load for the installed system (e.g. low resolution and scrollbars after booting), a one-off series of commands will fix this:\n\n$ su\n# depmod -a\n# modprobe -a vboxvideo vboxguest vboxsf\n# reboot"
 
-# Select Wireless Firmware Driver(s)
-_InstWirelessFirm="Install Wireless Device Firmware"
-_WirelssFirmTitle=" Select Wireless Device Firmware "
-_WirelssFirmBody="\nSome wireless devices require additional firmware to be installed in order to work.\n\nWhere unsure if additional firmware is required - or which to select - then all of them can be installed."
+# Select Wireless Packages
+_WirelssOptTitle="Install Wireless Device Packages"
+_WirelessOptBody="\nSupplementary packages are required to use wireless devices. Some may also require additional firmware to function.\n\n"
+_WirelssBody="Key wifi packages have been pre-selected. Where unsure if any additional firmware is required, all packages can be installed."
 _SeeWirelessDev="Display Wireless Device (optional)"
 _WirelessShowTitle=" Wireless Device "
 _WirelessErrBody="\nNone Detected.\n"
@@ -147,7 +155,7 @@ _ReqMetBody="\nAll checks passed!\n\n"
 _UefiDet="UEFI System Detected"
 _BiosDet="BIOS System Detected"
 
-# Installer Mirrorlist - Translate
+# Installer Mirrorlist
 _MirrorlistTitle=" Mirrorlist "
 _MirrorlistBody="\nThe mirrorlist contains server addresses used by pacman to install packages. They are accessed by pacman in the order listed.\n\n"
 _MirrorbyCountry="Generate list by Country"
@@ -250,6 +258,10 @@ _DevSelGrubTitle=" Select Grub Device "
 # Partitioning Tool - Translate
 _PartToolTitle=" Partitioning Tool "
 _PartToolBody="\nAn Auto-Partition option is available for beginners. CFDisk is recomended for BIOS, Parted for UEFI.\n\nDO NOT select a UEFI/GPT-only partitioning tool for a BIOS/MBR system as this could cause serious problems, including an unbootable installation."
+_PartOptAutoStandard="Standard Auto Partition (BIOS & UEFI)"
+_PartOptAutoLuks="Encrypted Auto partition (BIOS & UEFI)"
+_PartOptWipe="Securely Wipe Device (optional)"
+_AutoPartWipeBody="will be destroyed. This process may also take a long time depending on the size of the device.\n\nDo you wish to continue?\n"
 
 # UEFI Partitioning Error
 _UefiPartErrTitle=" UEFI Partitioning Error "
@@ -311,10 +323,9 @@ _InstBaseLK="Latest Kernel"
 _InstBaseLKBD="Latest Kernel & base-devel"
 _InstBaseLTS="LTS Kernel"
 _InstBaseLTSBD="LTS Kernel & base-devel"
-
-# Install Wireless Packages
-_InstWirTitle=" Wireless Device Detected "
-_InstWirBody="\nInstalling supplementary wireless packages...\n\n"
+_InstBaseCustom="Custom Installation"
+_InstBaseCustTitle=" Custom Base Installation "
+_InstBaseCustBody="Suitable for experienced users only."
 
 # Install BIOS Bootloader
 _InstBiosBtTitle=" Install BIOS Bootloader "
@@ -349,7 +360,7 @@ _RefiErrBody="\nThe rEFInd installation script will not work unless the UEFI par
 
 # ALSA, Xorg, Input
 _AXITitle=" ALSA, Xorg, and Input "
-_AXIBody="\nBefore installing graphics card driver(s) or desktop environments, other packages are needed first:\n\nalsa - Advanced Linux Sound Architecture\nxorg-* - open-source X window system for graphics\nxf86-input-* - open-source drivers for input devices\n\n"
+_AXIBody="Packages are first needed for sound (alsa), graphics (xorg), and input devices (xf86-input). Key packages have been pre-selected.\n\n"
 
 # Graphics Card Menu
 _GCtitle=" Graphics Card Menu "
@@ -370,7 +381,7 @@ _InstDEBody="\nDesktop Environments are listed first, and may have multiple down
 
 # Install Common Packages
 _InstComTitle=" Install Common Packages? "
-_InstComBody="\nSome environments require common files to be installed, particularly for permissions, creation of home folders, and file manager functionality.\n\nPackages include: xdg-user-dirs, gksu, gnome-keyring, polkit, gvfs, and the gnome-icon-theme, etc. Those installing the full KDE desktop alone will not need to install these.\n\nInstall these packages? This option will only be presented ONCE.\n\n"
+_InstComBody="Some environments require additional packages to function better."
 
 # DM Enabled
 _DmDoneTitle="Enabled "

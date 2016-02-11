@@ -16,7 +16,9 @@
 ################################################################################
 
 # Create a temporary file to store menu selections
-ANSWER="/tmp/.install"
+ANSWER="/tmp/.install"          # Basic menu selections
+PACKAGES="/tmp/.packages"       # Packages to install
+BTRFS_OPTS="/tmp/.btrfs_opts"   #BTRFS mount options
 # Save retyping
 VERSION="Installation script for Archlinux"
 # Installation
@@ -69,7 +71,6 @@ PACOPT=-1               # Option for confirmation with pacstrap
 MOUNTPOINT="/mnt"       # Installation
 MOUNT_TYPE=""           # "/dev/" for standard partitions, "/dev/mapper" for LVM
 BTRFS=0                 # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
-BTRFS_OPTS="/tmp/.btrfs_opts" #BTRFS Mount options
 BTRFS_MNT=""            # used for syslinux where /mnt is a btrfs subvolume
 # Language Support
 CURR_LOCALE="en_US.UTF-8"   # Default Locale
@@ -548,12 +549,13 @@ umount_partitions(){
   check_for_error
 }
 
-# Adapted from AIS
+# Revised to deal with partion sizes now being displayed to the user
 confirm_mount() {
   if [[ $(mount | grep $1) ]]; then
     DIALOG --title "$_MntStatusTitle" --infobox "$_MntStatusSucc" 0 0
     sleep 2
-    PARTITIONS="$(echo $PARTITIONS | sed s/${PARTITION}$' -'//)"
+    #PARTITIONS="$(echo $PARTITIONS | sed s/${PARTITION}$' -'//)"
+    PARTITIONS=$(echo $PARTITIONS | sed "s/${PARTITION} [0-9]*[G-M]//" | sed "s/${PARTITION} [0-9]*\.[0-9]*[G-M]//" | sed s/${PARTITION}$' -'//)
     NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
   else
     DIALOG --title "$_MntStatusTitle" --infobox "$_MntStatusFail" 0 0
@@ -574,14 +576,16 @@ confirm_mount_btrfs() {
   fi
 }
 
-# Adapted from AIS. However, this does not assume that the formatted device is the Root
-# installation device; more than one device may be formatted. This is now set in the
-# mount_partitions function, when the Root is chosen.
+# Revised to include device size in menu display. This function does not assume
+# that the formatted device is the Root installation device as more than one
+# device may be formatted. Root is set in the mount_partitions function, when
+# the Root is chosen.
 select_device() {
   DEVICE=""
-  devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme\|mmc');
+  #devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep -i 'sd\|hd\|vd\|nvme\|mmc');
+  devices_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'disk' | awk '{print "/dev/" $1 " " $2}' | sort -u);
   for i in ${devices_list[@]}; do
-    DEVICE="${DEVICE} ${i} -"
+    DEVICE="${DEVICE} ${i}"
   done
   DIALOG --title "$_DevSelTitle" --menu "$_DevSelBody" 0 0 4 ${DEVICE} 2>${ANSWER} || prep_menu
   DEVICE=$(cat ${ANSWER})
@@ -590,7 +594,7 @@ select_device() {
 # Same as above, but goes to install_base_menu instead where cancelling, and otherwise installs Grub.
 select_grub_device() {
   GRUB_DEVICE=""
-  grub_devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd');
+  grub_devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep -i 'sd\|hd\|vd\|nvme\|mmc');
   for i in ${grub_devices_list[@]}; do
     GRUB_DEVICE="${GRUB_DEVICE} ${i} -"
   done
@@ -601,6 +605,28 @@ select_grub_device() {
   sleep 1
   arch_chroot "grub-install --target=i386-pc --recheck ${GRUB_DEVICE}" 2>/tmp/.errlog
   check_for_error
+}
+
+# Securely destroy all data on a given device.
+secure_wipe(){
+  # Warn the user. If they proceed, wipe the selected device.
+  DIALOG --title " $_PartOptWipe " --yesno "\nWARNING: ALL data on ${DEVICE} $_AutoPartWipeBody" 0 0
+  if [[ $? -eq 0 ]]; then
+    clear
+    # Install wipe where not already installed. Much faster than dd
+    if [[ $(pacman -Qs wipe) == "" ]]; then
+      pacman -Sy --noconfirm wipe 2>/tmp/.errlog
+      check_for_error
+      clear
+    fi
+    echo -e "\n\nSecurly Wiping Device ${DEVICE}. Please be patient...\n\n"
+    wipe -Ifre ${DEVICE}
+    # Alternate dd command - requires pv to be installed
+    #dd if=/dev/zero | pv | dd of=${DEVICE} iflag=nocache oflag=direct bs=4096 2>/tmp/.errlog
+    check_for_error
+  else
+    create_partitions
+  fi
 }
 
 # Originally adapted from AIS.
@@ -661,32 +687,40 @@ create_partitions(){
   }
 
   DIALOG --title "$_PartToolTitle" \
-  --menu "$_PartToolBody" 0 0 6 \
-  "1" $"Auto Partition (BIOS & UEFI)" \
-  "2" $"Parted (BIOS & UEFI)" \
-  "3" $"CFDisk (BIOS/MBR)" \
-  "4" $"CGDisk (UEFI/GPT)" \
-  "5" $"FDisk  (BIOS & UEFI)" \
-  "6" $"GDisk  (UEFI/GPT)" 2>${ANSWER}
+  --menu "$_PartToolBody" 0 0 8 \
+  "1" "$_PartOptWipe" \
+  "2" "$_PartOptAutoStandard" \
+  "3" "$_PartOptAutoLuks" \
+  "4" $"Parted (BIOS & UEFI)" \
+  "5" $"CFDisk (BIOS/MBR)" \
+  "6" $"CGDisk (UEFI/GPT)" \
+  "7" $"FDisk  (BIOS & UEFI)" \
+  "8" $"GDisk  (UEFI/GPT)" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
-    auto_partition
+    secure_wipe
     ;;
     "2")
+    auto_partition
+    ;;
+    "3")
+    luks_auto_partition
+    ;;
+    "4")
     clear
     parted ${DEVICE}
     ;;
-    "3")
+    "5")
     cfdisk ${DEVICE}
     ;;
-    "4")
+    "6")
     cgdisk ${DEVICE}
     ;;
-    "5")
+    "7")
     clear
     fdisk ${DEVICE}
     ;;
-    "6")
+    "8")
     clear
     gdisk ${DEVICE}
     ;;
@@ -696,14 +730,15 @@ create_partitions(){
   esac
 }
 
-# find all available partitions and generate a list of them
-# This also includes partitions on different devices.
+# Revised to include partition sizes. Finds all available partitions and
+# generate a list of them. This also includes partitions on different devices.
 find_partitions() {
   PARTITIONS=""
   NUMBER_PARTITIONS=0
-  partition_list=$(lsblk -l | grep 'part\|lvm' | sed 's/[\t ].*//' | sort -u)
+  #partition_list=$(lsblk -l | grep 'part\|lvm' | sed 's/[\t ].*//' | sort -u)
+  partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm' | awk '{print $1 " " $2}' | sort -u)
   for i in ${partition_list[@]}; do
-    PARTITIONS="${PARTITIONS} ${i} -"
+    PARTITIONS="${PARTITIONS} ${i}"
     NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
   done
   # Deal with incorrect partitioning
@@ -858,40 +893,22 @@ mount_partitions() {
   btrfs_mount_opts() {
     echo "" > ${BTRFS_OPTS}
     DIALOG --title "$_btrfsMntTitle" --checklist "$_btrfsMntBody" 0 0 16 \
-    "1" "autodefrag" off \
-    "2" "compress=zlib" off \
-    "3" "compress=lzo" off \
-    "4" "compress=no" off \
-    "5" "compress-force=zlib" off \
-    "6" "compress-force=lzo" off \
-    "7" "discard" off \
-    "8" "noacl" off \
-    "9" "noatime" off \
-    "10" "nodatasum" off \
-    "11" "nospace_cache" off \
-    "12" "recovery" off \
-    "13" "skip_balance" off \
-    "14" "space_cache" off  \
-    "15" "ssd" off \
-    "16" "ssd_spread" off 2>${BTRFS_OPTS}
-    # Double-digits first
-    sed -i 's/10/nodatasum,/' ${BTRFS_OPTS}
-    sed -i 's/11/nospace_cache,/' ${BTRFS_OPTS}
-    sed -i 's/12/recovery,/' ${BTRFS_OPTS}
-    sed -i 's/13/skip_balance,/' ${BTRFS_OPTS}
-    sed -i 's/14/space_cache,/' ${BTRFS_OPTS}
-    sed -i 's/15/ssd,/' ${BTRFS_OPTS}
-    sed -i 's/16/ssd_spread,/' ${BTRFS_OPTS}
-    # then single digits
-    sed -i 's/1/autodefrag,/' ${BTRFS_OPTS}
-    sed -i 's/2/compress=zlib,/' ${BTRFS_OPTS}
-    sed -i 's/3/compress=lzo,/' ${BTRFS_OPTS}
-    sed -i 's/4/compress=no,/' ${BTRFS_OPTS}
-    sed -i 's/5/compress-force=zlib,/' ${BTRFS_OPTS}
-    sed -i 's/6/compress-force=lzo,/' ${BTRFS_OPTS}
-    sed -i 's/7/noatime,/' ${BTRFS_OPTS}
-    sed -i 's/8/noacl,/' ${BTRFS_OPTS}
-    sed -i 's/9/noatime,/' ${BTRFS_OPTS}
+    "autodefrag," "-" off \
+    "compress=zlib," "-" off \
+    "compress=lzo," "-" off \
+    "compress=no," "-" off \
+    "compress-force=zlib," "-" off \
+    "compress-force=lzo," "-" off \
+    "discard," "-" off \
+    "noacl," "-" off \
+    "noatime," "-" off \
+    "nodatasum," "-" off \
+    "nospace_cache," "-" off \
+    "recovery," "-" off \
+    "skip_balance," "-" off \
+    "space_cache," "-" off \
+    "ssd," "-" off \
+    "ssd_spread," "-" off 2>${BTRFS_OPTS}
     # Now clean up the file
     sed -i 's/ //g' ${BTRFS_OPTS}
     sed -i '$s/,$//' ${BTRFS_OPTS}
@@ -1091,7 +1108,7 @@ deactivate_lvm() {
       pvremove -f ${i} >/dev/null 2>&1
     done
     # This step will remove old lvm metadata on partitions where identified.
-    LVM_PT=$(lvmdiskscan | grep 'LVM physical volume' | grep 'sd[a-z]' | sed 's/\/dev\///' | awk '{print $1}')
+    LVM_PT=$(lvmdiskscan | grep 'LVM physical volume' | grep 'sd\|hd\|vd\|nvme\|mmc' | sed 's/\/dev\///' | awk '{print $1}')
     for i in ${LVM_PT}; do
       dd if=/dev/zero bs=512 count=512 of=/dev/${i} >/dev/null 2>&1
     done
@@ -1102,7 +1119,7 @@ deactivate_lvm() {
 find_lvm_partitions() {
   LVM_PARTITIONS=""
   NUMBER_LVM_PARTITIONS=0
-  lvm_partition_list=$(lvmdiskscan | grep -v 'LVM physical volume' | grep 'sd[a-z][1-99]' | sed 's/\/dev\///' | awk '{print $1}')
+  lvm_partition_list=$(lvmdiskscan | grep -v 'LVM physical volume' | grep 'sd\|hd\|vd\|nvme\|mmc' | sed 's/\/dev\///' | awk '{print $1}')
   for i in ${lvm_partition_list[@]}; do
     LVM_PARTITIONS="${LVM_PARTITIONS} ${i} -"
     NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS + 1 ))
@@ -1177,6 +1194,7 @@ create_lvm() {
   LVM_PARTITION=$(cat ${ANSWER})
   # add the partition to the temporary file for the vgcreate command
   # Remove selected partition from the list and deduct number of LVM viable partitions remaining
+  # FIX TO INCLUDE PARTITION SIZES
   sed -i "s/x/\/dev\/${LVM_PARTITION} x/" /tmp/.vgcreate
   LVM_PARTITIONS="$(echo $LVM_PARTITIONS | sed s/${LVM_PARTITION}$' -'//)"
   NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
@@ -1274,12 +1292,88 @@ create_lvm() {
 
 # Install necessary package to have a functional system
 install_base() {
+
+  # Total control of core packages installed
+  install_custom_base() {
+    DIALOG --title "$_InstBaseCustTitle" --checklist "$_InstBaseCustBody $_UseSpaceBar" 0 50 14 \
+    "bash" "-" on \
+    "base-devel" "-" on \
+    "btrfs-progs" "-" on \
+    "bzip2" "-" on \
+    "coreutils" "-" on \
+    "cryptsetup" "-" on \
+    "device-mapper" "-" on \
+    "dhcpcd" "-" on \
+    "diffutils" "-" on \
+    "e2fsprogs" "-" on \
+    "f2fs-tools" "-" on \
+    "file" "-" on \
+    "filesystem" "-" on \
+    "findutils" "-" on \
+    "gawk" "-" on \
+    "gcc-libs" "-" on \
+    "gettext" "-" on \
+    "glibc" "-" on \
+    "grep" "-" on \
+    "gzip" "-" on \
+    "inetutils" "-" on \
+    "iproute2" "-" on \
+    "iputils" "-" on \
+    "jfsutils" "-" on \
+    "less" "-" on \
+    "licenses" "-" on \
+    "linux" "-" on \
+    "linux-lts" "-" off \
+    "logrotate" "-" on \
+    "lvm2" "-" on \
+    "man-db" "-" on \
+    "man-pages" "-" on \
+    "mdadm" "-" on \
+    "nano" "-" on \
+    "netctl" "-" on \
+    "ntp" "-" on \
+    "pacman" "-" on \
+    "pciutils" "-" on \
+    "pcmciautils" "-" on \
+    "perl" "-" on \
+    "procps-ng" "-" on \
+    "psmisc" "-" on \
+    "reiserfsprogs" "-" on \
+    "s-nail" "-" on \
+    "sed" "-" on \
+    "shadow" "-" on \
+    "sysfsutils" "-" on \
+    "systemd-sysvcompat" "-" on \
+    "sudo" "-" on \
+    "tar" "-" on \
+    "texinfo" "-" on \
+    "usbutils" "-" on \
+    "util-linux" "-" on \
+    "vi" "-" on \
+    "which" "-" on \
+    "xfsprogs" "-" on 2>${PACKAGES}
+
+    # If at least one package, install.
+    if [[ $(cat ${PACKAGES}) != "" ]]; then
+      # Ensure a kernel has been selected at the very least
+      if [[ $(cat ${PACKAGES} | grep " linux \| linux-lts ") != "" ]]; then
+        PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
+        check_for_error
+      else
+        # If no kernel selected, warn and show the menu again
+        DIALOG --title "$_ErrTitle" --msgbox "$_ErrNoKernel" 0 0
+        install_custom_base
+      fi
+    fi
+  }
+
   DIALOG --title "$_InstBseTitle" \
-  --menu "$_InstBseBody" 0 0 4 \
+  --menu "$_InstBseBody" 0 0 5 \
   "1" "$_InstBaseLK" \
   "2" "$_InstBaseLKBD" \
   "3" "$_InstBaseLTS" \
-  "4" "$_InstBaseLTSBD" 2>${ANSWER}
+  "4" "$_InstBaseLTSBD" \
+  "5" "$_InstBaseCustom" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
     # Latest Kernel
@@ -1302,6 +1396,11 @@ install_base() {
     base-devel btrfs-progs ntp sudo f2fs-tools
     [[ $? -eq 0 ]] && LTS=1 && BASE_DEVEL=1
     ;;
+    "5")
+    # Custom (experienced users)
+    clear
+    install_custom_base
+    ;;
     *)
     install_base_menu
     ;;
@@ -1310,14 +1409,6 @@ install_base() {
   [[ -e /tmp/vconsole.conf ]] && cp /tmp/vconsole.conf \
   ${MOUNTPOINT}/etc/vconsole.conf 2>>/tmp/.errlog
   check_for_error
-  #check for a wireless device
-  if [[ $(lspci | grep -i "Network Controller") != "" ]]; then
-    DIALOG --title "$_InstWirTitle" --infobox "$_InstWirBody" 0 0
-    sleep 2
-    PACSTRAP iw wireless_tools wpa_actiond wpa_supplicant \
-    dialog
-    check_for_error
-  fi
 }
 
 # Install an AUR helper for managing AUR packages
@@ -1516,17 +1607,11 @@ install_bootloader() {
 }
 
 # Needed for broadcom and other network controllers
-install_wireless_firmware() {
+install_wireless_packages() {
   check_mount
-  DIALOG --title "$_WirelssFirmTitle" --menu "$_WirelssFirmBody" 0 0 8 \
+  DIALOG --title "$_WirelssOptTitle" --menu "$_WirelessOptBody" 0 0 2 \
   "1" "$_SeeWirelessDev" \
-  "2" $"Broadcom 802.11b/g/n" \
-  "3" $"Broadcom BCM203x / STLC2300 Bluetooth" \
-  "4" $"Intel PRO/Wireless 2100" \
-  "5" $"Intel PRO/Wireless 2200" \
-  "6" $"ZyDAS ZD1211(b) 802.11a/b/g USB WLAN" \
-  "7" "$_All" \
-  "8" "$_Back" 2>${ANSWER}
+  "2" "$_WirelssOptTitle" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
     # Identify the Wireless Device
@@ -1536,47 +1621,53 @@ install_wireless_firmware() {
     else
       DIALOG --title "$_WirelessShowTitle" --msgbox "$_WirelessErrBody" 7 30
     fi
+    install_wireless_packages
     ;;
-    "2")
-    # Broadcom
-    PACSTRAP b43-fwcutter
-    ;;
-    "3")
-    # Bluetooth
-    PACSTRAP bluez-firmware
-    ;;
-    "4")
-    # Intel 2100
-    PACSTRAP ipw2100-fw
-    ;;
-    "5")
-    # Intel 2200
-    PACSTRAP ipw2200-fw
-    ;;
-    "6")
-    # ZyDAS
-    PACSTRAP zd1211-firmware
-    ;;
-    "7")
-    # All
-    PACSTRAP b43-fwcutter bluez-firmware ipw2100-fw ipw2200-fw \
-    zd1211-firmware
+    "2") # Install Wireless Device Packages
+    DIALOG --title " $_WirelssOptTitle " --checklist "$_WirelssBody $_UseSpaceBar" 0 0 11 \
+    "dialog" "wifi" on \
+    "iw" "wifi" on \
+    "rp-pppoe" "wifi" on \
+    "wireless_tools" "wifi" on \
+    "wpa_actiond" "wifi" on \
+    "wpa_supplicant" "wifi" on \
+    "b43-fwcutter" "Broadcom 802.11b/g/n" off \
+    "bluez-firmware" "Broadcom BCM203x / STLC2300 Bluetooth" off \
+    "ipw2100-fw" "Intel PRO/Wireless 2100" off \
+    "ipw2200-fw" "Intel PRO/Wireless 2200" off \
+    "zd1211-firmware" "ZyDAS ZD1211(b) 802.11a/b/g USB WLAN" off 2>${PACKAGES}
+    # If at least one package, install.
+    if [[ $(cat ${PACKAGES}) != "" ]]; then
+      PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
+      check_for_error
+    fi
     ;;
     *)
     install_base_menu
     ;;
   esac
-  check_for_error
-  install_wireless_firmware
 }
 
 # Install alsa, xorg and input drivers. Also copy the xkbmap configuration file created earlier to the installed system
 # This will run only once.
 install_alsa_xorg_input() {
-  DIALOG --title "$_AXITitle" --msgbox "$_AXIBody" 0 0
-  PACSTRAP alsa-utils xorg-server xorg-server-utils xorg-xinit \
-  xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
-  check_for_error
+  echo "" > ${PACKAGES}
+  DIALOG --title "$_AXITitle" --checklist "$_AXIBody$_UseSpaceBar" 0 0 10 \
+  "alsa-utils" "-" on \
+  "xorg-server" "-" on \
+  "xorg-server-common" "-" off \
+  "xorg-server-utils" "-" on \
+  "xorg-xinit" "-" on \
+  "xf86-input-evdev" "-" off \
+  "xf86-input-joystick" "-" off \
+  "xf86-input-keyboard" "-" on \
+  "xf86-input-mouse" "-" on \
+  "xf86-input-synaptics" "-" on 2>${PACKAGES}
+  # If at least one package, install.
+  if [[ $(cat ${PACKAGES}) != "" ]]; then
+    PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
+    check_for_error
+  fi
   # copy the keyboard configuration file, if generated
   [[ -e /tmp/00-keyboard.conf ]] && cp /tmp/00-keyboard.conf ${MOUNTPOINT}/etc/X11/xorg.conf.d/00-keyboard.conf
   # now copy across .xinitrc for all user accounts
@@ -1585,6 +1676,7 @@ install_alsa_xorg_input() {
     cp -f ${MOUNTPOINT}/etc/X11/xinit/xinitrc ${MOUNTPOINT}/home/$i
     arch_chroot "chown -R ${i}:users /home/${i}"
   done
+  # Ensure option is only shown once
   AXI_INSTALLED=1
 }
 
@@ -1888,14 +1980,31 @@ install_de_wm() {
   check_for_error
   # Offer to install common packages
   if [[ $COMMON_INSTALLED -eq 0 ]]; then
-    DIALOG --title "$_InstComTitle" --yesno "$_InstComBody" 0 0
-    if [[ $? -eq 0 ]]; then
-      PACSTRAP gksu gnome-keyring polkit xdg-user-dirs xdg-utils gamin gvfs gvfs-afc gvfs-smb ttf-dejavu gnome-icon-theme python2-xdg bash-completion ntfs-3g
+    # Clear the packages file
+    echo "" > ${PACKAGES}
+    DIALOG --title "$_InstComTitle" --checklist "$_InstComBody $_UseSpaceBar" 0 50 14 \
+    "bash-completion" "-" on \
+    "gamin" "-" on \
+    "gksu" "-" on \
+    "gnome-icon-theme" "-" on \
+    "gnome-keyring" "-" on \
+    "gvfs" "-" on \
+    "gvfs-afc" "-" on \
+    "gvfs-smb" "-" on \
+    "polkit" "-" on \
+    "python2-xdg" "-" on \
+    "ntfs-3g" "-" on \
+    "ttf-dejavu" "-" on \
+    "xdg-user-dirs" "-" on \
+    "xdg-utils" "-" on \
+    "xterm" "-" on 2>${PACKAGES}
+    # If at least one package, install.
+    if [[ $(cat ${PACKAGES}) != "" ]]; then
+      PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
     fi
+    COMMON_INSTALLED=1
   fi
-  # Either way, the option will no longer be presented.
-  COMMON_INSTALLED=1
 }
 
 # Determine if LXDE, LXQT, Gnome, and/or KDE has been installed, and act accordingly.
@@ -2019,7 +2128,7 @@ install_nm() {
       ;;
       "3")
       # Network Manager
-      PACSTRAP networkmanager network-manager-applet rp-pppoe
+      PACSTRAP networkmanager network-manager-applet
       arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
       ;;
       "4")
@@ -2271,7 +2380,7 @@ install_base_menu() {
   "2" "$_InstBse" \
   "3" "$_InstAur" \
   "4" "$_InstBootldr" \
-  "5" "$_InstWirelessFirm" \
+  "5" "$_WirelssOptTitle" \
   "6" "$_Back" 2>${ANSWER}
   HIGHLIGHT_SUB=$(cat ${ANSWER})
   case $(cat ${ANSWER}) in
@@ -2291,7 +2400,7 @@ install_base_menu() {
     install_bootloader
     ;;
     "5")
-    install_wireless_firmware
+    install_wireless_packages
     ;;
     *)
     main_menu_online
