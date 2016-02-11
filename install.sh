@@ -18,7 +18,7 @@
 # Create a temporary file to store menu selections
 ANSWER="/tmp/.install"          # Basic menu selections
 PACKAGES="/tmp/.packages"       # Packages to install
-BTRFS_OPTS="/tmp/.btrfs_opts"   #BTRFS mount options
+BTRFS_OPTS="/tmp/.btrfs_opts"   # BTRFS mount options
 # Save retyping
 VERSION="Installation script for Archlinux"
 # Installation
@@ -32,18 +32,17 @@ COMMON_INSTALLED=0      # Has the common-packages option been taken?
 NM_INSTALLED=0          # Has a network connection manager been installed and enabled?
 AXI_INSTALLED=0         # Have the ALSA, Xorg, and xf86-input packages been installed?
 BOOTLOADER="n/a"        # Which bootloader has been installed?
-EVOBOXFM=""             # Which file manager has been selected for EvoBox?
-EVOBOXIB=""             # Which Internet Browser has been selected for EvoBox?
 DM="n/a"                # Which display manager has been installed?
 KEYMAP="us"             # Virtual console keymap. Default is "us"
 XKBMAP="us"             # X11 keyboard layout. Default is "us"
 ZONE=""                 # For time
 SUBZONE=""              # For time
 LOCALE="en_US.UTF-8"    # System locale. Default is "en_US.UTF-8"
-LTS=0                   # Has the LTS Kernel been installed?
+KERNEL=0                   # Has the LTS Kernel been installed?
 GRAPHIC_CARD=""         # graphics card
 INTEGRATED_GC=""        # Integrated graphics card for NVIDIA
 NVIDIA_INST=0           # Indicates if NVIDIA proprietary driver has been installed
+VB_MOD=""               # Virtualbox guest modules to install depending on kernel
 SHOW_ONCE=0             # Show de_wm information only once
 # Architecture
 ARCHI=`uname -m`        # Display whether 32 or 64 bit system
@@ -52,6 +51,7 @@ ROOT_PART=""            # ROOT partition
 UEFI_PART=""            # UEFI partition
 UEFI_MOUNT=""           # UEFI mountpoint
 INST_DEV=""             # Device where system has been installed
+# Menu highlighting (automated step progression)
 HIGHLIGHT=0             # Highlight items for Main Menu
 HIGHLIGHT_SUB=0         # Highlight items for submenus
 SUB_MENU=""             # Submenu to be highlighted
@@ -72,6 +72,7 @@ MOUNTPOINT="/mnt"       # Installation
 MOUNT_TYPE=""           # "/dev/" for standard partitions, "/dev/mapper" for LVM
 BTRFS=0                 # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
 BTRFS_MNT=""            # used for syslinux where /mnt is a btrfs subvolume
+2FS=0                   # F2FS used? "1" = yes.
 # Language Support
 CURR_LOCALE="en_US.UTF-8"   # Default Locale
 FONT=""                 # Set new font if necessary
@@ -757,6 +758,7 @@ find_partitions() {
 select_filesystem(){
   # Clear special FS type flags
   BTRFS=0
+  F2FS=0
   DIALOG --title "$_FSTitle" \
   --menu "$_FSBody" 0 0 12 \
   "1" "$_FSSkip" \
@@ -797,6 +799,7 @@ select_filesystem(){
     "6")
     FILESYSTEM="mkfs.f2fs"
     modprobe f2fs
+    F2FS=1
     ;;
     "7")
     FILESYSTEM="mkfs.jfs -q"
@@ -1290,121 +1293,38 @@ create_lvm() {
 ##
 ################################################################################
 
-# Install necessary package to have a functional system
+# The linux package will be removed from the base group as it and/or the lts
+# version will be selected by the user.
 install_base() {
+  # Prep variables
+  echo "" > ${PACKAGES}
+  VB_MOD=""
+  BTRF_CHECK=""
+  F2FS_CHECK=""
+  # If btrfs and/or f2fs was used, auto-select the necessary packages for installation
+  [[ $BTRFS -gt 0 ]] && BTRF_CHECK=$(echo "btrfs-progs" "-" on) || BTRF_CHECK=$(echo "btrfs-progs" "-" off)
+  [[ $F2FS -gt 0 ]] && F2FS_CHECK=$(echo "f2fs-tools" "-" on) || F2FS_CHECK=$(echo "f2fs-tools" "-" off)
 
-  # Total control of core packages installed
-  install_custom_base() {
-    DIALOG --title "$_InstBaseCustTitle" --checklist "$_InstBaseCustBody $_UseSpaceBar" 0 50 14 \
-    "bash" "-" on \
-    "base-devel" "-" on \
-    "btrfs-progs" "-" on \
-    "bzip2" "-" on \
-    "coreutils" "-" on \
-    "cryptsetup" "-" on \
-    "device-mapper" "-" on \
-    "dhcpcd" "-" on \
-    "diffutils" "-" on \
-    "e2fsprogs" "-" on \
-    "f2fs-tools" "-" on \
-    "file" "-" on \
-    "filesystem" "-" on \
-    "findutils" "-" on \
-    "gawk" "-" on \
-    "gcc-libs" "-" on \
-    "gettext" "-" on \
-    "glibc" "-" on \
-    "grep" "-" on \
-    "gzip" "-" on \
-    "inetutils" "-" on \
-    "iproute2" "-" on \
-    "iputils" "-" on \
-    "jfsutils" "-" on \
-    "less" "-" on \
-    "licenses" "-" on \
-    "linux" "-" on \
-    "linux-lts" "-" off \
-    "logrotate" "-" on \
-    "lvm2" "-" on \
-    "man-db" "-" on \
-    "man-pages" "-" on \
-    "mdadm" "-" on \
-    "nano" "-" on \
-    "netctl" "-" on \
-    "ntp" "-" on \
-    "pacman" "-" on \
-    "pciutils" "-" on \
-    "pcmciautils" "-" on \
-    "perl" "-" on \
-    "procps-ng" "-" on \
-    "psmisc" "-" on \
-    "reiserfsprogs" "-" on \
-    "s-nail" "-" on \
-    "sed" "-" on \
-    "shadow" "-" on \
-    "sysfsutils" "-" on \
-    "systemd-sysvcompat" "-" on \
-    "sudo" "-" on \
-    "tar" "-" on \
-    "texinfo" "-" on \
-    "usbutils" "-" on \
-    "util-linux" "-" on \
-    "vi" "-" on \
-    "which" "-" on \
-    "xfsprogs" "-" on 2>${PACKAGES}
+  DIALOG --title "$_InstBseTitle" --checklist "$_InstBseBody$_UseSpaceBar" 0 0 6 \
+  "linux" "-" on \
+  "linux-lts" "-" off \
+  "base-devel" "-" on \
+  $BTRF_CHECK $F2FS_CHECK "sudo" "-" on 2>${PACKAGES}
 
-    # If at least one package, install.
-    if [[ $(cat ${PACKAGES}) != "" ]]; then
-      # Ensure a kernel has been selected at the very least
-      if [[ $(cat ${PACKAGES} | grep " linux \| linux-lts ") != "" ]]; then
-        PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
-        check_for_error
-      else
-        # If no kernel selected, warn and show the menu again
-        DIALOG --title "$_ErrTitle" --msgbox "$_ErrNoKernel" 0 0
-        install_custom_base
-      fi
-    fi
-  }
+  # Determine kernel type(s) selected for installation. Also determine VB guest modules to be installed (if applicable).
+  [[ $(cat ${PACKAGES} | grep "linux ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3 && VB_MOD="virtualbox-guest-modules virtualbox-guest-modules-lts"
+  [[ $(cat ${PACKAGES} | grep "linux ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2 && VB_MOD="virtualbox-guest-modules-lts"
+  [[ $(cat ${PACKAGES} | grep "linux ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1 && VB_MOD="virtualbox-guest-modules"
+  [[ $(cat ${PACKAGES} | grep "linux ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
 
-  DIALOG --title "$_InstBseTitle" \
-  --menu "$_InstBseBody" 0 0 5 \
-  "1" "$_InstBaseLK" \
-  "2" "$_InstBaseLKBD" \
-  "3" "$_InstBaseLTS" \
-  "4" "$_InstBaseLTSBD" \
-  "5" "$_InstBaseCustom" 2>${ANSWER}
-  case $(cat ${ANSWER}) in
-    "1")
-    # Latest Kernel
-    PACSTRAP base btrfs-progs ntp sudo f2fs-tools
-    ;;
-    "2")
-    # Latest Kernel and base-devel
-    PACSTRAP base base-devel btrfs-progs ntp sudo f2fs-tools
-    [[ $? -eq 0 ]] && BASE_DEVEL=1
-    ;;
-    "3")
-    # LTS Kernel
-    PACSTRAP $(pacman -Sqg base | sed 's/^linux$/&-lts/') \
-    btrfs-progs ntp sudo f2fs-tools
-    [[ $? -eq 0 ]] && LTS=1
-    ;;
-    "4")
-    # LTS Kernel and base-devel
-    PACSTRAP $(pacman -Sqg base | sed 's/^linux$/&-lts/') \
-    base-devel btrfs-progs ntp sudo f2fs-tools
-    [[ $? -eq 0 ]] && LTS=1 && BASE_DEVEL=1
-    ;;
-    "5")
-    # Custom (experienced users)
-    clear
-    install_custom_base
-    ;;
-    *)
-    install_base_menu
-    ;;
-  esac
+  if [[ $KERNEL -gt 0 ]]; then
+    pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) 2>/tmp/.errlog
+    check_for_error
+  else
+    DIALOG --title "$_ErrTitle" --msgbox "$_ErrNoKernel" 0 0
+    install_base
+  fi
+
   # If the virtual console has been set, then copy config file to installation
   [[ -e /tmp/vconsole.conf ]] && cp /tmp/vconsole.conf \
   ${MOUNTPOINT}/etc/vconsole.conf 2>>/tmp/.errlog
@@ -1803,9 +1723,8 @@ setup_graphics_card() {
     "8")
     # VirtualBox
     DIALOG --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
-    [[ $LTS == 0 ]] && PACSTRAP virtualbox-guest-utils virtualbox-guest-modules  \
-    || PACSTRAP virtualbox-guest-utils virtualbox-guest-modules-lts
-    # Load modules and enable vboxservice whatever the kernel
+    PACSTRAP virtualbox-guest-utils ${VB_MOD} 2>/tmp/.errlog
+    # Load modules and enable vboxservice.
     arch_chroot "modprobe -a vboxguest vboxsf vboxvideo"
     arch_chroot "systemctl enable vboxservice"
     echo -e "vboxguest\nvboxsf\nvboxvideo" > ${MOUNTPOINT}/etc/modules-load.d/virtualbox.conf
