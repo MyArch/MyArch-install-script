@@ -1456,6 +1456,7 @@ install_base() {
 	[[ $(cat ${PACKAGES} | grep "linux ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
 	
 	if [[ $KERNEL -gt 0 ]]; then
+		clear
 		pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) 2>/tmp/.errlog
 		check_for_error
 	else
