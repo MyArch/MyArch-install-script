@@ -817,6 +817,7 @@ select_filesystem(){
 
 # Clear special FS type flags
 BTRFS=0
+F2FS=0
 
 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" \
     --menu "$_FSBody" 0 0 12 \
