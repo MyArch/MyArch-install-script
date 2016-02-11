@@ -1,3 +1,6 @@
+This script is a fork of CarlDuff work. Check out his awesome work if you want another
+install-script : [CarlDuff](https://github.com/CarlDuff/aif-dev)
+
 # [MyArch](https://github.com/Nandicre/MyArch) Install Script
 
 Terminal setup for MyArch liveCD. You can use it without MyArch, it works fine
