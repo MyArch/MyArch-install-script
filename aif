@@ -1471,6 +1471,7 @@ bios_bootloader() {
 			
 			# If a device has been selected, configure
 			if [[ $DEVICE != "" ]]; then
+				clear
 				arch_chroot "grub-install --target=i386-pc --debug --recheck $DEVICE" 2>/tmp/.errlog
 				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
 				check_for_error
