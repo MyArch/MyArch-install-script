@@ -1934,7 +1934,7 @@ install_de_wm() {
 	if [[ $(cat ${PACKAGES}) != "" ]]; then
 		clear
 		sed -i 's/+\|\"//g' ${PACKAGES}
-		pacstrap ${MOUNTPOINT} ${PACKAGES} 2>/tmp/.errlog
+		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
 		check_for_error
 
 		
