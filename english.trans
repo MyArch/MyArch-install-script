@@ -251,12 +251,9 @@ _MntStatusTitle=" Mount Status "
 _MntStatusSucc="\nMount Successful!\n\n"
 _MntStatusFail="\nMount Failed!\n\n"
 
-# Select Device (installation) - Translate
+# Select Device (installation)
 _DevSelTitle=" Select Device "
 _DevSelBody="\nDevices (/dev) are available hard-disks and USB-sticks to install on. The first is /sda, the second /sdb, and so on.\n\nWhere using a USB-stick to boot Architect, be careful as it will also be listed!"
-
-# Select Device (Grub) - seperate body text is not required (uses standard device selection text)
-_DevSelGrubTitle=" Select Grub Device "
 
 # Partitioning Tool - Translate
 _PartToolTitle=" Partitioning Tool "
@@ -334,11 +331,8 @@ _InstBaseCustBody="Suitable for experienced users only."
 # Install BIOS Bootloader
 _InstBiosBtTitle=" Install BIOS Bootloader "
 _InstBiosBtBody="\nGrub2 is recommended for beginners. The installation device can also be selected.\n\nSyslinux is a lighter and simpler alternative that will only work with ext/btrfs filesystems."
-
-# Grub Installation
-_InstGrubDevTitle=" Select Grub Device "
-_InstGrubDevBody="\nInstall Grub on the same device/hard-drive as Root"
-_InstGrubDevBody2="\n\nPick 'Yes' if you are only installing on one device."
+_InstSysTitle=" Install Syslinux "
+_InstSysBody="\nInstall syslinux to Master Boot Record (MBR) or to Root (/)?\n\n"
 
 # Install UEFI Bootloader
 _InstUefiBtTitle=" Install UEFI Bootloader "
