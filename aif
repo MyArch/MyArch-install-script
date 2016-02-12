@@ -637,26 +637,6 @@ select_device() {
  
   }
 
-# Same as above, but goes to install_base_menu instead where cancelling, and otherwise installs Grub.
-select_grub_device() {
-	
-    GRUB_DEVICE=""
-    grub_devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep -i 'sd\|hd\|vd\|nvme\|mmc');
-    
-    for i in ${grub_devices_list[@]}; do
-        GRUB_DEVICE="${GRUB_DEVICE} ${i} -"
-    done
-    
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevSelGrubTitle" --menu "$_DevSelBody" 0 0 4 ${GRUB_DEVICE} 2>${ANSWER} || install_base_menu
-    GRUB_DEVICE=$(cat ${ANSWER})
-    clear
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
-    sleep 1
-    arch_chroot "grub-install --target=i386-pc --recheck ${GRUB_DEVICE}" 2>/tmp/.errlog
-    check_for_error
- 
-  }
-
 # Securely destroy all data on a given device.
 secure_wipe(){
 	
@@ -1470,75 +1450,64 @@ install_base() {
 
 }
 
-# Adapted from AIS. Integrated the configuration elements.
 install_bootloader() {
 
+# Grub auto-detects installed kernels, etc. Syslinux does not, hence the extra code for it.
 bios_bootloader() {	
 	
-   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBiosBtTitle" \
-    --menu "$_InstBiosBtBody" 0 0 3 \
- 	"1" $"Grub2" \
-	"2" $"Syslinux [MBR]" \
-	"3" $"Syslinux [/]" 2>${ANSWER}
-	
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBiosBtTitle" --menu "$_InstBiosBtBody" 0 0 3 \
+ 	"grub" "-" "grub + os-prober" "-" "syslinux" "-" 2>${PACKAGES}
 	clear
 	
-	case $(cat ${ANSWER}) in
-		"1") # Grub
-			 pacstrap ${MOUNTPOINT} grub os-prober 2>/tmp/.errlog
-			 check_for_error
-             
-			 # An LVM VG/LV can consist of multiple devices. Where LVM used, user must select the device manually.
-			 if [[ $LVM_ROOT -eq 1 ]]; then
-				select_grub_device
-			 else
-				dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstGrubDevTitle" --yesno "$_InstGrubDevBody ($INST_DEV)?$_InstGrubDevBody2" 0 0
-                
-				if [[ $? -eq 0 ]]; then
-					clear
-					dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
-					sleep 1 
-					arch_chroot "grub-install --target=i386-pc --recheck ${INST_DEV}" 2>/tmp/.errlog
-					check_for_error
-				else   
-					select_grub_device
+	# If something has been selected, act
+	if [[ $(cat ${PACKAGES}) != "" ]]; then
+		sed -i 's/+\|\"//g' ${PACKAGES}
+		pacstrap ${MOUNTPOINT} ${PACKAGES} 2>/tmp/.errlog
+		check_for_error
+		
+		# If Grub, select device
+		if [[ $(cat ${PACKAGES} | grep "grub") != "" ]]; then
+			select_device
+			
+			# If a device has been selected, configure
+			if [[ $DEVICE != "" ]]; then
+				arch_chroot "grub-install --target=i386-pc --debug --recheck $DEVICE" 2>/tmp/.errlog
+				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
+				check_for_error
+				
+				# if /boot is LVM then amend /boot/grub/grub.cfg accordingly
+				if ( [[ $LVM_ROOT -eq 1 ]] && [[ $LVM_SEP_BOOT -eq 0 ]] ) || [[ $LVM_SEP_BOOT -eq 2 ]]; then
+					sed -i '/### BEGIN \/etc\/grub.d\/00_header ###/a insmod lvm' ${MOUNTPOINT}/boot/grub/grub.cfg
 				fi
-			 fi
-                       
-			 arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>/tmp/.errlog
-			 check_for_error
-             
-			 # if /boot is LVM then amend /boot/grub/grub.cfg accordingly
-			 if ( [[ $LVM_ROOT -eq 1 ]] && [[ $LVM_SEP_BOOT -eq 0 ]] ) || [[ $LVM_SEP_BOOT -eq 2 ]]; then
-				sed -i '/### BEGIN \/etc\/grub.d\/00_header ###/a insmod lvm' ${MOUNTPOINT}/boot/grub/grub.cfg
-			 fi
-         
-			 BOOTLOADER="Grub"
-             ;;          
-	"2"|"3") # Syslinux
-			 pacstrap ${MOUNTPOINT} syslinux 2>/tmp/.errlog
-          
-			 # Install to MBR or root partition, accordingly
-			 [[ $(cat ${ANSWER}) == "2" ]] && arch_chroot "syslinux-install_update -iam" 2>>/tmp/.errlog
-			 [[ $(cat ${ANSWER}) == "3" ]] && arch_chroot "syslinux-install_update -i" 2>>/tmp/.errlog
-			 check_for_error
-             
-			 # Amend configuration file depending on whether lvm used or not for root.
-			 if [[ $LVM_ROOT -eq 0 ]]; then
-				sed -i "s/sda[0-9]/${ROOT_PART}/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-			 else
-				sed -i "s/APPEND.*/APPEND root=\/dev\/mapper\/${ROOT_PART} rw/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-			 fi
-             
-			 # Amend configuration file for LTS kernel and/or btrfs subvolume as root
-			 [[ $LTS -eq 1 ]] && sed -i 's/linux/linux-lts/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-			 [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-             
-			 BOOTLOADER="Syslinux"
-			 ;;
-		  *) install_base_menu
-		     ;;
-   esac
+			fi
+		else
+			# Syslinux
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstSysTitle" --menu "$_InstSysBody" 0 0 2 \
+			"syslinux-install_update -iam" "[MBR]" "syslinux-install_update -i" "[/]" 2>${PACKAGES}
+			
+			# If an installation method has been chosen, run it
+			if [[ $(cat ${PACKAGES}) != "" ]]; then
+				arch_chroot "$(cat ${PACKAGES})" 2>/tmp/.errlog
+				check_for_error
+
+				# Amend configuration file depending on whether lvm used or not for root.
+				[[ $LVM_ROOT -eq 0 ]] && sed -i "s/sda[0-9]/${ROOT_PART}/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg \
+				|| sed -i "s/APPEND.*/APPEND root=\/dev\/mapper\/${ROOT_PART} rw/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+
+				# Amend configuration file for kernel(s) installed
+				if [[ $KERNEL -eq 3 ]]; then
+					sed -i "/INITRD \.\.\/initramfs-linux\.img/a--insert--\n LABEL arch-lts\n\t\t MENU LABEL Arch Linux LTS\n\t\t LINUX \.\.\/vmlinuz-linux\n\t\t APPEND root=$ROOT_PART rw\n\t\t INITRD \.\.initramfs-linux-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+					sed -i "/INITRD \.\.\/initramfs-linux-fallback\.img/a--insert--\n LABEL archfallback-lts\n\t\t MENU LABEL Arch Linux Fallback LTS\n\t\t LINUX \.\.\/vmlinuz-linux\n\t\t APPEND root=$ROOT_PART rw\n\t\t INITRD \.\.initramfs-linux-fallback-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+					sed -i s/--insert--//g ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				elif [[ $KERNEL -eq 2 ]]; then
+					sed -i 's/linux/linux-lts/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				fi
+				
+				# If BTRFS Subvolume mount	
+				[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+			fi
+		fi
+	fi
 }
 
 uefi_bootloader() {
