@@ -558,14 +558,15 @@ create_new_user() {
 
 run_mkinitcpio() {
 	
-  clear
-  
-  # If $LVM is being used, add the lvm2 hook
-  [[ $LVM -eq 1 ]] && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
+	clear
+
+	# If $LVM is being used, add the lvm2 hook
+	[[ $LVM -eq 1 ]] && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
     
-  # Amend command depending on whether LTS kernel was installed or not
-  [[ $LTS -eq 1 ]] && arch_chroot "mkinitcpio -p linux-lts" 2>/tmp/.errlog || arch_chroot "mkinitcpio -p linux" 2>/tmp/.errlog
-  check_for_error
+	# Amend command depending on whether LTS kernel was installed or not
+	([[ $KERNEL -eq 1 ]] || [[ $KERNEL -eq 3 ]]) && arch_chroot "mkinitcpio -p linux" 2>/tmp/.errlog
+	([[ $KERNEL -eq 2 ]] || [[ $KERNEL -eq 3 ]]) && arch_chroot "mkinitcpio -p linux-lts" 2>/tmp/.errlog
+	check_for_error
  
 }
 
