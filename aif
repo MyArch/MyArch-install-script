@@ -829,9 +829,9 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" \
              fi
              
              ;;
-        "3") FILESYSTEM="mkfs.ext2 -F"
+        "3") FILESYSTEM="mkfs.ext2 -q"
              ;;
-        "4") FILESYSTEM="mkfs.ext3 -F"
+        "4") FILESYSTEM="mkfs.ext3 -q"
              ;;            
         "5") FILESYSTEM="mkfs.ext4 -q"
              ;;
