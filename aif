@@ -2361,20 +2361,21 @@ edit_configs() {
              ;;
         "7") FILE="${MOUNTPOINT}/etc/fstab"
              ;;
-        "8") case $BOOTLOADER in
-                   "Grub") FILE="${MOUNTPOINT}/etc/default/grub"
-                           ;;
-               "Syslinux") FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
-                           ;;
-           "systemd-boot") FILE="${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf" 
-                           FILE2="${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf"
-                           ;;
-                 "rEFInd") [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf ]] \
-                           && FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf" || FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf"
-                           FILE2="${MOUNTPOINT}/boot/refind_linux.conf"
-                           ;;
-              esac
-            ;;
+        "8") FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
+        #case $BOOTLOADER in
+         #          "Grub") FILE="${MOUNTPOINT}/etc/default/grub"
+         #                  ;;
+         #      "Syslinux") FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
+         #                  ;;
+         #  "systemd-boot") FILE="${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf" 
+         #                  FILE2="${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf"
+         #                  ;;
+         #        "rEFInd") [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf ]] \
+         #                  && FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf" || FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf"
+         #                  FILE2="${MOUNTPOINT}/boot/refind_linux.conf"
+         #                  ;;
+         #     esac
+         #   ;;
         "9") case $DM in
                    "LXDM") FILE="${MOUNTPOINT}/etc/lxdm/lxdm.conf" 
                            ;;
