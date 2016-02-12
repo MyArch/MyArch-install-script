@@ -32,7 +32,7 @@ COMMON_INSTALLED=0      # Has the common-packages option been taken?
 NM_INSTALLED=0          # Has a network connection manager been installed and enabled?
 AXI_INSTALLED=0         # Have the ALSA, Xorg, and xf86-input packages been installed?
 BOOTLOADER="n/a"        # Which bootloader has been installed?
-DM="n/a"                # Which display manager has been installed?
+DM_INST="/tmp/.dm"      # Which display manager has been installed?
 KEYMAP="us"             # Virtual console keymap. Default is "us"
 XKBMAP="us"             # X11 keyboard layout. Default is "us"
 ZONE=""                 # For time
@@ -42,6 +42,7 @@ KERNEL=0                   # Has the LTS Kernel been installed?
 GRAPHIC_CARD=""         # graphics card
 INTEGRATED_GC=""        # Integrated graphics card for NVIDIA
 NVIDIA_INST=0           # Indicates if NVIDIA proprietary driver has been installed
+NVIDIA=""               # NVIDIA driver(s) to install depending on kernel(s)
 VB_MOD=""               # Virtualbox guest modules to install depending on kernel
 SHOW_ONCE=0             # Show de_wm information only once
 # Architecture
@@ -529,7 +530,8 @@ run_mkinitcpio() {
   # If $LVM is being used, add the lvm2 hook
   [[ $LVM -eq 1 ]] && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
   # Amend command depending on whether LTS kernel was installed or not
-  [[ $LTS -eq 1 ]] && arch_chroot "mkinitcpio -p linux-lts" 2>/tmp/.errlog || arch_chroot "mkinitcpio -p linux" 2>/tmp/.errlog
+  ([[ $KERNEL -eq 1 ]] || [[ $KERNEL -eq 3 ]]) && arch_chroot "mkinitcpio -p linux" 2>/tmp/.errlog
+  ([[ $KERNEL -eq 2 ]] || [[ $KERNEL -eq 3 ]]) && arch_chroot "mkinitcpio -p linux-lts" 2>/tmp/.errlog
   check_for_error
 }
 
@@ -590,22 +592,6 @@ select_device() {
   done
   DIALOG --title "$_DevSelTitle" --menu "$_DevSelBody" 0 0 4 ${DEVICE} 2>${ANSWER} || prep_menu
   DEVICE=$(cat ${ANSWER})
-}
-
-# Same as above, but goes to install_base_menu instead where cancelling, and otherwise installs Grub.
-select_grub_device() {
-  GRUB_DEVICE=""
-  grub_devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep -i 'sd\|hd\|vd\|nvme\|mmc');
-  for i in ${grub_devices_list[@]}; do
-    GRUB_DEVICE="${GRUB_DEVICE} ${i} -"
-  done
-  DIALOG --title "$_DevSelGrubTitle" --menu "$_DevSelBody" 0 0 4 ${GRUB_DEVICE} 2>${ANSWER} || install_base_menu
-  GRUB_DEVICE=$(cat ${ANSWER})
-  clear
-  DIALOG --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
-  sleep 1
-  arch_chroot "grub-install --target=i386-pc --recheck ${GRUB_DEVICE}" 2>/tmp/.errlog
-  check_for_error
 }
 
 # Securely destroy all data on a given device.
@@ -759,70 +745,27 @@ select_filesystem(){
   # Clear special FS type flags
   BTRFS=0
   F2FS=0
-  DIALOG --title "$_FSTitle" \
-  --menu "$_FSBody" 0 0 12 \
-  "1" "$_FSSkip" \
-  "2" $"btrfs" \
-  "3" $"ext2" \
-  "4" $"ext3" \
-  "5" $"ext4" \
-  "6" $"f2fs" \
-  "7" $"jfs" \
-  "8" $"nilfs2" \
-  "9" $"ntfs" \
-  "10" $"reiserfs" \
-  "11" $"vfat" \
-  "12" $"xfs" 2>${ANSWER}
-  case $(cat ${ANSWER}) in
-    "1")
-    FILESYSTEM="skip"
-    ;;
-    "2")
-    FILESYSTEM="mkfs.btrfs -f"
+  DIALOG --title "$_FSTitle" --menu "$_FSBody" 0 0 12 \
+  "$_FSSkip" "-" \
+  "mkfs.btrfs -f" "btrfs" \
+  "mkfs.ext2 -q" "ext2" \
+  "mkfs.ext3 -q" "ext3" \
+  "mkfs.ext4 -q" "ext4" \
+  "mkfs.f2fs" "f2fs" \
+  "mkfs.jfs -q" "jfs" \
+  "mkfs.nilfs2 -q" "nilfs2" \
+  "mkfs.ntfs -q" "ntfs" \
+  "mkfs.reiserfs -q" "reiserfs" \
+  "mkfs.vfat -F32" "vfat" \
+  "mkfs.xfs -f" "xfs" 2>${ANSWER}
+  FILESYSTEM=$(cat ${ANSWER})
+  [[ $FILESYSTEM == "mkfs.f2fs" ]] && modprobe f2fs && F2FS=1
+  # If brtfs selected, ask if subvolumes are needed
+  if [[ $FILESYSTEM == "mkfs.btrfs -f" ]]; then
     modprobe btrfs
     DIALOG --title "$_btrfsSVTitle" --yesno "$_btrfsSVBody" 0 0
-    if [[ $? -eq 0 ]];then
-      BTRFS=2
-    else
-      BTRFS=1
-    fi
-    ;;
-    "3")
-    FILESYSTEM="mkfs.ext2 -F"
-    ;;
-    "4")
-    FILESYSTEM="mkfs.ext3 -F"
-    ;;
-    "5")
-    FILESYSTEM="mkfs.ext4 -F"
-    ;;
-    "6")
-    FILESYSTEM="mkfs.f2fs"
-    modprobe f2fs
-    F2FS=1
-    ;;
-    "7")
-    FILESYSTEM="mkfs.jfs -q"
-    ;;
-    "8")
-    FILESYSTEM="mkfs.nilfs2 -f"
-    ;;
-    "9")
-    FILESYSTEM="mkfs.ntfs -q"
-    ;;
-    "10")
-    FILESYSTEM="mkfs.reiserfs -f -f"
-    ;;
-    "11")
-    FILESYSTEM="mkfs.vfat -F32"
-    ;;
-    "12")
-    FILESYSTEM="mkfs.xfs -f"
-    ;;
-    *)
-    prep_menu
-    ;;
-  esac
+    [[ $? -eq 0 ]] && BTRFS=2 || BTRFS=1
+  fi
 }
 
 mount_partitions() {
@@ -947,7 +890,7 @@ mount_partitions() {
     LVM_ROOT=1
   fi
   select_filesystem
-  [[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
+  [[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
   check_for_error
   # Make the root directory
   mkdir -p ${MOUNTPOINT} 2>/tmp/.errlog
@@ -1028,7 +971,7 @@ mount_partitions() {
     else
       MOUNT=""
       select_filesystem
-      [[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
+      [[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
       check_for_error
       # Don't give /boot as an example for UEFI systems!
       if [[ $SYSTEM == "UEFI" ]]; then
@@ -1298,37 +1241,31 @@ create_lvm() {
 install_base() {
   # Prep variables
   echo "" > ${PACKAGES}
-  VB_MOD=""
   BTRF_CHECK=""
   F2FS_CHECK=""
   # If btrfs and/or f2fs was used, auto-select the necessary packages for installation
   [[ $BTRFS -gt 0 ]] && BTRF_CHECK=$(echo "btrfs-progs" "-" on) || BTRF_CHECK=$(echo "btrfs-progs" "-" off)
   [[ $F2FS -gt 0 ]] && F2FS_CHECK=$(echo "f2fs-tools" "-" on) || F2FS_CHECK=$(echo "f2fs-tools" "-" off)
-
   DIALOG --title "$_InstBseTitle" --checklist "$_InstBseBody$_UseSpaceBar" 0 0 6 \
   "linux" "-" on \
   "linux-lts" "-" off \
   "base-devel" "-" on \
   $BTRF_CHECK $F2FS_CHECK "sudo" "-" on 2>${PACKAGES}
-
-  # Determine kernel type(s) selected for installation. Also determine VB guest modules to be installed (if applicable).
-  [[ $(cat ${PACKAGES} | grep "linux ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3 && VB_MOD="virtualbox-guest-modules virtualbox-guest-modules-lts"
-  [[ $(cat ${PACKAGES} | grep "linux ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2 && VB_MOD="virtualbox-guest-modules-lts"
-  [[ $(cat ${PACKAGES} | grep "linux ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1 && VB_MOD="virtualbox-guest-modules"
+  # Determine kernel type(s) selected for installation.
+  [[ $(cat ${PACKAGES} | grep "linux ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3
+  [[ $(cat ${PACKAGES} | grep "linux ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2
+  [[ $(cat ${PACKAGES} | grep "linux ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1
   [[ $(cat ${PACKAGES} | grep "linux ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
-
   if [[ $KERNEL -gt 0 ]]; then
-    pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) 2>/tmp/.errlog
+    PACSTRAP $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) 2>/tmp/.errlog
+    check_for_error
+    # If the virtual console has been set, then copy config file to installation
+    [[ -e /tmp/vconsole.conf ]] && cp /tmp/vconsole.conf ${MOUNTPOINT}/etc/vconsole.conf 2>/tmp/.errlog
     check_for_error
   else
     DIALOG --title "$_ErrTitle" --msgbox "$_ErrNoKernel" 0 0
     install_base
   fi
-
-  # If the virtual console has been set, then copy config file to installation
-  [[ -e /tmp/vconsole.conf ]] && cp /tmp/vconsole.conf \
-  ${MOUNTPOINT}/etc/vconsole.conf 2>>/tmp/.errlog
-  check_for_error
 }
 
 # Install an AUR helper for managing AUR packages
@@ -1366,65 +1303,58 @@ install_aur() {
   check_for_error
 }
 
-# Adapted from AIS. Integrated the configuration elements.
 install_bootloader() {
 
+  # Grub auto-detects installed kernels, etc. Syslinux does not, hence the extra code for it.
   bios_bootloader() {
-    DIALOG --title "$_InstBiosBtTitle" \
-    --menu "$_InstBiosBtBody" 0 0 3 \
-    "1" $"Grub2" \
-    "2" $"Syslinux [MBR]" \
-    "3" $"Syslinux [/]" 2>${ANSWER}
-    case $(cat ${ANSWER}) in
-      "1")
-      # Grub
-      PACSTRAP grub os-prober
+    DIALOG --title "$_InstBiosBtTitle" --menu "$_InstBiosBtBody" 0 0 3 \
+    "grub" "-" \
+    "grub + os-prober" "-" \
+    "syslinux" "-" 2>${PACKAGES}
+    # If something has been selected, act
+    if [[ $(cat ${PACKAGES}) != "" ]]; then
+      sed -i 's/+\|\"//g' ${PACKAGES}
+      PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
-      # An LVM VG/LV can consist of multiple devices. Where LVM used, user must select the device manually.
-      if [[ $LVM_ROOT -eq 1 ]]; then
-        select_grub_device
-      else
-        DIALOG --title "$_InstGrubDevTitle" --yesno "$_InstGrubDevBody ($INST_DEV)?$_InstGrubDevBody2" 0 0
-        if [[ $? -eq 0 ]]; then
+      # If Grub, select device
+      if [[ $(cat ${PACKAGES} | grep "grub") != "" ]]; then
+        select_device
+        # If a device has been selected, configure
+        if [[ $DEVICE != "" ]]; then
           clear
-          DIALOG --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
-          sleep 1
-          arch_chroot "grub-install --target=i386-pc --recheck ${INST_DEV}" 2>/tmp/.errlog
+          arch_chroot "grub-install --target=i386-pc --debug --recheck $DEVICE" 2>/tmp/.errlog
+          arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
           check_for_error
-        else
-          select_grub_device
+          # if /boot is LVM then amend /boot/grub/grub.cfg accordingly
+          if ( [[ $LVM_ROOT -eq 1 ]] && [[ $LVM_SEP_BOOT -eq 0 ]] ) || [[ $LVM_SEP_BOOT -eq 2 ]]; then
+            sed -i '/### BEGIN \/etc\/grub.d\/00_header ###/a insmod lvm' ${MOUNTPOINT}/boot/grub/grub.cfg
+          fi
+        fi
+      else
+        # Syslinux
+        DIALOG --title "$_InstSysTitle" --menu "$_InstSysBody" 0 0 2 \
+        "syslinux-install_update -iam" "[MBR]" \
+        "syslinux-install_update -i" "[/]" 2>${PACKAGES}
+        # If an installation method has been chosen, run it
+        if [[ $(cat ${PACKAGES}) != "" ]]; then
+          arch_chroot "$(cat ${PACKAGES})" 2>/tmp/.errlog
+          check_for_error
+          # Amend configuration file depending on whether lvm used or not for root.
+          [[ $LVM_ROOT -eq 0 ]] && sed -i "s/sda[0-9]/${ROOT_PART}/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg \
+          || sed -i "s/APPEND.*/APPEND root=\/dev\/mapper\/${ROOT_PART} rw/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          # Amend configuration file for kernel(s) installed
+          if [[ $KERNEL -eq 3 ]]; then
+            sed -i "/INITRD \.\.\/initramfs-linux\.img/a--insert--\nLABEL arch-lts\n\tMENU LABEL Arch Linux LTS\n\tLINUX \.\.\/vmlinuz-linux-lts\n\tAPPEND root=/dev/$ROOT_PART rw\n\tINITRD \.\./initramfs-linux-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+            sed -i "/INITRD \.\.\/initramfs-linux-fallback\.img/a--insert--\nLABEL archfallback-lts\n\tMENU LABEL Arch Linux Fallback LTS\n\tLINUX \.\.\/vmlinuz-linux-lts\n\tAPPEND root=/dev/$ROOT_PART rw\n\tINITRD \.\./initramfs-linux-fallback-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+            sed -i s/--insert--//g ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          elif [[ $KERNEL -eq 2 ]]; then
+            sed -i 's/linux/linux-lts/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          fi
+          # If BTRFS Subvolume mount
+          [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
         fi
       fi
-      arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>/tmp/.errlog
-      check_for_error
-      # if /boot is LVM then amend /boot/grub/grub.cfg accordingly
-      if ( [[ $LVM_ROOT -eq 1 ]] && [[ $LVM_SEP_BOOT -eq 0 ]] ) || [[ $LVM_SEP_BOOT -eq 2 ]]; then
-        sed -i '/### BEGIN \/etc\/grub.d\/00_header ###/a insmod lvm' ${MOUNTPOINT}/boot/grub/grub.cfg
-      fi
-      BOOTLOADER="Grub"
-      ;;
-      "2"|"3")
-      # Syslinux
-      PACSTRAP syslinux
-      # Install to MBR or root partition, accordingly
-      [[ $(cat ${ANSWER}) == "2" ]] && arch_chroot "syslinux-install_update -iam" 2>>/tmp/.errlog
-      [[ $(cat ${ANSWER}) == "3" ]] && arch_chroot "syslinux-install_update -i" 2>>/tmp/.errlog
-      check_for_error
-      # Amend configuration file depending on whether lvm used or not for root.
-      if [[ $LVM_ROOT -eq 0 ]]; then
-        sed -i "s/sda[0-9]/${ROOT_PART}/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-      else
-        sed -i "s/APPEND.*/APPEND root=\/dev\/mapper\/${ROOT_PART} rw/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-      fi
-      # Amend configuration file for LTS kernel and/or btrfs subvolume as root
-      [[ $LTS -eq 1 ]] && sed -i 's/linux/linux-lts/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-      [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-      BOOTLOADER="Syslinux"
-      ;;
-      *)
-      install_base_menu
-      ;;
-    esac
+    fi
   }
 
   uefi_bootloader() {
@@ -1631,6 +1561,8 @@ setup_graphics_card() {
   }
 
   # Main menu. Correct option for graphics card should be automatically highlighted.
+  NVIDIA=""
+  VB_MOD=""
   GRAPHIC_CARD=""
   INTEGRATED_GC="N/A"
   GRAPHIC_CARD=$(lspci | grep -i "vga" | sed 's/.*://' | sed 's/(.*//' | sed 's/^[ \t]*//')
@@ -1693,27 +1625,33 @@ setup_graphics_card() {
     # NVIDIA-GF
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
     arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
-    # Now deal with kernel installed
-    [[ $LTS == 0 ]] && PACSTRAP nvidia nvidia-libgl nvidia-utils pangox-compat \
-    || PACSTRAP nvidia-lts nvidia-libgl nvidia-utils pangox-compat
+    # Set NVIDIA driver(s) to install depending on installed kernel(s)
+    [[ $KERNEL == 3 ]] && NVIDIA="nvidia nvidia-lts"
+    [[ $KERNEL == 2 ]] && NVIDIA="nvidia-lts"
+    [[ $KERNEL == 1 ]] && NVIDIA="nvidia"
+    PACSTRAP ${NVIDIA} nvidia-libgl nvidia-utils pangox-compat 2>/tmp/.errlog
     NVIDIA_INST=1
     ;;
     "5")
     # NVIDIA-340
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
     arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
-    # Now deal with kernel installed
-    [[ $LTS == 0 ]] && PACSTRAP nvidia-340xx nvidia-340xx-libgl nvidia-340xx-utils  \
-    || PACSTRAP nvidia-340xx-lts nvidia-340xx-libgl nvidia-340xx-utils
+    # Set NVIDIA driver(s) to install depending on installed kernel(s)
+    [[ $KERNEL == 3 ]] && NVIDIA="nvidia-340xx nvidia-340xx-lts"
+    [[ $KERNEL == 2 ]] && NVIDIA="nvidia-340xx-lts"
+    [[ $KERNEL == 1 ]] && NVIDIA="nvidia-340xx"
+    PACSTRAP ${NVIDIA} nvidia-340xx-libgl nvidia-340xx-utils 2>/tmp/.errlog
     NVIDIA_INST=1
     ;;
     "6")
     # NVIDIA-304
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
     arch_chroot "pacman -Rdds --noconfirm mesa-libgl mesa"
-    # Now deal with kernel installed
-    [[ $LTS == 0 ]] && PACSTRAP nvidia-304xx nvidia-304xx-libgl nvidia-304xx-utils  \
-    || PACSTRAP  nvidia-304xx-lts nvidia-304xx-libgl nvidia-304xx-utils
+    # Set NVIDIA driver(s) to install depending on installed kernel(s)
+    [[ $KERNEL == 3 ]] && NVIDIA="nvidia-304xx nvidia-304xx-lts"
+    [[ $KERNEL == 2 ]] && NVIDIA="nvidia-304xx-lts"
+    [[ $KERNEL == 1 ]] && NVIDIA="nvidia-304xx"
+    PACSTRAP ${NVIDIA} nvidia-304xx-libgl nvidia-304xx-utils 2>/tmp/.errlog
     NVIDIA_INST=1
     ;;
     "7")
@@ -1722,6 +1660,10 @@ setup_graphics_card() {
     ;;
     "8")
     # VirtualBox
+    # Set VB modules to install depending on installed kernel(s)
+    [[ $KERNEL == 3 ]] && VB_MOD="virtualbox-guest-modules virtualbox-guest-modules-lts"
+    [[ $KERNEL == 2 ]] && VB_MOD="virtualbox-guest-modules-lts"
+    [[ $KERNEL == 1 ]] && VB_MOD="virtualbox-guest-modules"
     DIALOG --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
     PACSTRAP virtualbox-guest-utils ${VB_MOD} 2>/tmp/.errlog
     # Load modules and enable vboxservice.
@@ -1765,142 +1707,44 @@ setup_graphics_card() {
 install_de_wm() {
   # Only show this information box once
   if [[ $SHOW_ONCE -eq 0 ]]; then
-    DIALOG --title "$_DEInfoTitle" --msgbox "$_DEInfoBody" 0 0
+    DIALOG --title "$_InstDETitle" --msgbox "$_DEInfoBody" 0 0
     SHOW_ONCE=1
   fi
-  DIALOG --title "$_InstDETitle" \
-  --menu "$_InstDEBody" 0 0 11 \
-  "1" $"Cinnamon" \
-  "2" $"Deepin (minimal)" \
-  "3" $"Deepin + Extras" \
-  "4" $"Enlightenment" \
-  "5" $"Gnome-Shell (minimal)" \
-  "6" $"Gnome" \
-  "7" $"Gnome + Extras" \
-  "8" $"KDE 5 Base (minimal)" \
-  "9" $"KDE 5" \
-  "10" $"LXDE" \
-  "11" $"LXQT" \
-  "12" $"MATE" \
-  "13" $"MATE + Extras" \
-  "14" $"Xfce" \
-  "15" $"Xfce + Extras" \
-  "16" $"Awesome WM" \
-  "17" $"Fluxbox WM" \
-  "18" $"i3 WM" \
-  "19" $"Ice WM" \
-  "20" $"Openbox WM" \
-  "21" $"Pek WM" \
-  "22" $"WindowMaker WM" 2>${ANSWER}
-  case $(cat ${ANSWER}) in
-    "1")
-    # Cinnamon
-    PACSTRAP cinnamon xterm
-    ;;
-    "2")
-    # Deepin (minimal)
-    PACSTRAP deepin xterm
-    ;;
-    "3")
-    # Deepin + Extras
-    clear
-    PACSTRAP deepin deepin-extra xterm
-    ;;
-    "4")
-    # Enlightement
-    PACSTRAP enlightenment terminology polkit-gnome xterm
-    ;;
-    "5")
-    # Gnome-Shell
-    PACSTRAP gnome-shell gdm xterm
-    GNOME_INSTALLED=1
-    ;;
-    "6")
-    # Gnome
-    PACSTRAP gnome rp-pppoe xterm
-    GNOME_INSTALLED=1
-    ;;
-    "7")
-    # Gnome + Extras
-    PACSTRAP gnome gnome-extra rp-pppoe xterm
-    GNOME_INSTALLED=1
-    ;;
-    "8")
-    # KDE5 BASE
-    PACSTRAP plasma-desktop xdg-utils rp-pppoe xterm
-    ;;
-    "9")
-    # KDE5
-    PACSTRAP plasma xdg-user-dirs xdg-utils rp-pppoe xterm
-    if [[ $NM_INSTALLED -eq 0 ]]; then
-      arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
-      NM_INSTALLED=1
-    fi
-    KDE_INSTALLED=1
-    ;;
-    "10")
-    # LXDE
-    PACSTRAP lxde xterm
-    LXDE_INSTALLED=1
-    ;;
-    "11")
-    # LXQT
-    PACSTRAP lxqt oxygen-icons xterm
-    LXQT_INSTALLED=1
-    ;;
-    "12")
-    # MATE
-    PACSTRAP mate xterm
-    ;;
-    "13")
-    # MATE + Extras
-    PACSTRAP mate mate-extra xterm
-    ;;
-    "14")
-    # Xfce
-    PACSTRAP xfce4 polkit-gnome xterm
-    ;;
-    "15")
-    # Xfce + Extras
-    PACSTRAP xfce4 xfce4-goodies polkit-gnome xterm
-    ;;
-    "16")
-    # Awesome
-    PACSTRAP awesome vicious polkit-gnome xterm
-    ;;
-    "17")
-    #Fluxbox
-    PACSTRAP fluxbox fbnews polkit-gnome xterm
-    ;;
-    "18")
-    #i3
-    PACSTRAP i3-wm i3lock i3status dmenu polkit-gnome xterm
-    ;;
-    "19")
-    #IceWM
-    PACSTRAP icewm icewm-themes polkit-gnome xterm
-    ;;
-    "20")
-    #Openbox
-    PACSTRAP openbox openbox-themes polkit-gnome xterm
-    ;;
-    "21")
-    #PekWM
-    PACSTRAP pekwm pekwm-themes polkit-gnome xterm
-    ;;
-    "22")
-    #WindowMaker
-    PACSTRAP windowmaker polkit-gnome xterm
-    ;;
-    *)
-    install_desktop_menu
-    ;;
-  esac
-  check_for_error
-  # Offer to install common packages
-  if [[ $COMMON_INSTALLED -eq 0 ]]; then
-    # Clear the packages file
+  # DE/WM Menu
+  DIALOG --title "$_InstDETitle" --checklist "$_InstDEBody $_UseSpaceBar" 0 0 12 \
+  "cinnamon" "-" off \
+  "deepin" "-" off \
+  "deepin-extra" "-" off \
+  "enlightenment + terminology" "-" off \
+  "gnome-shell" "-" off \
+  "gnome" "-" off \
+  "gnome-extra" "-" off \
+  "plasma-desktop" "-" off \
+  "plasma" "-" off \
+  "kde-applications" "-" off \
+  "lxde" "-" off \
+  "lxqt + oxygen-icons" "-" off \
+  "mate" "-" off \
+  "mate-extra" "-" off \
+  "mate-gtk3" "-" off \
+  "mate-extra-gtk3" "-" off \
+  "xfce4" "-" off \
+  "xfce4-goodies" "-" off \
+  "awesome + vicious" "-" off \
+  "fluxbox + fbnews" "-" off \
+  "i3-wm + i3lock + i3status" "-" off \
+  "icewm + icewm-themes" "-" off \
+  "openbox + openbox-themes" "-" off \
+  "pekwm + pekwm-themes" "-" off \
+  "windowmaker" "-" off 2>${PACKAGES}
+  # If something has been selected, install
+  if [[ $(cat ${PACKAGES}) != "" ]]; then
+    sed -i 's/+\|\"//g' ${PACKAGES}
+    PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
+    check_for_error
+    # Clear the packages file for installation of "common" packages
     echo "" > ${PACKAGES}
+    # Offer to install various "common" packages.
     DIALOG --title "$_InstComTitle" --checklist "$_InstComBody $_UseSpaceBar" 0 50 14 \
     "bash-completion" "-" on \
     "gamin" "-" on \
@@ -1922,149 +1766,87 @@ install_de_wm() {
       PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
     fi
-    COMMON_INSTALLED=1
   fi
 }
 
-# Determine if LXDE, LXQT, Gnome, and/or KDE has been installed, and act accordingly.
+# First see if selected.
 install_dm() {
-
-  # Function to save repetition
-  dm_menu(){
-    DIALOG --title "$_DmChTitle" \
-    --menu "$_DmChBody" 0 0 4 \
-    "1" $"LXDM" \
-    "2" $"LightDM" \
-    "3" $"SDDM" \
-    "4" $"SLiM" 2>${ANSWER}
-    case $(cat ${ANSWER}) in
-      "1")
-      # LXDM
-      PACSTRAP lxdm
-      arch_chroot "systemctl enable lxdm.service" >/dev/null 2>>/tmp/.errlog
-      DM="LXDM"
-      ;;
-      "2")
-      # LIGHTDM
-      PACSTRAP lightdm lightdm-gtk-greeter
-      arch_chroot "systemctl enable lightdm.service" >/dev/null 2>>/tmp/.errlog
-      DM="LightDM"
-      ;;
-      "3")
-      # SDDM
-      PACSTRAP sddm
-      arch_chroot "sddm --example-config > /etc/sddm.conf"
-      arch_chroot "systemctl enable sddm.service" >/dev/null 2>>/tmp/.errlog
-      DM="SDDM"
-      ;;
-      "4")
-      # SLiM
-      PACSTRAP slim
-      arch_chroot "systemctl enable slim.service" >/dev/null 2>>/tmp/.errlog
-      DM="SLiM"
-      # Amend the xinitrc file accordingly for all user accounts
-      user_list=$(ls ${MOUNTPOINT}/home/ | sed "s/lost+found//")
-      for i in ${user_list[@]}; do
-        if [[ -n ${MOUNTPOINT}/home/$i/.xinitrc ]]; then
-          cp -f ${MOUNTPOINT}/etc/X11/xinit/xinitrc ${MOUNTPOINT}/home/$i/.xinitrc
-          arch_chroot "chown -R ${i}:users /home/${i}"
-        fi
-        echo 'exec $1' >> ${MOUNTPOINT}/home/$i/.xinitrc
-      done
-      ;;
-      *)
-      install_desktop_menu
-      ;;
-    esac
-  }
-
   if [[ $DM_INSTALLED -eq 0 ]]; then
-    # Gnome without KDE
-    if [[ $GNOME_INSTALLED -eq 1 ]] && [[ $KDE_INSTALLED -eq 0 ]]; then
-      arch_chroot "systemctl enable gdm.service" >/dev/null 2>/tmp/.errlog
-      DM="GDM"
-      # Gnome with KDE
-    elif [[ $GNOME_INSTALLED -eq 1 ]] && [[ $KDE_INSTALLED -eq 1 ]]; then
-      DIALOG --title "$_DmChTitle" \
-      --menu "$_DmChBody" 12 45 2 \
-      "1" $"GDM  (Gnome)" \
-      "2" $"SDDM (KDE)" 2>${ANSWER}
-      case $(cat ${ANSWER}) in
-        "1")
-        arch_chroot "systemctl enable gdm.service" >/dev/null 2>/tmp/.errlog
-        DM="GDM"
-        ;;
-        "2")
-        arch_chroot "sddm --example-config > /etc/sddm.conf"
-        arch_chroot "systemctl enable sddm.service" >/dev/null 2>>/tmp/.errlog
-        DM="SDDM"
-        ;;
-        *)
-        install_desktop_menu
-        ;;
-      esac
-      # KDE without Gnome
-    elif [[ $KDE_INSTALLED -eq 1 ]] && [[ $GNOME_INSTALLED -eq 0 ]]; then
-      arch_chroot "sddm --example-config > /etc/sddm.conf"
-      arch_chroot "systemctl enable sddm.service" >/dev/null 2>>/tmp/.errlog
-      DM="SDDM"
-      # LXDM, without KDE or Gnome
-    elif [[ $LXDE_INSTALLED -eq 1 ]] && [[ $KDE_INSTALLED -eq 0 ]] && [[ $GNOME_INSTALLED -eq 0 ]]; then
-      arch_chroot "systemctl enable lxdm.service" >/dev/null 2>/tmp/.errlog
-      DM="LXDM"
-      # Otherwise, select a DM
-    else
-      dm_menu
+    # Prep variables
+    echo "" > ${PACKAGES}
+    echo "" > ${DM_INST}
+    dm_list="gdm lxdm lightdm sddm"
+    DM_LIST=""
+    # Generate list of DMs installed with DEs, and a list for selection menu
+    for i in ${dm_list[@]}; do
+      [[ -e ${MOUNTPOINT}/usr/share/${i} ]] && echo ${i} >> $DM_INST
+      DM_LIST="${DM_LIST} ${i} -"
+    done
+    DIALOG --title "$_DmChTitle" --menu "$_AlreadyInst$(cat $DM_INST)\n\n$_DmChBody" 0 0 5 ${DM_LIST} 2>${PACKAGES}
+    clear
+    # If a selection has been made, act
+    if [[ $(cat ${PACKAGES}) != "" ]]; then
+      # check if selected dm already installed. If so, enable and break loop.
+      for i in $(cat ${DM_INST[@]}); do
+        if [[ $(cat ${PACKAGES}) == ${i} ]]; then
+          arch_chroot "systemctl enable $(cat ${PACKAGES})" >/dev/null 2>/tmp/.errlog
+          check_for_error
+          DM_INSTALLED=1
+          break
+        fi
+      done
+      # If no match found, install and enable DM
+      if [[ $DM_INSTALLED -eq 0 ]]; then
+        # Where lightdm selected, add gtk greeter package
+        sed -i 's/lightdm/lightdm lightdm-gtk-greeter/' ${PACKAGES}
+        PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
+        # Where lightdm selected, now remove the greeter package
+        sed -i 's/lightdm-gtk-greeter//' ${PACKAGES}
+        arch_chroot "systemctl enable $(cat ${PACKAGES})" >/dev/null 2>/tmp/.errlog
+        check_for_error
+        DM_INSTALLED=1
+      fi
     fi
-    # Check installation success, inform user, and flag DM_INSTALLED so it cannot be run again
-    check_for_error
-    DIALOG --title " $DM $_DmDoneTitle" --msgbox "\n$DM $_DMDoneBody" 0 0
-    DM_INSTALLED=1
-    # if A display manager has already been installed and enabled (DM_INSTALLED=1), show a message instead.
-  else
-    DIALOG --title "$_DmInstTitle" --msgbox "$_DmInstBody" 0 0
   fi
+  # Show after successfully installing or where attempting to repeat when already completed.
+  [[ $DM_INSTALLED -eq 1 ]] && DIALOG --title "$_DmChTitle" --msgbox "$_DmDoneBody" 0 0
 }
 
 install_nm() {
   # Check to see if a NM has already been installed and enabled
   if [[ $NM_INSTALLED -eq 0 ]]; then
-    DIALOG --title "$_InstNMTitle" \
-    --menu "$_InstNMBody" 0 0 4 \
-    "1" $"Connman (CLI)" \
-    "2" $"dhcpcd  (CLI)" \
-    "3" $"Network Manager (GUI)" \
-    "4" $"WICD (GUI)" 2>${ANSWER}
-    case $(cat ${ANSWER}) in
-      "1")
-      # connman
-      PACSTRAP connman
-      arch_chroot "systemctl enable connman.service" 2>>/tmp/.errlog
-      ;;
-      "2")
-      # dhcpcd
-      arch_chroot "systemctl enable dhcpcd.service" 2>/tmp/.errlog
-      ;;
-      "3")
-      # Network Manager
-      PACSTRAP networkmanager network-manager-applet
-      arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>>/tmp/.errlog
-      ;;
-      "4")
-      # WICD
-      PACSTRAP wicd-gtk
-      arch_chroot "systemctl enable wicd.service" 2>>/tmp/.errlog
-      ;;
-      *)
-      install_desktop_menu
-      ;;
-    esac
-    check_for_error
-    DIALOG --title "$_InstNMDoneTitle" --msgbox "$_InstNMDoneBody" 0 0
-    NM_INSTALLED=1
-  else
-    DIALOG --title "$_InstNMDoneTitle" --msgbox "$_InstNMErrBody" 0 0
+    echo "" > ${PACKAGES}
+    NM_INST=""
+    [[ -e ${MOUNTPOINT}/usr/bin/NetworkManager ]] && NM_INST="networkmanager"
+    DIALOG --title "$_InstNMTitle" --menu "$_AlreadyInst $NM_INST\n\n$_InstNMBody" 0 0 4 \
+    "connman" "(CLI)" \
+    "dhcpcd"  "(CLI)" \
+    "networkmanager" "(GUI)" \
+    "wicd" "(GUI)" 2> ${PACKAGES}
+    clear
+    # If a selection has been made, act
+    if [[ $(cat ${PACKAGES}) != "" ]]; then
+      # check if selected nm already installed. If so, enable.
+      if [[ $(cat ${PACKAGES}) == $NM_INST ]]; then
+        arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>/tmp/.errlog
+        check_for_error
+        NM_INSTALLED=1
+      fi
+      # If no match found, install and enable NM
+      if [[ $NM_INSTALLED -eq 0 ]]; then
+        # Where networkmanager selected, add network-manager-applet
+        sed -i 's/networkmanager/networkmanager network-manager-applet/' ${PACKAGES}
+        PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
+        # Where networkmanager selected, now change for systemctl enable command
+        sed -i 's/networkmanager network-manager-applet/NetworkManager \&\& systemctl enable NetworkManager-dispatcher/g' ${PACKAGES}
+        arch_chroot "systemctl enable $(cat ${PACKAGES})" 2>>/tmp/.errlog
+        check_for_error
+        NM_INSTALLED=1
+      fi
+    fi
   fi
+  # Show after successfully installing or where attempting to repeat when already completed.
+  [[ $NM_INSTALLED -eq 1 ]] && DIALOG --title "$_InstNMTitle" --msgbox "$_InstNMErrBody" 0 0
 }
 
 # Let the user choose a shell
@@ -2445,104 +2227,29 @@ install_desktop_menu() {
 
 # Install Accessibility Applications
 install_acc_menu() {
-  if [[ $SUB_MENU != "install_acc_menu" ]]; then
-    SUB_MENU="install_acc_menu"
-    HIGHLIGHT_SUB=1
-  else
-    if [[ $HIGHLIGHT_SUB != 17 ]]; then
-      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
-    fi
+  echo "" > ${PACKAGES}
+  DIALOG --title "$_InstAccTitle" --checklist "$_InstAccBody" 0 0 15 \
+  "accerciser" "-" off \
+  "at-spi2-atk" "-" off \
+  "at-spi2-core" "-" off \
+  "brltty" "-" off \
+  "caribou" "-" off \
+  "dasher" "-" off \
+  "espeak" "-" off \
+  "espeakup" "-" off \
+  "festival" "-" off \
+  "java-access-bridge" "-" off \
+  "java-atk-wrapper" "-" off \
+  "julius" "-" off \
+  "orca" "-" off \
+  "qt-at-spi" "-" off \
+  "speech-dispatcher" "-" off 2>${PACKAGES}
+  clear
+  # If something has been selected, install
+  if [[ $(cat ${PACKAGES}) != "" ]]; then
+    PACSTRAP ${PACKAGES} 2>/tmp/.errlog
+    check_for_error
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstAccTitle" --menu "$_InstAccBody" 0 0 17 \
-  "1" $"accerciser" \
-  "2" $"at-spi2-atk" \
-  "3" $"at-spi2-core" \
-  "4" $"brltty" \
-  "5" $"caribou" \
-  "6" $"dasher" \
-  "7" $"espeak" \
-  "8" $"espeakup" \
-  "9" $"festival" \
-  "10" $"java-access-bridge" \
-  "11" $"java-atk-wrapper" \
-  "12" $"julius" \
-  "13" $"orca" \
-  "14" $"qt-at-spi" \
-  "15" $"speech-dispatcher" \
-  "16" "$_All" \
-  "17" "$_Back" 2>${ANSWER}
-  HIGHLIGHT_SUB=$(cat ${ANSWER})
-  case $(cat ${ANSWER}) in
-    "1")
-    # accerciser
-    PACSTRAP accerciser
-    ;;
-    "2")
-    # at-spi2-atk
-    PACSTRAP at-spi2-atk
-    ;;
-    "3")
-    # at-spi2-core
-    PACSTRAP at-spi2-core
-    ;;
-    "4")
-    # brltty
-    PACSTRAP brltty
-    ;;
-    "5")
-    # caribou
-    PACSTRAP caribou
-    ;;
-    "6")
-    # dasher
-    PACSTRAP dasher
-    ;;
-    "7")
-    # espeak
-    PACSTRAP espeak
-    ;;
-    "8")
-    # espeakup
-    PACSTRAP espeakup
-    ;;
-    "9")
-    # festival
-    PACSTRAP festival
-    ;;
-    "10")
-    # java-access-bridge
-    PACSTRAP java-access-bridge
-    ;;
-    "11")
-    # java-atk-wrapper
-    PACSTRAP java-atk-wrapper
-    ;;
-    "12")
-    # julius
-    PACSTRAP julius
-    ;;
-    "13")
-    # orca
-    PACSTRAP orca
-    ;;
-    "14")
-    # qt-at-spi
-    PACSTRAP qt-at-spi
-    ;;
-    "15")
-    # speech-dispatcher
-    PACSTRAP speech-dispatcher
-    ;;
-    "16")
-    # install all
-    PACSTRAP accerciser at-spi2-atk at-spi2-core brltty dasher espeak espeakup festival java-access-bridge caribou julius orca qt-at-spi speech-dispatcher
-    ;;
-    *)
-    main_menu_online
-    ;;
-  esac
-  check_for_error
-  install_acc_menu
 }
 
 # Install additional software
@@ -2601,7 +2308,7 @@ edit_configs() {
   "5" "/etc/sudoers" \
   "6" "/etc/mkinitcpio.conf" \
   "7" "/etc/fstab" \
-  "8" "$BOOTLOADER" \
+  "8" "sys" \
   "9" "$DM" \
   "10" "$_Back" 2>${ANSWER}
   HIGHLIGHT_SUB=$(cat ${ANSWER})
@@ -2628,23 +2335,20 @@ edit_configs() {
     FILE="${MOUNTPOINT}/etc/fstab"
     ;;
     "8")
-    case $BOOTLOADER in
-      "Grub")
-      FILE="${MOUNTPOINT}/etc/default/grub"
-      ;;
-      "Syslinux")
-      FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
-      ;;
-      "systemd-boot")
-      FILE="${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf"
-      FILE2="${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf"
-      ;;
-      "rEFInd")
-      [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf ]] \
-      && FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf" || FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf"
-      FILE2="${MOUNTPOINT}/boot/refind_linux.conf"
-      ;;
-    esac
+    FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
+    #case $BOOTLOADER in
+    #          "Grub") FILE="${MOUNTPOINT}/etc/default/grub"
+    #                  ;;
+    #      "Syslinux") FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
+    #                  ;;
+    #  "systemd-boot") FILE="${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf"
+    #                  FILE2="${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf"
+    #                  ;;
+    #        "rEFInd") [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf ]] \
+    #                  && FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf" || FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf"
+    #                  FILE2="${MOUNTPOINT}/boot/refind_linux.conf"
+    #                  ;;
+    #     esac
     ;;
     "9")
     case $DM in
