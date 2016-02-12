@@ -797,64 +797,36 @@ find_partitions() {
 # partially because some don't seem to be viable.
 select_filesystem(){
 
-# Clear special FS type flags
-BTRFS=0
-F2FS=0
+	# Clear special FS type flags
+	BTRFS=0
+	F2FS=0
 
-dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" \
-    --menu "$_FSBody" 0 0 12 \
- 	"1" "$_FSSkip" \
- 	"2" $"btrfs" \
-	"3" $"ext2" \
- 	"4" $"ext3" \
-	"5" $"ext4" \
-	"6" $"f2fs" \
-	"7" $"jfs" \
- 	"8" $"nilfs2" \
-	"9" $"ntfs" \
-	"10" $"reiserfs" \
- 	"11" $"vfat" \
-	"12" $"xfs" 2>${ANSWER}	
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FSTitle" --menu "$_FSBody" 0 0 12 \
+	"$_FSSkip" "-" \
+	"mkfs.btrfs -f" "btrfs" \
+	"mkfs.ext2 -q" "ext2" \
+	"mkfs.ext3 -q" "ext3" \
+	"mkfs.ext4 -q" "ext4" \
+	"mkfs.f2fs" "f2fs" \
+	"mkfs.jfs -q" "jfs" \
+	"mkfs.nilfs2 -q" "nilfs2" \
+	"mkfs.ntfs -q" "ntfs" \
+	"mkfs.reiserfs -q" "reiserfs" \
+	"mkfs.vfat -F32" "vfat" \
+	"mkfs.xfs -f" "xfs" 2>${ANSWER}	
 
-    case $(cat ${ANSWER}) in
-        "1") FILESYSTEM="skip"
-             ;;
-        "2") FILESYSTEM="mkfs.btrfs -f"
-             modprobe btrfs
-             
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --yesno "$_btrfsSVBody" 0 0
-             if [[ $? -eq 0 ]];then
-				BTRFS=2
-		     else
-                BTRFS=1
-             fi
-             
-             ;;
-        "3") FILESYSTEM="mkfs.ext2 -q"
-             ;;
-        "4") FILESYSTEM="mkfs.ext3 -q"
-             ;;            
-        "5") FILESYSTEM="mkfs.ext4 -q"
-             ;;
-        "6") FILESYSTEM="mkfs.f2fs"
-             modprobe f2fs
-             F2FS=1
-             ;;
-        "7") FILESYSTEM="mkfs.jfs -q"
-             ;;
-        "8") FILESYSTEM="mkfs.nilfs2 -f"
-             ;;  
-        "9") FILESYSTEM="mkfs.ntfs -q"
-             ;;  
-        "10") FILESYSTEM="mkfs.reiserfs -f -f"
-             ;;  
-       "11") FILESYSTEM="mkfs.vfat -F32"
-             ;;  
-       "12") FILESYSTEM="mkfs.xfs -f"
-             ;;      
-          *) prep_menu
-             ;;
-    esac
+	FILESYSTEM=$(cat ${ANSWER})
+
+	if [[ $FILESYSTEM == "mkfs.f2fs" ]]; then
+		modprobe f2fs
+		F2FS=1
+	elif
+		[[ $FILESYSTEM == "mkfs.btrfs -f" ]];
+		modprobe btrfs	
+
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --yesno "$_btrfsSVBody" 0 0
+		[[ $? -eq 0 ]] && BTRFS=2 || BTRFS=1
+	fi
 
   }
   
@@ -1003,7 +975,7 @@ btrfs_mount_opts() {
     fi
     	
 	select_filesystem
-	[[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
+	[[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
 	check_for_error
 	
 	# Make the root directory
@@ -1097,7 +1069,7 @@ btrfs_mount_opts() {
                 MOUNT=""
                 
                 select_filesystem 
-                [[ $FILESYSTEM != "skip" ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
+                [[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
 	            check_for_error
 	            
                 # Don't give /boot as an example for UEFI systems!
