@@ -3,7 +3,7 @@
 ## English Translation File		
 ##								
 ##
-## Written by Carl Duff (09-Feb-2016)
+## Written by Carl Duff (11-Feb-2016)
 ##
 ##
 
@@ -14,12 +14,12 @@ _PartOptAutoLuks="Encrypted Auto partition (BIOS & UEFI)"
 _PartOptWipe="Securely Wipe Device (optional)"
 _AutoPartWipeBody="will be destroyed. This process may also take a long time depending on the size of the device (approximately two minutes for every gigabyte).\n\nDo you wish to continue?\n"
 _UseSpaceBar="Use [Spacebar] to de/select packages listed."
-
+_AlreadyInst="Already installed:"
 
 # Accessibility
 _InstAccOpt="Accessibility Packages (optional)"
 _InstAccTitle=" Install Accessibility Packages "
-_InstAccBody="Select desired accessibility packages."
+_InstAccBody="\nSelect desired accessibility packages.\n\n"
 
 # btrfs
 _btrfsSVTitle=" btrfs Subvolumes "
@@ -381,39 +381,25 @@ _GCDetBody="\nIs your graphics card or virtualisation software"
 _GCDetBody2="-Select 'Yes' to install its OPEN-SOURCE driver.\n\n-Select 'No' to open the graphics card menu, which includes proprietary NVIDIA drivers."
 
 #  Install DE Info
-_DEInfoTitle=" Install Desktop Environments "
-_DEInfoBody="\nThis option can be repeated to install multiple environments.\n\nGnome, KDE (full), and LXDE come with a display manager.\n\nCinnamon, Gnome and KDE come with a Network Manager.\n\n"
+_DEInfoBody="\nMultiple environments can be installed.\n\nGnome and LXDE come with a display manager.\n\nCinnamon, Gnome and KDE come with a Network Manager.\n\n"
 
 # Install DE Menu
 _InstDETitle=" Install Desktop Environments "
-_InstDEBody="\nDesktop Environments are listed first, and may have multiple download options."
+_InstDEBody="Desktop Environments and their related package groups are listed first."
 
 # Install Common Packages
 _InstComTitle=" Install Common Packages? "
 _InstComBody="Some environments require additional packages to function better."
 
-# DM Enabled
-_DmDoneTitle="Enabled "
-_DMDoneBody="has been enabled.\n\n"
-
-# LXDM or LightDM
-_DmChTitle=" Choose Display Manager "
-_DmChBody="\nPlease choose your display manager.\n"
-
-# DM Already Installed
-_DmInstTitle=" Display Manager Installed "
-_DmInstBody="\nA display manager has already been installed and enabled.\n\n"
+# Display Manager
+_DmChTitle=" Install Display Manager "
+_DmChBody="gdm lists Gnome-shell as a dependency. sddm is recommended for plasma. lightdm will incude lightdm-gtk-greeter. slim is no longer maintained."
+_DmDoneBody="\nDisplay manager has been installed and enabled.\n\n"
 
 # Network Manager
-_InstNMTitle=" Choose Network Manager "
+_InstNMTitle=" Install Network Manager "
 _InstNMBody="\nNetwork Manager is recommended, especially for wireless and PPPoE/DSL connections.\n"
-
-# Network Manager Installed
-_InstNMDoneTitle=" Network Manager Installed "
-_InstNMDoneBody="\nThe network connection manager has been installed and enabled."
-
-# Network Manager Already Installed (no need for seperate title)
-_InstNMErrBody="\nA network connection manager has already been installed and enabled."
+_InstNMErrBody="\nNetwork connection manager has been installed and enabled.\n\n"
 
 # Welcome
 _WelTitle=" Welcome to"
