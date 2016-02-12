@@ -817,13 +817,11 @@ select_filesystem(){
 
 	FILESYSTEM=$(cat ${ANSWER})
 
-	if [[ $FILESYSTEM == "mkfs.f2fs" ]]; then
-		modprobe f2fs
-		F2FS=1
-	elif
-		[[ $FILESYSTEM == "mkfs.btrfs -f" ]];
+	[[ $FILESYSTEM == "mkfs.f2fs" ]] && modprobe f2fs && F2FS=1
+	
+	# If brtfs selected, ask if subvolumes are needed
+	if [[ $FILESYSTEM == "mkfs.btrfs -f" ]]; then
 		modprobe btrfs	
-
 		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --yesno "$_btrfsSVBody" 0 0
 		[[ $? -eq 0 ]] && BTRFS=2 || BTRFS=1
 	fi
