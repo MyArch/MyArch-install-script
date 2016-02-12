@@ -1498,8 +1498,8 @@ bios_bootloader() {
 
 				# Amend configuration file for kernel(s) installed
 				if [[ $KERNEL -eq 3 ]]; then
-					sed -i "/INITRD \.\.\/initramfs-linux\.img/a--insert--\n LABEL arch-lts\n\t\t MENU LABEL Arch Linux LTS\n\t\t LINUX \.\.\/vmlinuz-linux-lts\n\t\t APPEND root=/dev/$ROOT_PART rw\n\t\t INITRD \.\.initramfs-linux-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-					sed -i "/INITRD \.\.\/initramfs-linux-fallback\.img/a--insert--\n LABEL archfallback-lts\n\t\t MENU LABEL Arch Linux Fallback LTS\n\t\t LINUX \.\.\/vmlinuz-linux-lts\n\t\t APPEND root=/dev/$ROOT_PART rw\n\t\t INITRD \.\.initramfs-linux-fallback-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+					sed -i "/INITRD \.\.\/initramfs-linux\.img/a--insert--\nLABEL arch-lts\nMENU LABEL Arch Linux LTS\nLINUX \.\.\/vmlinuz-linux-lts\nAPPEND root=/dev/$ROOT_PART rw\nINITRD \.\.initramfs-linux-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+					sed -i "/INITRD \.\.\/initramfs-linux-fallback\.img/a--insert--\n LABEL archfallback-lts\n MENU LABEL Arch Linux Fallback LTS\n LINUX \.\.\/vmlinuz-linux-lts\n APPEND root=/dev/$ROOT_PART rw\n INITRD \.\.initramfs-linux-fallback-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 					sed -i s/--insert--//g ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				elif [[ $KERNEL -eq 2 ]]; then
 					sed -i 's/linux/linux-lts/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
