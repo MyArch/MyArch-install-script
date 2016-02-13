@@ -770,8 +770,12 @@ find_partitions() {
 
 	PARTITIONS=""
 	NUMBER_PARTITIONS=0
-	#partition_list=$(lsblk -l | grep 'part\|lvm' | sed 's/[\t ].*//' | sort -u)
-	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm' | awk '{print $1 " " $2}' | sort -u)
+	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm' | sed 's/part/\/dev\//g' | sed 's/lvm\|crypt/\/dev\/mapper\//g' |awk '{print $3$1 " " $2}' | sort -u)
+
+    for i in ${partition_list[@]}; do
+        PARTITIONS="${PARTITIONS} ${i}"
+        NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
+    done
 	
     for i in ${partition_list[@]}; do
         PARTITIONS="${PARTITIONS} ${i}"
