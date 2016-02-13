@@ -776,11 +776,6 @@ find_partitions() {
         PARTITIONS="${PARTITIONS} ${i}"
         NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
     done
-	
-    for i in ${partition_list[@]}; do
-        PARTITIONS="${PARTITIONS} ${i}"
-        NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
-    done
     
     # Deal with incorrect partitioning
     if [[ $NUMBER_PARTITIONS -lt 2 ]] && [[ $SYSTEM == "UEFI" ]]; then
