@@ -1363,21 +1363,45 @@ check_lv_size() {
 ##																	##
 ######################################################################	
 
-# The linux package will be removed from the base group as it and/or the lts version will be
-# selected by the user.
+# The linux kernel package will be removed from the base group as it and/or the lts version will be
+# selected by the user. Two installation methods are available: Standard (group package based) and
+# Advanced (individual package based). Neither will allow progress without selecting a kernel.
 install_base() {
-	
+
 	# Prep variables
 	echo "" > ${PACKAGES}
+	echo "" > ${ANSWER}
 	BTRF_CHECK=""
 	F2FS_CHECK=""
+	BASE_LIST=""
+	
+	# Need a seperate base-devel package list as there are so many duplicates with the base group.
+	base_list=$(echo $(pacman -Sqg base) | sed s/" linux "/" "/ | sort -u)
+	BASE_DEV_LIST=$(echo "autoconf automake binutils bison fakeroot flex gcc groff libtool m4 make patch pkg-config sudo" \
+				| sed s/" "/" base-devel on "/g | sed s/$/" base-devel on "/g)
+
+	for i in ${base_list}; do
+		BASE_LIST="${BASE_LIST} ${i} base on"
+	done
 
 	# If btrfs and/or f2fs was used, auto-select the necessary packages for installation 
 	[[ $BTRFS -gt 0 ]] && BTRF_CHECK=$(echo "btrfs-progs" "-" on) || BTRF_CHECK=$(echo "btrfs-progs" "-" off)
 	[[ $F2FS -gt 0 ]] && F2FS_CHECK=$(echo "f2fs-tools" "-" on) || F2FS_CHECK=$(echo "f2fs-tools" "-" off)
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --checklist "$_InstBseBody$_UseSpaceBar" 0 0 6 \
-	"linux" "-" on "linux-lts" "-" off "base-devel" "-" on $BTRF_CHECK $F2FS_CHECK "sudo" "-" on 2>${PACKAGES}
+	# User to select "standard" or "advanced" installation Method
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --menu "$_InstBseBody" 0 0 2 \
+ 	"1" "$_InstStandBase" \
+	"2" "$_InstAdvBase" 2>${ANSWER}
+
+	# "Standard" installation method
+	if [[ $(cat ${ANSWER}) -eq 1 ]]; then
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --checklist "$_InstStandBseBody$_UseSpaceBar" 0 0 6 \
+		"linux" "-" on "linux-lts" "-" off "base-devel" "-" on $BTRF_CHECK $F2FS_CHECK "sudo" "-" on 2>${PACKAGES}
+	elif [[ $(cat ${ANSWER}) -eq 2 ]]; then
+	# "Advanced" installation method
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --checklist "$_InstAdvBseBody $_UseSpaceBar" 0 0 0 \
+		"linux" "base" on "linux-lts" "core" off $BASE_LIST $BASE_DEV_LIST $BTRF_CHECK $F2FS_CHECK 2>${PACKAGES}
+    fi
     
     # Determine kernel type(s) selected for installation.
     if 	[[ $(cat ${PACKAGES}) != "" ]]; then
@@ -1388,7 +1412,8 @@ install_base() {
 	
 		if [[ $KERNEL -gt 0 ]]; then
 			clear
-			pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) 2>/tmp/.errlog
+			[[ $(cat ${ANSWER}) -eq 1 ]] && pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) 2>/tmp/.errlog
+			[[ $(cat ${ANSWER}) -eq 2 ]] && pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
 			check_for_error
 		
 			# If the virtual console has been set, then copy config file to installation
@@ -1399,6 +1424,7 @@ install_base() {
 			install_base
 		fi
 	fi
+
 }
 
 install_bootloader() {

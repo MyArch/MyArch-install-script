@@ -51,7 +51,7 @@ _PlsWaitBody="\nPlease wait...\n\n"
 _ErrTitle=" Error "
 _ErrNoMount="\nPartition(s) must be mounted first.\n\n"
 _ErrNoBase="\nThe Arch base must be installed first.\n\n"
-_ErrNoKernel="\nA kernel (linux or linux-lts) must be selected.\n\n"
+_ErrNoKernel="\nAt least one kernel (linux or linux-lts) must be selected.\n\n"
 
 # Vbox Installations
 _VBoxInstTitle=" VirtualBox Installation "
@@ -319,14 +319,11 @@ _ExtErrBody="\nPartition cannot be mounted. A name must be given after a forward
 
 # Install Base
 _InstBseTitle=" Install Base "
-_InstBseBody="\nThe latest (linux) or long term support (linux-lts) kernel must be selected. The base package group will be installed automatically. The base-devel package group is required to use the Arch User Repository (AUR).\n\n"
-_InstBaseLK="Latest Kernel"
-_InstBaseLKBD="Latest Kernel & base-devel"
-_InstBaseLTS="LTS Kernel"
-_InstBaseLTSBD="LTS Kernel & base-devel"
-_InstBaseCustom="Custom Installation"
-_InstBaseCustTitle=" Custom Base Installation "
-_InstBaseCustBody="Suitable for experienced users only."
+_InstBseBody="\nSelect installation method.\n\nStandard: Select kernel(s) and optionally the base-devel package group, necessary for the Arch User Repository (AUR). Recommended for beginners.\n\nAdvanced: Select kernel(s) and individual packages from the base and base-devel package groups.\n\n"
+_InstStandBseBody="\nAt least one kernel (linux or linux-lts) must be selected. The base package group will be installed automatically. The base-devel package group is required to use the Arch User Repository (AUR).\n\n"
+_InstStandBase="Standard Installation"
+_InstAdvBase="Advanced Installation"
+_InstAdvBseBody="WARNING: This is for experienced users only. Newer users should use the 'standard' installation option.\n"
 
 # Install BIOS Bootloader
 _InstBiosBtTitle=" Install BIOS Bootloader "
