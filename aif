@@ -1955,11 +1955,12 @@ install_dm() {
 
 		# Generate list of DMs installed with DEs, and a list for selection menu
 		for i in ${dm_list[@]}; do
-			[[ -e ${MOUNTPOINT}/usr/share/${i} ]] && echo ${i} >> $DM_INST
+			[[ -e ${MOUNTPOINT}/usr/bin/${i} ]] && echo ${i} >> $DM_INST
 			DM_LIST="${DM_LIST} ${i} -"
 		done
 
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --menu "$_AlreadyInst$(cat $DM_INST)\n\n$_DmChBody" 0 0 5 ${DM_LIST} 2>${PACKAGES}
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --menu "$_AlreadyInst$(cat $DM_INST)\n\n$_DmChBody" 0 0 5 \
+		${DM_LIST} 2>${PACKAGES}
 		clear
 		
 		# If a selection has been made, act
@@ -2154,7 +2155,7 @@ config_base_menu() {
 	   SUB_MENU="config_base_menu"
 	   HIGHLIGHT_SUB=1
 	else
-	   if [[ $HIGHLIGHT_SUB != 7 ]]; then
+	   if [[ $HIGHLIGHT_SUB != 9 ]]; then
 	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
 	   fi
 	fi
