@@ -55,7 +55,6 @@ SYSTEM="Unknown"     				# Display whether system is BIOS or UEFI. Default is "u
 ROOT_PART=""          				# ROOT partition
 UEFI_PART=""						# UEFI partition
 UEFI_MOUNT=""         				# UEFI mountpoint
-INST_DEV=""           				# Device where system has been installed
 
 # Menu highlighting (automated step progression)
 HIGHLIGHT=0           				# Highlight items for Main Menu
@@ -76,7 +75,6 @@ VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 
 # Installation
 MOUNTPOINT="/mnt"       			# Installation
-MOUNT_TYPE=""           			# "/dev/" for standard partitions, "/dev/mapper" for LVM
 BTRFS=0                     		# BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
 BTRFS_MNT=""                		# used for syslinux where /mnt is a btrfs subvolume
 F2FS=0								# F2FS used? "1" = yes.
@@ -626,7 +624,6 @@ confirm_mount_btrfs() {
 select_device() {
 	
     DEVICE=""
-    #devices_list=$(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme\|mmc');
     devices_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'disk' | awk '{print "/dev/" $1 " " $2}' | sort -u);
     
     for i in ${devices_list[@]}; do
@@ -830,14 +827,7 @@ select_filesystem(){
   
 mount_partitions() {
 
-# function created to save repetition of code. Checks and determines if standard partition or LVM LV,
-# and sets the prefix accordingly.
-set_mount_type() {
-
-[[ $(echo ${PARTITION} | grep 'sd\|hd\|vd[a-z][1-99]') != "" ]] && MOUNT_TYPE="/dev/" || MOUNT_TYPE="/dev/mapper/"
-	
-}
-
+# subfunction for btrfs
 btrfs_subvols() {
 
  BTRFS_MSUB_VOL=""
@@ -864,15 +854,15 @@ btrfs_subvols() {
  [[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  btrfs subvolume create ${BTRFS_MSUB_VOL} 2>>/tmp/.errlog
  cd
- umount ${MOUNT_TYPE}${PARTITION} 2>>/tmp/.errlog
+ umount ${PARTITION} 2>>/tmp/.errlog
  check_for_error
  
  # Get any mount options and mount
  btrfs_mount_opts
  if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  else
-    [[ ${MOUNT} == "" ]] &&	mount -o "subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o "subvol="${BTRFS_MSUB_VOL} ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+    [[ ${MOUNT} == "" ]] &&	mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  fi
  
  # Check for error and confirm successful mount
@@ -962,18 +952,12 @@ btrfs_mount_opts() {
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelRootTitle" --menu "$_SelRootBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
 	PARTITION=$(cat ${ANSWER})
     ROOT_PART=${PARTITION}
-    set_mount_type
     
-    # This is to identify the device for Grub installations.
-    if [[ $MOUNT_TYPE == "/dev/" ]]; then   
-       LVM_ROOT=0
-       INST_DEV=${MOUNT_TYPE}$(cat ${ANSWER} | sed 's/[0-9]*//g')
-    else
-       LVM_ROOT=1
-    fi
+    # Identify if root is LVM
+    [[ $(echo $ROOT_PART | grep "/dev/mapper/") == "" ]] && LVM_ROOT=0 || LVM_ROOT=1
     	
 	select_filesystem
-	[[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
+	[[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${PARTITION} >/dev/null 2>/tmp/.errlog
 	check_for_error
 	
 	# Make the root directory
@@ -985,9 +969,9 @@ btrfs_mount_opts() {
     # If btrfs has been selected without subvolumes - and at least one btrfs mount option selected - then
 	# mount with options. Otherwise, basic mount.
 	if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	   mount -o $(cat ${BTRFS_OPTS}) ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
+	   mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
 	else
-	   mount ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
+	   mount ${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
     fi
 	  
 	# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
@@ -1008,10 +992,9 @@ btrfs_mount_opts() {
           mkswap ${MOUNTPOINT}/swapfile >/dev/null 2>&1
           swapon ${MOUNTPOINT}/swapfile >/dev/null 2>&1
        else
-          set_mount_type
           # Only create a swap if not already in place
-          [[ $(lsblk -o FSTYPE  ${MOUNT_TYPE}${PARTITION} | grep -i "swap") != "swap" ]] &&  mkswap  ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
-          swapon  ${MOUNT_TYPE}${PARTITION} >/dev/null 2>>/tmp/.errlog
+          [[ $(lsblk -o FSTYPE  ${MOUNT_TYPE}${PARTITION} | grep -i "swap") != "swap" ]] &&  mkswap  ${PARTITION} >/dev/null 2>/tmp/.errlog
+          swapon  ${PARTITION} >/dev/null 2>>/tmp/.errlog
           check_for_error
           # Since a partition was used, remove that partition from the list
           PARTITIONS="$(echo $PARTITIONS | sed s/${PARTITION}$' -'//)"
@@ -1024,13 +1007,13 @@ btrfs_mount_opts() {
     
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelUefiTitle" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || config_base_menu  
        PARTITION=$(cat ${ANSWER})
-       UEFI_PART=$"/dev/"${PARTITION}
+       UEFI_PART=${PARTITION}
        
        # If it is already a fat/vfat partition...
        if [[ $(fsck -N /dev/$PARTITION | grep fat) ]]; then
-          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FormUefiTitle" --yesno "$_FormUefiBody $PARTITION $_FormUefiBody2" 0 0 && mkfs.vfat -F32 $"/dev/"${PARTITION} >/dev/null 2>/tmp/.errlog
+          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FormUefiTitle" --yesno "$_FormUefiBody $PARTITION $_FormUefiBody2" 0 0 && mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
        else 
-          mkfs.vfat -F32 $"/dev/"${PARTITION} >/dev/null 2>/tmp/.errlog
+          mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
        fi
        check_for_error
        
@@ -1049,7 +1032,7 @@ btrfs_mount_opts() {
        esac
        
        mkdir -p ${MOUNTPOINT}${UEFI_MOUNT} 2>/tmp/.errlog
-       mount $"/dev/"${PARTITION} ${MOUNTPOINT}${UEFI_MOUNT} 2>>/tmp/.errlog
+       mount ${PARTITION} ${MOUNTPOINT}${UEFI_MOUNT} 2>>/tmp/.errlog
        check_for_error
        confirm_mount ${MOUNTPOINT}${UEFI_MOUNT}     
        
@@ -1059,7 +1042,6 @@ btrfs_mount_opts() {
        while [[ $NUMBER_PARTITIONS > 0 ]]; do 
              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtPartTitle" --menu "$_ExtPartBody" 0 0 4 "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || config_base_menu 
              PARTITION=$(cat ${ANSWER})
-             set_mount_type
              
              if [[ $PARTITION == ${_Done} ]]; then
                 break;
@@ -1067,7 +1049,7 @@ btrfs_mount_opts() {
                 MOUNT=""
                 
                 select_filesystem 
-                [[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${MOUNT_TYPE}${PARTITION} >/dev/null 2>/tmp/.errlog
+                [[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${PARTITION} >/dev/null 2>/tmp/.errlog
 	            check_for_error
 	            
                 # Don't give /boot as an example for UEFI systems!
@@ -1100,9 +1082,9 @@ btrfs_mount_opts() {
                 # If btrfs has been selected without subvolumes - and at least one btrfs mount option selected - then
 	            # mount with options. Otherwise, basic mount.
 	            if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-					mount -o $(cat ${BTRFS_OPTS}) ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+					mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
 				else
-					mount ${MOUNT_TYPE}${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+					mount ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
 				fi
 	  
 				# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
@@ -1112,9 +1094,8 @@ btrfs_mount_opts() {
                 
                 # Determine if a seperate /boot is used, and if it is LVM or not
                 LVM_SEP_BOOT=0
-                if [[ $MOUNT == "/boot" ]]; then
-                   [[ $MOUNT_TYPE == "/dev/" ]] && LVM_SEP_BOOT=1 || LVM_SEP_BOOT=2
-                fi                   
+                [[ $MOUNT == "/boot" ]] && LVM_SEP_BOOT=1 || LVM_SEP_BOOT=2
+                
              fi
        done
 }	
@@ -1182,10 +1163,10 @@ find_lvm_partitions() {
 
     LVM_PARTITIONS=""
     NUMBER_LVM_PARTITIONS=0
-    lvm_partition_list=$(lvmdiskscan | grep -v 'LVM physical volume' | grep 'sd\|hd\|vd\|nvme\|mmc' | sed 's/\/dev\///' | awk '{print $1}')
+    lvm_partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'lvm' | awk '{print $1 " " $2}' | sort -u)
 	
     for i in ${lvm_partition_list[@]}; do
-        LVM_PARTITIONS="${LVM_PARTITIONS} ${i} -"
+        LVM_PARTITIONS="${LVM_PARTITIONS} ${i}"
         NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS + 1 ))
     done
     
@@ -1462,14 +1443,13 @@ bios_bootloader() {
 				arch_chroot "$(cat ${PACKAGES})" 2>/tmp/.errlog
 				check_for_error
 
-				# Amend configuration file depending on whether lvm used or not for root.
-				[[ $LVM_ROOT -eq 0 ]] && sed -i "s/sda[0-9]/${ROOT_PART}/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg \
-				|| sed -i "s/APPEND.*/APPEND root=\/dev\/mapper\/${ROOT_PART} rw/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				# Amend configuration file to specify root.
+				sed -i "s/APPEND.*/APPEND root=${ROOT_PART} rw/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 
 				# Amend configuration file for kernel(s) installed
 				if [[ $KERNEL -eq 3 ]]; then
-					sed -i "/INITRD \.\.\/initramfs-linux\.img/a--insert--\nLABEL arch-lts\n\tMENU LABEL Arch Linux LTS\n\tLINUX \.\.\/vmlinuz-linux-lts\n\tAPPEND root=/dev/$ROOT_PART rw\n\tINITRD \.\./initramfs-linux-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-					sed -i "/INITRD \.\.\/initramfs-linux-fallback\.img/a--insert--\nLABEL archfallback-lts\n\tMENU LABEL Arch Linux Fallback LTS\n\tLINUX \.\.\/vmlinuz-linux-lts\n\tAPPEND root=/dev/$ROOT_PART rw\n\tINITRD \.\./initramfs-linux-fallback-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+					sed -i "/INITRD \.\.\/initramfs-linux\.img/a--insert--\nLABEL arch-lts\n\tMENU LABEL Arch Linux LTS\n\tLINUX \.\.\/vmlinuz-linux-lts\n\tAPPEND root=$ROOT_PART rw\n\tINITRD \.\./initramfs-linux-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+					sed -i "/INITRD \.\.\/initramfs-linux-fallback\.img/a--insert--\nLABEL archfallback-lts\n\tMENU LABEL Arch Linux Fallback LTS\n\tLINUX \.\.\/vmlinuz-linux-lts\n\tAPPEND root=$ROOT_PART rw\n\tINITRD \.\./initramfs-linux-fallback-lts\.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 					sed -i s/--insert--//g ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				elif [[ $KERNEL -eq 2 ]]; then
 					sed -i 's/linux/linux-lts/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
@@ -1487,11 +1467,8 @@ uefi_bootloader() {
     #Ensure again that efivarfs is mounted
 	[[ -z $(mount | grep /sys/firmware/efi/efivars) ]] && mount -t efivarfs efivarfs /sys/firmware/efi/efivars
      
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstUefiBtTitle" \
-    --menu "$_InstUefiBtBody" 0 0 3 \
-    "1" $"Grub2" \
-    "2" $"rEFInd" \
-    "3" $"systemd-boot" 2>${ANSWER}
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstUefiBtTitle" --menu "$_InstUefiBtBody" 0 0 3 \
+    "grub" "-" "refind-efi" "-" "[systemd-boot]" "-" 2>${PACKAGES}
 
      case $(cat ${ANSWER}) in
      "1") # Grub2
@@ -1559,10 +1536,10 @@ uefi_bootloader() {
           check_for_error
           
           # Deal with LVM Root
-          if [[ $LVM_ROOT -eq 0 ]]; then
-             sysdb_root=$(blkid -s PARTUUID $"/dev/"${ROOT_PART} | sed 's/.*=//g' | sed 's/"//g')
+          if [[ $(echo $ROOT_PART | grep "/dev/mapper/") == "" ]]; then
+			sysdb_root=$(blkid -s PARTUUID ${ROOT_PART} | sed 's/.*=//g' | sed 's/"//g')
           else
-             sysdb_root="/dev/mapper/${ROOT_PART}" 
+             sysdb_root=$ROOT_PART 
           fi
            
           # Deal with LTS Kernel
