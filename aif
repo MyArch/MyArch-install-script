@@ -2159,14 +2159,16 @@ config_base_menu() {
 	   fi
 	fi
 
-    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTitle" --menu "$_ConfBseBody" 0 0 7 \
+    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTitle" --menu "$_ConfBseBody" 0 0 9 \
  	"1" "$_ConfBseFstab" \
 	"2" "$_ConfBseHost" \
 	"3" "$_ConfBseTime" \
 	"4" "$_ConfBseHWC" \
 	"5" "$_ConfBseSysLoc" \
 	"6" "$_PrepKBLayout" \
-	"7" "$_Back" 2>${ANSWER}	
+	"7" "$_ConfUsrRoot" \
+	"8" "$_ConfUsrNew" \
+	"9" "$_Back" 2>${ANSWER}	
 	
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
@@ -2181,45 +2183,18 @@ config_base_menu() {
         "5") set_locale
              ;;
         "6") set_xkbmap
-             ;;           
-          *) main_menu_online
              ;;
+		"7") set_root_password 
+			;;
+		"8") create_new_user
+			;;    
+          *) main_menu_online
+			;;
     esac
     
     config_base_menu
 
 }
-
-# Root and User Configuration
-config_user_menu() {
-
-	if [[ $SUB_MENU != "config_user_menu" ]]; then
-	   SUB_MENU="config_user_menu"
-	   HIGHLIGHT_SUB=1
-	else
-	   if [[ $HIGHLIGHT_SUB != 3 ]]; then
-	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
-	   fi
-	fi
-
-    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrTitle" --menu "$_ConfUsrBody" 0 0 3 \
- 	"1" "$_ConfUsrRoot" \
-	"2" "$_ConfUsrNew" \
-	"3" "$_Back" 2>${ANSWER}
-	
-	HIGHLIGHT_SUB=$(cat ${ANSWER})
-    case $(cat ${ANSWER}) in
-    "1") set_root_password 
-         ;;
-    "2") create_new_user
-         ;;     
-      *) main_menu_online
-         ;;
-    esac
-    
-    config_user_menu
-}
-
 
 install_desktop_menu() {
 
@@ -2383,16 +2358,15 @@ main_menu_online() {
 	fi
 	
     dialog --default-item ${HIGHLIGHT} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MMTitle" \
-    --menu "$_MMBody" 0 0 9 \
+    --menu "$_MMBody" 0 0 8 \
  	"1" "$_MMPrep" \
 	"2" "$_MMInstBse" \
 	"3" "$_MMConfBse" \
-	"4" "$_MMConfUsr" \
-	"5" "$_MMInstDE" \
-	"6" "$_InstAccOpt" \
-    "7" "$_MMRunMkinit" \
-    "8" "$_SeeConfOpt" \
-	"9" "$_Done" 2>${ANSWER}
+	"4" "$_MMInstDE" \
+	"5" "$_InstAccOpt" \
+    "6" "$_MMRunMkinit" \
+    "7" "$_SeeConfOpt" \
+	"8" "$_Done" 2>${ANSWER}
 
     HIGHLIGHT=$(cat ${ANSWER})
     
@@ -2401,7 +2375,7 @@ main_menu_online() {
        check_mount
     fi
 
-    if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 7 ]]; then
+    if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 6 ]]; then
        check_mount
        check_base
     fi
@@ -2412,16 +2386,14 @@ main_menu_online() {
         "2") install_base_menu
              ;;
         "3") config_base_menu
+             ;;          
+        "4") install_desktop_menu
              ;;
-        "4") config_user_menu
-             ;;            
-        "5") install_desktop_menu
+        "5") install_acc_menu
+			;;
+        "6") run_mkinitcpio
              ;;
-        "6") install_acc_menu
-             ;;
-        "7") run_mkinitcpio
-             ;;
-        "8") edit_configs
+        "7") edit_configs
              ;;            
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
           
