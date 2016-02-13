@@ -950,7 +950,9 @@ btrfs_mount_opts() {
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelRootTitle" --menu "$_SelRootBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
 	PARTITION=$(cat ${ANSWER})
     ROOT_PART=${PARTITION}
-    
+    clear
+    echo $ROOT_PART
+    read
     # Identify if root is LVM
     [[ $(echo $ROOT_PART | grep "/dev/mapper/") == "" ]] && LVM_ROOT=0 || LVM_ROOT=1
     	
