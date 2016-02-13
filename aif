@@ -991,12 +991,12 @@ btrfs_mount_opts() {
           swapon ${MOUNTPOINT}/swapfile >/dev/null 2>&1
        else
           # Only create a swap if not already in place
-          [[ $(lsblk -o FSTYPE  ${MOUNT_TYPE}${PARTITION} | grep -i "swap") != "swap" ]] &&  mkswap  ${PARTITION} >/dev/null 2>/tmp/.errlog
+          [[ $(lsblk -o FSTYPE  ${MOUNT_TYPE}${PARTITION} | grep -i "swap") != "swap" ]] &&  mkswap ${PARTITION} >/dev/null 2>/tmp/.errlog
           swapon  ${PARTITION} >/dev/null 2>>/tmp/.errlog
           check_for_error
           # Since a partition was used, remove that partition from the list
-          PARTITIONS="$(echo $PARTITIONS | sed s/${PARTITION}$' -'//)"
-          NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
+          PARTITIONS=$(echo $PARTITIONS | sed "s~${PARTITION} [0-9]*[G-M]~~" | sed "s~${PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${PARTITION}$' -'~~)
+		  NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
        fi
     fi
     
