@@ -1380,10 +1380,10 @@ install_base() {
 	"linux" "-" on "linux-lts" "-" off "base-devel" "-" on $BTRF_CHECK $F2FS_CHECK "sudo" "-" on 2>${PACKAGES}
     
     # Determine kernel type(s) selected for installation.
-	[[ $(cat ${PACKAGES} | grep "linux ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3
-	[[ $(cat ${PACKAGES} | grep "linux ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2
-	[[ $(cat ${PACKAGES} | grep "linux ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1
-	[[ $(cat ${PACKAGES} | grep "linux ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
+	[[ $(cat ${PACKAGES} | grep "linux") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3
+	[[ $(cat ${PACKAGES} | grep "linux") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2
+	[[ $(cat ${PACKAGES} | grep "linux") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1
+	[[ $(cat ${PACKAGES} | grep "linux") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
 	
 	if [[ $KERNEL -gt 0 ]]; then
 		clear
