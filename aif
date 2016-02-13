@@ -1405,10 +1405,10 @@ install_base() {
     
     # Determine kernel type(s) selected for installation.
     if 	[[ $(cat ${PACKAGES}) != "" ]]; then
-		[[ $(cat ${PACKAGES} | grep -w -l "linux") != "" ]] && [[ $(cat ${PACKAGES} | grep -w -l "linux-lts") != "" ]] && KERNEL=3
-		[[ $(cat ${PACKAGES} | grep -w -l "linux") == "" ]] && [[ $(cat ${PACKAGES} | grep -w -l "linux-lts") != "" ]] && KERNEL=2
-		[[ $(cat ${PACKAGES} | grep -w -l "linux") != "" ]] && [[ $(cat ${PACKAGES} | grep -w -l "linux-lts") == "" ]] && KERNEL=1
-		[[ $(cat ${PACKAGES} | grep -w -l "linux") == "" ]] && [[ $(cat ${PACKAGES} | grep -w -l "linux-lts") == "" ]] && KERNEL=0
+		[[ $(cat ${PACKAGES} | grep -w -F "linux") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3
+		[[ $(cat ${PACKAGES} | grep -w -F "linux") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2
+		[[ $(cat ${PACKAGES} | grep -w -F "linux") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1
+		[[ $(cat ${PACKAGES} | grep -w -F "linux") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
 	
 		if [[ $KERNEL -gt 0 ]]; then
 			clear
