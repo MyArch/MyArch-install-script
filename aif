@@ -26,14 +26,11 @@ BTRFS_OPTS="/tmp/.btrfs_opts"	# BTRFS mount options
 VERSION="Architect Installation Framework (beta)"
 
 # Installation
-KDE_INSTALLED=0      				# Has KDE been installed? Used for display manager option
-GNOME_INSTALLED=0    				# Has Gnome been installed? Used for display manager option
-LXDE_INSTALLED=0     				# Has LXDE been installed? Used for display manager option
-LXQT_INSTALLED=0            		# Has LXQT been installed? Used for display manager option
-DM_INSTALLED=0       				# Has a display manager been installed?
+DM_INST=""							# Which DMs have been installed?
+DM_ENABLED=0						# Has a display manager been enabled?
+NM_INST=""							# Which NMs have been installed?
+NM_ENABLED=0						# Has a network connection manager been enabled?
 COMMON_INSTALLED=0   				# Has the common-packages option been taken?
-DM_INST="/tmp/.dm"					# Which DMs have been installed with DEs?
-NM_INSTALLED=0       				# Has a network connection manager been installed and enabled?
 AXI_INSTALLED=0             		# Have the ALSA, Xorg, and xf86-input packages been installed?
 BOOTLOADER="n/a"      				# Which bootloader has been installed?
 KEYMAP="us"          				# Virtual console keymap. Default is "us"
@@ -1943,23 +1940,31 @@ install_de_wm() {
 
 }
 
-# First see if selected
+# Display Manager
 install_dm() {
 
-	if [[ $DM_INSTALLED -eq 0 ]]; then
+# Save repetition of code
+enable_dm() {
+	arch_chroot "systemctl enable $(cat ${PACKAGES})" > /tmp/.symlink 2>/tmp/.errlog
+	check_for_error
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --textbox /tmp/.symlink 0 0
+	DM_ENABLED=1
+}
+
+	if [[ $DM_ENABLED -eq 0 ]]; then
 		# Prep variables
 		echo "" > ${PACKAGES}
-		echo "" > ${DM_INST}
 		dm_list="gdm lxdm lightdm sddm"
 		DM_LIST=""
+		DM_INST=""
 
 		# Generate list of DMs installed with DEs, and a list for selection menu
-		for i in ${dm_list[@]}; do
-			[[ -e ${MOUNTPOINT}/usr/bin/${i} ]] && echo ${i} >> $DM_INST
+		for i in ${dm_list}; do
+			[[ -e ${MOUNTPOINT}/usr/bin/${i} ]] && DM_INST="${DM_INST} ${i}"
 			DM_LIST="${DM_LIST} ${i} -"
 		done
 
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --menu "$_AlreadyInst$(cat $DM_INST)\n\n$_DmChBody" 0 0 5 \
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --menu "$_AlreadyInst$DM_INST\n\n$_DmChBody" 0 0 5 \
 		${DM_LIST} 2>${PACKAGES}
 		clear
 		
@@ -1967,17 +1972,12 @@ install_dm() {
 		if [[ $(cat ${PACKAGES}) != "" ]]; then
 		
 			# check if selected dm already installed. If so, enable and break loop.
-			for i in $(cat ${DM_INST[@]}); do
-				if [[ $(cat ${PACKAGES}) == ${i} ]]; then 
-					arch_chroot "systemctl enable $(cat ${PACKAGES})" >/dev/null 2>/tmp/.errlog
-					check_for_error
-					DM_INSTALLED=1
-					break;
-				fi
+			for i in ${DM_INST}; do
+				[[ $(cat ${PACKAGES}) == ${i} ]] && enable_dm && break;
 			done
 		
 			# If no match found, install and enable DM	
-			if [[ $DM_INSTALLED -eq 0 ]]; then
+			if [[ $DM_ENABLED -eq 0 ]]; then
 		
 				# Where lightdm selected, add gtk greeter package
 				sed -i 's/lightdm/lightdm lightdm-gtk-greeter/' ${PACKAGES}
@@ -1985,61 +1985,75 @@ install_dm() {
 			
 				# Where lightdm selected, now remove the greeter package
 				sed -i 's/lightdm-gtk-greeter//' ${PACKAGES}
-				arch_chroot "systemctl enable $(cat ${PACKAGES})" >/dev/null 2>/tmp/.errlog
-				check_for_error
-				DM_INSTALLED=1	
+				enable_dm
 			fi
 		fi
 	fi
 
 	# Show after successfully installing or where attempting to repeat when already completed.
-	[[ $DM_INSTALLED -eq 1 ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --msgbox "$_DmDoneBody" 0 0       
+	[[ $DM_ENABLED -eq 1 ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --msgbox "$_DmDoneBody" 0 0       
 }
 
+# Network Manager
 install_nm() {
 
-   # Check to see if a NM has already been installed and enabled
-	if [[ $NM_INSTALLED -eq 0 ]]; then
+# Save repetition of code
+enable_nm() {
+	if [[ $(cat ${PACKAGES}) == "NetworkManager" ]]; then
+		arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" >/tmp/.symlink 2>/tmp/.errlog
+	else
+		arch_chroot "systemctl enable $(cat ${PACKAGES})" >/tmp/.symlink 2>/tmp/.errlog
+	fi
+	
+	check_for_error
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstNMTitle" --textbox /tmp/.symlink 0 0
+	NM_ENABLED=1
+}
 
+	if [[ $NM_ENABLED -eq 0 ]]; then
+		# Prep variables
 		echo "" > ${PACKAGES}
+		nm_list="connman CLI dhcpcd CLI netctl CLI NetworkManager GUI wicd GUI"
+		NM_LIST=""
 		NM_INST=""
-		[[ -e ${MOUNTPOINT}/usr/bin/NetworkManager ]] && NM_INST="networkmanager"
 
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstNMTitle" --menu "$_AlreadyInst $NM_INST\n\n$_InstNMBody" 0 0 4 \
-		"connman" "(CLI)" \
-		"dhcpcd"  "(CLI)" \
-		"networkmanager" "(GUI)" \
-		"wicd" "(GUI)" 2> ${PACKAGES}	
+		# Generate list of DMs installed with DEs, and a list for selection menu
+		for i in ${nm_list}; do
+			[[ -e ${MOUNTPOINT}/usr/bin/${i} ]] && NM_INST="${NM_INST} ${i}"
+			NM_LIST="${NM_LIST} ${i}"
+		done
+
+		# Remove netctl from selectable list as it is a PITA to configure via arch_chroot
+		NM_LIST=$(echo $NM_LIST | sed "s/netctl CLI//")
+
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstNMTitle" --menu "$_AlreadyInst $NM_INST\n$_InstNMBody" 0 0 4 \
+		${NM_LIST}
 		clear
 
 		# If a selection has been made, act
 		if [[ $(cat ${PACKAGES}) != "" ]]; then
 		
-			# check if selected nm already installed. If so, enable.
-			if [[ $(cat ${PACKAGES}) == $NM_INST ]]; then
-				arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" 2>/tmp/.errlog
-				check_for_error
-                NM_INSTALLED=1
-            fi
-            
+			# check if selected nm already installed. If so, enable and break loop.
+			for i in ${NM_INST}; do
+				[[ $(cat ${PACKAGES}) == ${i} ]] && enable_nm && break
+			done
+			            
 			# If no match found, install and enable NM	
 			if [[ $NM_INSTALLED -eq 0 ]]; then
 			 
 				# Where networkmanager selected, add network-manager-applet
-				sed -i 's/networkmanager/networkmanager network-manager-applet/' ${PACKAGES}
+				sed -i 's/NetworkManager/networkmanager network-manager-applet/g' ${PACKAGES}
 				pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
 			
-				# Where networkmanager selected, now change for systemctl enable command
-				sed -i 's/networkmanager network-manager-applet/NetworkManager \&\& systemctl enable NetworkManager-dispatcher/g' ${PACKAGES}
-				arch_chroot "systemctl enable $(cat ${PACKAGES})" 2>>/tmp/.errlog
-				check_for_error
-				NM_INSTALLED=1
+				# Where networkmanager selected, now remove network-manager-applet
+				sed -i 's/networkmanager network-manager-applet/NetworkManager/g' ${PACKAGES}
+				enable_nm
 			fi
 		fi
 	fi
 	
 	# Show after successfully installing or where attempting to repeat when already completed.
-	[[ $NM_INSTALLED -eq 1 ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstNMTitle" --msgbox "$_InstNMErrBody" 0 0
+	[[ $NM_ENABLED -eq 1 ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstNMTitle" --msgbox "$_InstNMErrBody" 0 0
 
 }
 
