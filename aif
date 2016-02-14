@@ -2027,7 +2027,7 @@ enable_nm() {
 		NM_LIST=$(echo $NM_LIST | sed "s/netctl CLI//")
 
 		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstNMTitle" --menu "$_AlreadyInst $NM_INST\n$_InstNMBody" 0 0 4 \
-		${NM_LIST}
+		${NM_LIST} 2> ${PACKAGES}
 		clear
 
 		# If a selection has been made, act
@@ -2039,7 +2039,7 @@ enable_nm() {
 			done
 			            
 			# If no match found, install and enable NM	
-			if [[ $NM_INSTALLED -eq 0 ]]; then
+			if [[ $NM_ENABLED -eq 0 ]]; then
 			 
 				# Where networkmanager selected, add network-manager-applet
 				sed -i 's/NetworkManager/networkmanager network-manager-applet/g' ${PACKAGES}
