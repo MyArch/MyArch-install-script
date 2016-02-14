@@ -1945,9 +1945,8 @@ install_dm() {
 
 # Save repetition of code
 enable_dm() {
-	arch_chroot "systemctl enable $(cat ${PACKAGES})" > /tmp/.symlink 2>/tmp/.errlog
+	arch_chroot "systemctl enable $(cat ${PACKAGES})" 2>/tmp/.errlog
 	check_for_error
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --textbox /tmp/.symlink 0 0
 	DM_ENABLED=1
 }
 
@@ -2002,11 +2001,10 @@ enable_nm() {
 	if [[ $(cat ${PACKAGES}) == "NetworkManager" ]]; then
 		arch_chroot "systemctl enable NetworkManager.service && systemctl enable NetworkManager-dispatcher.service" >/tmp/.symlink 2>/tmp/.errlog
 	else
-		arch_chroot "systemctl enable $(cat ${PACKAGES})" >/tmp/.symlink 2>/tmp/.errlog
+		arch_chroot "systemctl enable $(cat ${PACKAGES})" 2>/tmp/.errlog
 	fi
 	
 	check_for_error
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstNMTitle" --textbox /tmp/.symlink 0 0
 	NM_ENABLED=1
 }
 
