@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 2.0 beta - 11-Feb-2016)
+# Architect Installation Framework (version 1.9 beta - 15-Feb-2016)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -23,7 +23,7 @@ PACKAGES="/tmp/.pkgs"			# Packages to install
 BTRFS_OPTS="/tmp/.btrfs_opts"	# BTRFS mount options
 
 # Save retyping
-VERSION="Architect Installation Framework (beta)"
+VERSION="Architect Installation Framework 1.9 (beta)"
 
 # Installation
 DM_INST=""							# Which DMs have been installed?
@@ -31,7 +31,6 @@ DM_ENABLED=0						# Has a display manager been enabled?
 NM_INST=""							# Which NMs have been installed?
 NM_ENABLED=0						# Has a network connection manager been enabled?
 COMMON_INSTALLED=0   				# Has the common-packages option been taken?
-AXI_INSTALLED=0             		# Have the ALSA, Xorg, and xf86-input packages been installed?
 BOOTLOADER="n/a"      				# Which bootloader has been installed?
 KEYMAP="us"          				# Virtual console keymap. Default is "us"
 XKBMAP="us"      	    			# X11 keyboard layout. Default is "us"
@@ -60,7 +59,6 @@ SUB_MENU=""           				# Submenu to be highlighted
 
 # Logical Volume Management
 LVM=0                   			# Logical Volume Management Detected?
-LUKS=0                  			# Luks Detected?
 LVM_ROOT=0              			# LVM used for Root?
 LVM_SEP_BOOT=0          			# 1 = Seperate /boot, 2 = seperate /boot & LVM
 LVM_DISABLE=0           			# Option to allow user to deactive existing LVM
@@ -69,6 +67,9 @@ LVM_VG_MB=0             			# MB remaining of VG
 LVM_LV_NAME=""          			# Name of LV to create
 LV_SIZE_INVALID=0       			# Is LVM LV size entered valid?
 VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
+
+# LUKS
+LUKS=0                  			# Luks Detected?
 
 # Installation
 MOUNTPOINT="/mnt"       			# Installation
@@ -94,7 +95,7 @@ FILE2=""							# Which second file is to be opened?
 select_language() {
     
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 4 \
- 	"1" $"English		(en)" 2>${ANSWER}
+ 	"1" $"English (en)" 2>${ANSWER}
 #	"2" $"Italian 		(it)" \
 # 	"3" $"Russian 		(ru)" \
 # 	"4" $"Turkish 		(tr)" \
@@ -187,7 +188,6 @@ check_requirements() {
   sleep 2   
   clear
   echo "" > /tmp/.errlog
-  pacman -Syy
 
 }
 
@@ -257,8 +257,8 @@ check_base() {
 
 # Simple code to show devices / partitions.
 show_devices() {
-     lsblk -o NAME,MODEL,TYPE,FSTYPE,SIZE,MOUNTPOINT | grep -v "loop" | grep -v "rom" | grep -v "arch_airootfs" > /tmp/.devlist
-     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevShowTitle" --textbox /tmp/.devlist 0 0
+     lsblk -o NAME,MODEL,TYPE,FSTYPE,SIZE,MOUNTPOINT | grep "disk\|part\|lvm\|crypt\|NAME\|MODEL\|TYPE\|FSTYPE\|SIZE\|MOUNTPOINT" > /tmp/.devlist
+     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevShowOpt" --textbox /tmp/.devlist 0 0
 }
 
 ######################################################################
@@ -268,40 +268,39 @@ show_devices() {
 ######################################################################
 
 
-# Adapted from AIS. Added option to allow users to edit the mirrorlist.
+# Originally adapted from AIS. Added option to allow users to edit the mirrorlist.
 configure_mirrorlist() {
 
 # Generate a mirrorlist based on the country chosen.	
 mirror_by_country() {
 
  COUNTRY_LIST=""
- countries_list=("AU_Australia AT_Austria BY_Belarus BE_Belgium BR_Brazil BG_Bulgaria CA_Canada CL_Chile CN_China CO_Colombia CZ_Czech_Republic DK_Denmark EE_Estonia FI_Finland FR_France DE_Germany GB_United_Kingdom GR_Greece HU_Hungary IN_India IE_Ireland IL_Israel IT_Italy JP_Japan KZ_Kazakhstan KR_Korea LV_Latvia LU_Luxembourg MK_Macedonia NL_Netherlands NC_New_Caledonia NZ_New_Zealand NO_Norway PL_Poland PT_Portugal RO_Romania RU_Russia RS_Serbia SG_Singapore SK_Slovakia ZA_South_Africa ES_Spain LK_Sri_Lanka SE_Sweden CH_Switzerland TW_Taiwan TR_Turkey UA_Ukraine US_United_States UZ_Uzbekistan VN_Vietnam")
+ countries_list="AU Australia AT Austria BY Belarus BE Belgium BR Brazil BG Bulgaria CA Canada CL Chile CN China CO Colombia CZ Czech_Republic DK Denmark EE Estonia FI Finland FR France DE Germany GB United_Kingdom GR Greece HU Hungary IN India IE Ireland IL Israel IT Italy JP Japan KZ Kazakhstan KR Korea LV Latvia LU Luxembourg MK Macedonia NL Netherlands NC New_Caledonia NZ New_Zealand NO Norway PL Poland PT Portugal RO Romania RU Russia RS Serbia SG Singapore SK Slovakia ZA South_Africa ES Spain LK Sri_Lanka SE Sweden CH Switzerland TW Taiwan TR Turkey UA Ukraine US United_States UZ Uzbekistan VN Vietnam"
 
  for i in ${countries_list}; do
-     COUNTRY_LIST="${COUNTRY_LIST} ${i} -"
+     COUNTRY_LIST="${COUNTRY_LIST} ${i}"
  done
-	
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorCntryTitle" --menu "$_MirrorCntryBody" 0 0 16 ${COUNTRY_LIST} 2>${ANSWER} || prep_menu
- COUNTRY_CODE=$(cat ${ANSWER} |sed 's/_.*//')
 
- URL="https://www.archlinux.org/mirrorlist/?country=${COUNTRY_CODE}&use_mirror_status=on"
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorbyCountry" --menu "$_MirrorCntryBody" 0 0 0 $COUNTRY_LIST 2>${ANSWER} || prep_menu
+
+ URL="https://www.archlinux.org/mirrorlist/?country=$(cat ${COUNTRY_CODE})&use_mirror_status=on"
  MIRROR_TEMP=$(mktemp --suffix=-mirrorlist)
 
  # Get latest mirror list and save to tmpfile
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorGenTitle" --infobox "$_MirrorGenBody" 0 0
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorGenTitle" --infobox "$_PlsWaitBody" 0 0
   
  curl -so ${MIRROR_TEMP} ${URL} 2>/tmp/.errlog
  check_for_error
  sed -i 's/^#Server/Server/g' ${MIRROR_TEMP}
  nano ${MIRROR_TEMP}
 
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_MirrorGenQ" 0 0
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorGenTitle" --yesno "$_MirrorGenQ" 0 0
 
  if [[ $? -eq 0 ]];then
     mv -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.orig
     mv -f ${MIRROR_TEMP} /etc/pacman.d/mirrorlist
     chmod +r /etc/pacman.d/mirrorlist
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --infobox "$_DoneMsg" 0 0
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorGenTitle" --infobox "$_MirrorGenDone" 0 0
 	sleep 2
  else
     prep_menu
@@ -312,8 +311,8 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" \
     --menu "$_MirrorlistBody" 0 0 5 \
 	"1" "$_MirrorbyCountry" \
 	"2" "$_MirrorEdit" \
-	"3" "$_MirrorRank" \
-	"4" "$_MirrorRestore" \
+	"3" "$_MirrorRankTitle" \
+	"4" "$_MirrorRestTitle" \
 	"5" "$_Back" 2>${ANSWER}	
 
     case $(cat ${ANSWER}) in
@@ -321,18 +320,18 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" \
              ;;
         "2") nano /etc/pacman.d/mirrorlist
              ;;
-        "3") dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorRankTitle" --infobox "$_MirrorRankBody" 0 0
+        "3") dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorRankTitle" --infobox "$_MirrorRankBody $_PlsWaitBody" 0 0
              cp -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
              rankmirrors -n 10 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist 2>/tmp/.errlog
              check_for_error
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --infobox "$_DoneMsg" 0 0
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorRankTitle" --infobox "$_MirrorRankDone" 0 0
 			 sleep 2
              ;;
          "4") if [[ -e /etc/pacman.d/mirrorlist.orig ]]; then       
 				 mv -f /etc/pacman.d/mirrorlist.orig /etc/pacman.d/mirrorlist
-				 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --msgbox "$_MirrorRestDone" 0 0
+				 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorRestTitle" --msgbox "$_MirrorRestDone" 0 0
 		      else
-		         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorNoneTitle" --msgbox "$_MirrorNoneBody" 0 0
+		         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_MirrorNoneBody" 0 0
 		      fi
              ;;
           *) prep_menu
@@ -346,12 +345,12 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" \
 set_keymap() { 
 	
 	KEYMAPS=""
-    for i in $(ls -R /usr/share/kbd/keymaps | grep "map.gz" | sed 's/\.map.gz//g' | sort); do
+    for i in $(ls -R /usr/share/kbd/keymaps | grep "map.gz" | sed 's/\.map\.gz//g' | sort); do
         KEYMAPS="${KEYMAPS} ${i} -"
     done
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_KeymapTitle" \
-    --menu "$_KeymapBody" 20 40 16 ${KEYMAPS} 2>${ANSWER} || prep_menu 
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_VCKeymapTitle" \
+    --menu "$_VCKeymapBody" 20 40 16 ${KEYMAPS} 2>${ANSWER} || prep_menu 
     KEYMAP=$(cat ${ANSWER})
     
 	loadkeys $KEYMAP 2>/tmp/.errlog
@@ -364,13 +363,13 @@ set_keymap() {
  set_xkbmap() {
 	 
 	XKBMAP_LIST=""
-	keymaps_xkb=("af_Afghani al_Albanian am_Armenian ara_Arabic at_German-Austria az_Azerbaijani ba_Bosnian bd_Bangla be_Belgian bg_Bulgarian br_Portuguese-Brazil bt_Dzongkha bw_Tswana by_Belarusian ca_French-Canada cd_French-DR-Congo ch_German-Switzerland cm_English-Cameroon cn_Chinese cz_Czech de_German dk_Danishee_Estonian epo_Esperanto es_Spanish et_Amharic fo_Faroese fi_Finnish fr_French gb_English-UK ge_Georgian gh_English-Ghana gn_French-Guinea gr_Greek hr_Croatian hu_Hungarian ie_Irish il_Hebrew iq_Iraqi ir_Persian is_Icelandic it_Italian jp_Japanese ke_Swahili-Kenya kg_Kyrgyz kh_Khmer-Cambodia kr_Korean kz_Kazakh la_Lao latam_Spanish-Lat-American lk_Sinhala-phonetic lt_Lithuanian lv_Latvian ma_Arabic-Morocco mao_Maori md_Moldavian me_Montenegrin mk_Macedonian ml_Bambara mm_Burmese mn_Mongolian mt_Maltese mv_Dhivehi ng_English-Nigeria nl_Dutch no_Norwegian np_Nepali ph_Filipino pk_Urdu-Pakistan pl_Polish pt_Portuguese ro_Romanian rs_Serbian ru_Russian se_Swedish si_Slovenian sk_Slovak sn_Wolof sy_Arabic-Syria th_Thai tj_Tajik tm_Turkmen tr_Turkish tw_Taiwanese tz_Swahili-Tanzania ua_Ukrainian us_English-US uz_Uzbek vn_Vietnamese za_English-S-Africa")
+	keymaps_xkb=("af Afghani al Albanian am Armenian ara Arabic at German-Austria az Azerbaijani ba Bosnian bd Bangla be Belgian bg Bulgarian br Portuguese-Brazil bt Dzongkha bw Tswana by Belarusian ca French-Canada cd French-DR-Congo ch German-Switzerland cm English-Cameroon cn Chinese cz Czech de German dk Danish ee Estonian epo Esperanto es Spanish et Amharic fo Faroese fi Finnish fr French gb English-UK ge Georgian gh English-Ghana gn French-Guinea gr Greek hr Croatian hu Hungarian ie Irish il Hebrew iq Iraqi ir Persian is Icelandic it Italian jp Japanese ke Swahili-Kenya kg Kyrgyz kh Khmer-Cambodia kr Korean kz Kazakh la Lao latam Spanish-Lat-American lk Sinhala-phonetic lt Lithuanian lv Latvian ma Arabic-Morocco mao Maori md Moldavian me Montenegrin mk Macedonian ml Bambara mm Burmese mn Mongolian mt Maltese mv Dhivehi ng English-Nigeria nl Dutch no Norwegian np Nepali ph Filipino pk Urdu-Pakistan pl Polish pt Portuguese ro Romanian rs Serbian ru Russian se Swedish si Slovenian sk Slovak sn Wolof sy Arabic-Syria th Thai tj Tajik tm Turkmen tr Turkish tw Taiwanese tz Swahili-Tanzania ua Ukrainian us English-US uz Uzbek vn Vietnamese za English-S-Africa")
     
 	for i in ${keymaps_xkb}; do
-        XKBMAP_LIST="${XKBMAP_LIST} ${i} -"
+        XKBMAP_LIST="${XKBMAP_LIST} ${i}"
     done
 	
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_XkbmapTitle" --menu "$_XkbmapBody" 0 0 16 ${XKBMAP_LIST} 2>${ANSWER} || config_base_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepKBLayout" --menu "$_XkbmapBody" 0 0 16 ${XKBMAP_LIST} 2>${ANSWER} || config_base_menu
     XKBMAP=$(cat ${ANSWER} |sed 's/_.*//')
     echo -e "Section "\"InputClass"\"\nIdentifier "\"system-keyboard"\"\nMatchIsKeyboard "\"on"\"\nOption "\"XkbLayout"\" "\"${XKBMAP}"\"\nEndSection" > /tmp/00-keyboard.conf
  
@@ -384,7 +383,7 @@ set_locale() {
       LOCALES="${LOCALES} ${i} -"
   done
 
-  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LocateTitle" --menu "$_localeBody" 0 0 16 ${LOCALES} 2>${ANSWER} || config_base_menu 
+  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseSysLoc" --menu "$_localeBody" 0 0 16 ${LOCALES} 2>${ANSWER} || config_base_menu 
   LOCALE=$(cat ${ANSWER})
   
   echo "LANG=\"${LOCALE}\"" > ${MOUNTPOINT}/etc/locale.conf
@@ -401,7 +400,7 @@ set_timezone() {
       ZONE="$ZONE ${i} -"
     done
     
-     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_TimeZTitle" --menu "$_TimeZBody" 0 0 10 ${ZONE} 2>${ANSWER} || config_base_menu
+     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTimeHC" --menu "$_TimeZBody" 0 0 10 ${ZONE} 2>${ANSWER} || config_base_menu
      ZONE=$(cat ${ANSWER}) 
     
      SUBZONE=""
@@ -409,10 +408,10 @@ set_timezone() {
         SUBZONE="$SUBZONE ${i} -"
      done
          
-     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_TimeSubZTitle" --menu "$_TimeSubZBody" 0 0 11 ${SUBZONE} 2>${ANSWER} || config_base_menu
+     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTimeHC" --menu "$_TimeSubZBody" 0 0 11 ${SUBZONE} 2>${ANSWER} || config_base_menu
      SUBZONE=$(cat ${ANSWER}) 
     
-     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_TimeZQ ${ZONE}/${SUBZONE} ?" 0 0 
+     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTimeHC" --yesno "$_TimeZQ ${ZONE}/${SUBZONE}?" 0 0 
      
      if [[ $? -eq 0 ]]; then
         arch_chroot "ln -s /usr/share/zoneinfo/${ZONE}/${SUBZONE} /etc/localtime" 2>/tmp/.errlog
@@ -424,51 +423,32 @@ set_timezone() {
 
 set_hw_clock() {
 	
-   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_HwCTitle" \
-    --menu "$_HwCBody" 0 0 2 \
- 	"1" "$_HwCUTC" \
-	"2" "$_HwLocal" 2>${ANSWER}	
+   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTimeHC" --menu "$_HwCBody" 0 0 2 \
+ 	"utc" "-" "localtime" "-" 2>${ANSWER}	
 
-    case $(cat ${ANSWER}) in
-        "1") arch_chroot "hwclock --systohc --utc"  2>/tmp/.errlog
-             ;;
-        "2") arch_chroot "hwclock --systohc --localtime" 2>/tmp/.errlog
-             ;;
-          *) config_base_menu
-             ;;
-     esac	
-     
-     check_for_error
+    [[ $(cat ${ANSWER}) != "" ]] && arch_chroot "hwclock --systohc --$(cat ${ANSWER})"  2>/tmp/.errlog && check_for_error
 }
 
-# Adapted from AIS. As with some other functions, decided that keeping the numbering for options
-# was worth repeating portions of code.
+# Function will not allow incorrect UUID type for installed system.
 generate_fstab() {
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FstabTitle" \
-    --menu "$_FstabBody" 0 0 3 \
-	"1" "$_FstabDev" \
-	"2" "$_FstabLabel" \
-	"3" "$_FstabUUID" 2>${ANSWER}
-
-    case $(cat ${ANSWER}) in
-        "1") genfstab -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
-             ;;
-        "2") genfstab -L -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
-             ;;
-        "3") if [[ $SYSTEM == "UEFI" ]]; then
-                genfstab -t PARTUUID -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
-             else 
-                genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
-             fi
-             ;;
-          *) config_base_menu
-             ;;
-    esac
-
-    check_for_error
-
-    [[ -f ${MOUNTPOINT}/swapfile ]] && sed -i "s/\\${MOUNTPOINT}//" ${MOUNTPOINT}/etc/fstab
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FstabTitle" --menu "$_FstabBody" 0 0 4 \
+	"genfstab -p" "Device Name" \
+	"genfstab -L -p" "Device Label" \
+	"genfstab -U -p" "UUID (BIOS)" \
+	"genfstab -t PARTUUID -p" "Part UUID (UEFI)" 2>${ANSWER}
+	
+	if [[ $(cat ${ANSWER}) != "" ]]; then
+		if ([[ $SYSTEM == "BIOS" ]] && [[ $(cat ${ANSWER}) == "genfstab -t PARTUUID -p" ]]) \
+		|| ([[ $SYSTEM == "UEFI" ]] && [[ $(cat ${ANSWER}) == "genfstab -U -p" ]] ); then
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ErrTitle " --msgbox "$_FstabErr ($SYSTEM)\n\n" 0 0
+			generate_fstab
+		fi
+		
+		$(cat ${ANSWER}) ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
+		check_for_error
+		[[ -f ${MOUNTPOINT}/swapfile ]] && sed -i "s/\\${MOUNTPOINT}//" ${MOUNTPOINT}/etc/fstab
+	fi
 
 }
 
@@ -558,9 +538,9 @@ run_mkinitcpio() {
 	# If $LVM is being used, add the lvm2 hook
 	[[ $LVM -eq 1 ]] && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
     
-	# Amend command depending on whether LTS kernel was installed or not
+	# Amend command depending on kernel(s) installed
 	([[ $KERNEL -eq 1 ]] || [[ $KERNEL -eq 3 ]]) && arch_chroot "mkinitcpio -p linux" 2>/tmp/.errlog
-	([[ $KERNEL -eq 2 ]] || [[ $KERNEL -eq 3 ]]) && arch_chroot "mkinitcpio -p linux-lts" 2>/tmp/.errlog
+	([[ $KERNEL -eq 2 ]] || [[ $KERNEL -eq 3 ]]) && arch_chroot "mkinitcpio -p linux-lts" 2>>/tmp/.errlog
 	check_for_error
  
 }
@@ -1599,14 +1579,78 @@ uefi_bootloader() {
     fi
 }
 
-# Needed for broadcom and other network controllers
-install_wireless_packages() {
-    
-    check_mount
+# 
+install_network_menu() {
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_WirelssOptTitle" --menu "$_WirelessOptBody" 0 0 2 \
+# ntp not exactly wireless, but this menu is the best fit.
+install_wireless_packages(){
+
+	WIRELESS_PACKAGES="dialog iw rp-pppoe wireless_tools wpa_actiond"
+	if [[ $(lspci | grep -i "Network Controller") != "" ]]; then
+		WIRELESS_PACKAGES=$(echo $WIRELESS_PACKAGES | sed s/" "/" wifi on "/g | sed s/$/" wifi on "/g)
+	else
+		WIRELESS_PACKAGES=$(echo $WIRELESS_PACKAGES | sed s/" "/" wifi off "/g | sed s/$/" wifi off "/g)
+	fi
+	
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstNMMenuPkg " --checklist "$_InstNMMenuPkgBody\n\n$_UseSpaceBar" 0 0 11 \
+	$WIRELESS_PACKAGES \
+	"ntp" "-" off \
+	"b43-fwcutter" "Broadcom 802.11b/g/n" off \
+	"bluez-firmware" "Broadcom BCM203x / STLC2300 Bluetooth" off \
+	"ipw2100-fw" "Intel PRO/Wireless 2100" off \
+	"ipw2200-fw" "Intel PRO/Wireless 2200" off \
+	"zd1211-firmware" "ZyDAS ZD1211(b) 802.11a/b/g USB WLAN" off 2>${PACKAGES}
+	
+	if [[ $(cat ${PACKAGES}) != "" ]]; then
+		clear
+		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+		check_for_error
+	fi
+
+}
+
+install_cups(){
+
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstNMMenuCups " --checklist "$_InstCupsBody\n\n$_UseSpaceBar" 0 0 11 \
+	"cups" "-" on \
+	"cups-pdf" "-" off \
+	"ghostscript" "-" on \
+	"gsfonts" "-" on \
+	"samba" "-" off 2>${PACKAGES}
+	
+	if [[ $(cat ${PACKAGES}) != "" ]]; then
+		clear
+		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+		check_for_error
+		
+		if [[ $(cat ${PACKAGES} | grep "cups") != "" ]]; then
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstNMMenuCups " --yesno "$_InstCupsQ" 0 0
+			if [[ $? -eq 0 ]]; then
+				arch_chroot "systemctl enable org.cups.cupsd.service" 2>/tmp/.errlog
+				check_for_error
+				dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --infobox "$_Done!" 0 0
+				sleep 2
+			fi
+		fi
+	fi
+
+}
+
+	if [[ $SUB_MENU != "install_network_packages" ]]; then
+	   SUB_MENU="install_network_packages"
+	   HIGHLIGHT_SUB=1
+	else
+	   if [[ $HIGHLIGHT_SUB != 5 ]]; then
+	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
+	   fi
+	fi
+
+    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstNMMenuTitle " --menu "$_InstNMMenuBody" 0 0 5 \
  	"1" "$_SeeWirelessDev" \
- 	"2" "$_WirelssOptTitle" 2>${ANSWER}
+ 	"2" "$_InstNMMenuPkg" \
+ 	"3" "$_InstNMMenuNM" \
+ 	"4" "$_InstNMMenuCups" \
+ 	"5" "$_Back" 2>${ANSWER}
 
     case $(cat ${ANSWER}) in
     "1") # Identify the Wireless Device 
@@ -1616,46 +1660,31 @@ install_wireless_packages() {
         else
            dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_WirelessShowTitle" --msgbox "$_WirelessErrBody" 7 30
         fi
-        
-        install_wireless_packages
         ;;
-    "2") # Install Wireless Device Packages
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_WirelssOptTitle " --checklist "$_WirelssBody $_UseSpaceBar" 0 0 11 \
-		"dialog" "wifi" on \
-		"iw" "wifi" on \
-		"rp-pppoe" "wifi" on \
-		"wireless_tools" "wifi" on \
-		"wpa_actiond" "wifi" on \
-		"wpa_supplicant" "wifi" on \
-		"b43-fwcutter" "Broadcom 802.11b/g/n" off \
-		"bluez-firmware" "Broadcom BCM203x / STLC2300 Bluetooth" off \
-		"ipw2100-fw" "Intel PRO/Wireless 2100" off \
-		"ipw2200-fw" "Intel PRO/Wireless 2200" off \
-		"zd1211-firmware" "ZyDAS ZD1211(b) 802.11a/b/g USB WLAN" off 2>${PACKAGES}
-
-		# If at least one package, install.
-		if [[ $(cat ${PACKAGES}) != "" ]]; then
-			pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
-			check_for_error
-		fi
+    "2") install_wireless_packages
         ;;
-      *) install_base_menu
+	"3") install_nm
+		;;
+	"4") install_cups
+		;;
+	*) main_menu_online
         ;;
     esac
 }
 
 # Install alsa, xorg and input drivers. Also copy the xkbmap configuration file created earlier to the installed system
 # This will run only once.
-install_alsa_xorg_input() {
+install_xorg_input() {
 
 	echo "" > ${PACKAGES}
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_AXITitle" --checklist "$_AXIBody$_UseSpaceBar" 0 0 10 \
-	"alsa-utils" "-" on \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_AXITitle" --checklist "$_AXIBody$_UseSpaceBar" 0 0 11 \
+	"wayland" "-" off \
 	"xorg-server" "-" on \
 	"xorg-server-common" "-" off \
 	"xorg-server-utils" "-" on \
 	"xorg-xinit" "-" on \
+	"xorg-server-xwayland" "-" off \
 	"xf86-input-evdev" "-" off \
 	"xf86-input-joystick" "-" off \
 	"xf86-input-keyboard" "-" on \
@@ -1678,9 +1707,6 @@ install_alsa_xorg_input() {
 		arch_chroot "chown -R ${i}:users /home/${i}"
 	done
     
-    # Ensure option is only shown once 
-	AXI_INSTALLED=1
-
 }
 
 setup_graphics_card() {
@@ -1922,6 +1948,7 @@ install_de_wm() {
 		"gvfs-afc" "-" on \
 		"gvfs-smb" "-" on \
 		"polkit" "-" on \
+		"poppler" "-" on \
 		"python2-xdg" "-" on \
 		"ntfs-3g" "-" on \
 		"ttf-dejavu" "-" on \
@@ -2055,6 +2082,101 @@ enable_nm() {
 
 }
 
+install_multimedia_menu(){
+
+install_alsa_pulse(){
+	# Prep Variables
+	echo "" > ${PACKAGES}
+	PULSE_EXTRA=""
+	pulse_extra=$(pacman -Ss pulseaudio- | awk '{print $1}' | sed "s/extra\///g" | grep "pulseaudio-" | sort -u)
+	for i in ${pulse_extra}; do
+		PULSE_EXTRA="${PULSE_EXTRA} ${i} - off"
+	done
+
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_AXITitle" --checklist "$_AXIBody$_UseSpaceBar" 0 0 10 \
+	"alsa-firmware" "-" off \
+	"alsa-plugins" "-" on \
+	"alsa-tools" "-" off \
+	"alsa-utils" "-" on \
+	"pulseaudio" "-" off \
+	$PULSE_EXTRA \
+	"paprefs" "pulseaudio GUI" off \
+	"pavucontrol" "pulseaudio GUI" off \
+	"ponymix" "pulseaudio CLI" off \
+	"volumeicon" "ALSA GUI" off \
+	"volwheel" "ASLA GUI" off 2>${PACKAGES}
+
+	# If at least one package, install.
+	if [[ $(cat ${PACKAGES}) != "" ]]; then
+		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+		check_for_error
+	fi
+
+}
+
+install_codecs(){
+
+	# Prep Variables
+	echo "" > ${PACKAGES}
+	GSTREAMER=""
+	gstreamer=$(pacman -Ss gstreamer | awk '{print $1}' | grep "/gstreamer" | sed "s/extra\///g" | sed "s/community\///g" | sort -u)
+	echo $gstreamer
+	for i in ${gstreamer}; do
+		GSTREAMER="${GSTREAMER} ${i} - off"
+	done
+
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstMulCodec " --checklist "$_InstMulCodBody$_UseSpaceBar" 0 0 14 \
+	$GSTREAMER "xine-lib" "-" off 2>${PACKAGES}
+
+	# If at least one package, install.
+	if [[ $(cat ${PACKAGES}) != "" ]]; then
+		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+		check_for_error
+	fi	
+}
+ 
+install_cust_pkgs(){
+	echo "" > ${PACKAGES}
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstMulCust " --inputbox "$_InstMulCustBody" 0 0 "" 2>${PACKAGES} || install_multimedia_menu
+
+	# If at least one package, install.
+	if [[ $(cat ${PACKAGES}) != "" ]]; then
+		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+		check_for_error
+	fi	
+}
+
+	if [[ $SUB_MENU != "install_multimedia_menu" ]]; then
+	   SUB_MENU="install_multimedia_menu"
+	   HIGHLIGHT_SUB=1
+	else
+	   if [[ $HIGHLIGHT_SUB != 5 ]]; then
+	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
+	   fi
+	fi
+
+    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstMultMenuTitle" --menu "$_InstMultMenuBody" 0 0 5 \
+ 	"1" "$_InstMulSnd" \
+ 	"2" "$_InstMulCodec" \
+ 	"3" "$_InstMulAcc" \
+ 	"4" "$_InstMulCust" \
+ 	"5" "$_Back" 2>${ANSWER}
+ 	
+	HIGHLIGHT_SUB=$(cat ${ANSWER})
+	case $(cat ${ANSWER}) in
+        "1") install_alsa_pulse
+             ;;
+        "2") install_codecs
+             ;;
+        "3") install_acc_menu
+             ;;
+        "4") install_cust_pkgs
+             ;;
+		  *) main_menu_online
+             ;;
+	esac
+}
+
 ######################################################################
 ##																	##
 ##                 Main Interfaces       							##
@@ -2080,12 +2202,11 @@ prep_menu() {
 	   fi
 	fi
 	
-   dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepTitle" \
-    --menu "$_PrepBody" 0 0 7 \
- 	"1" "$_ConfBseVirtCon" \
-	"2" "$_PrepMirror" \
-	"3" "$_DevShowOpt" \
-	"4" "$_PrepPartDisk" \
+	dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMenuTitle" --menu "$_PrepMenuBody" 0 0 7 \
+	"1" "$_VCKeymapTitle" \
+	"2" "$_DevShowOpt" \
+	"3" "$_PrepPartDisk" \
+	"4" "$_PrepLUKS" \
 	"5" "$_PrepLVM" \
 	"6" "$_PrepMntPart" \
 	"7" "$_Back" 2>${ANSWER}
@@ -2094,14 +2215,14 @@ prep_menu() {
 	case $(cat ${ANSWER}) in
         "1") set_keymap 
              ;;
-        "2") configure_mirrorlist
+        "2") show_devices
              ;;
-        "3") show_devices
-             ;;
-        "4") umount_partitions
+        "3") umount_partitions
              select_device
              create_partitions
              ;;
+        "4") echo "" >/dev/null # LUKS here
+			;;
         "5") detect_lvm
              deactivate_lvm
              find_lvm_partitions
@@ -2130,30 +2251,32 @@ install_base_menu() {
 	fi
 
    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBsMenuTitle" --menu "$_InstBseMenuBody" 0 0 5 \
- 	"1" "$_PrepPacKey" \
- 	"2" "$_InstBse" \
-	"3" "$_InstBootldr" \
-	"4" "$_WirelssOptTitle" \
+ 	"1"	"$_PrepMirror" \
+ 	"2" "$_PrepPacKey" \
+ 	"3" "$_InstBse" \
+	"4" "$_InstBootldr" \
 	"5" "$_Back" 2>${ANSWER}	
 	
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
-        "1") clear
-             pacman-key --init
-             pacman-key --populate archlinux
-             pacman-key --refresh-keys
-             ;;
-        "2") install_base
-             ;;
-        "3") install_bootloader
-             ;;
-        "4") install_wireless_packages
-             ;;
-          *) main_menu_online
-             ;;
-     esac
+	"1") configure_mirrorlist
+		;;
+	"3") clear
+		 pacman-key --init
+		 pacman-key --populate archlinux
+		 pacman-key --refresh-keys
+		;;
+	"2") install_base
+		;;
+	"3") install_bootloader
+		;;
+	"4") install_wireless_packages
+		;;
+	*) main_menu_online
+		;;
+	esac
     
-    install_base_menu 	
+	install_base_menu 	
 }
 
 # Base Configuration
@@ -2172,16 +2295,15 @@ config_base_menu() {
 	   fi
 	fi
 
-    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTitle" --menu "$_ConfBseBody" 0 0 9 \
+    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseTitle" --menu "$_ConfBseBody" 0 0 8 \
  	"1" "$_ConfBseFstab" \
 	"2" "$_ConfBseHost" \
-	"3" "$_ConfBseTime" \
-	"4" "$_ConfBseHWC" \
-	"5" "$_ConfBseSysLoc" \
-	"6" "$_PrepKBLayout" \
-	"7" "$_ConfUsrRoot" \
-	"8" "$_ConfUsrNew" \
-	"9" "$_Back" 2>${ANSWER}	
+	"3" "$_ConfBseSysLoc" \
+	"4" "$_ConfBseTimeHC" \
+	"5" "$_ConfUsrRoot" \
+	"6" "$_ConfUsrNew" \
+	"7" "$_MMRunMkinit" \
+	"8" "$_Back" 2>${ANSWER}	
 	
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
@@ -2189,18 +2311,17 @@ config_base_menu() {
              ;;
         "2") set_hostname
              ;;
-        "3") set_timezone
+        "3") set_locale
+             ;;        
+        "4") set_timezone
+			 set_hw_clock
              ;;
-        "4") set_hw_clock
-             ;;            
-        "5") set_locale
-             ;;
-        "6") set_xkbmap
-             ;;
-		"7") set_root_password 
+		"5") set_root_password 
 			;;
-		"8") create_new_user
-			;;    
+		"6") create_new_user
+			;;
+		"7") run_mkinitcpio
+			;;
           *) main_menu_online
 			;;
     esac
@@ -2209,37 +2330,39 @@ config_base_menu() {
 
 }
 
-install_desktop_menu() {
+install_graphics_menu() {
 
-	if [[ $SUB_MENU != "install_deskop_menu" ]]; then
-	   SUB_MENU="install_deskop_menu"
+	if [[ $SUB_MENU != "install_graphics_menu" ]]; then
+	   SUB_MENU="install_graphics_menu"
 	   HIGHLIGHT_SUB=1
 	else
-	   if [[ $HIGHLIGHT_SUB != 5 ]]; then
+	   if [[ $HIGHLIGHT_SUB != 6 ]]; then
 	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
 	   fi
 	fi
 
-    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstDEMenuTitle" --menu "$_InstDEMenuBody" 0 0 5 \
- 	"1" "$_InstDEMenuGISD" \
-	"2" "$_InstDEMenuDE" \
-	"3" "$_InstDEMenuNM" \
-	"4" "$_InstDEMenuDM" \
-	"5" "$_Back" 2>${ANSWER}
-	
+    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstGrMenuTitle " --menu "$_InstGrMenuBody" 0 0 6 \
+ 	"1" "$_InstGrMenuDS" \
+	"2" "$_InstGrMenuDD" \
+	"3" "$_InstGrMenuGE" \
+	"4" "$_InstGrMenuDM" \
+	"5"	"$_PrepKBLayout" \
+	"6" "$_Back" 2>${ANSWER}
+
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
-        "1") [[ AXI_INSTALLED -eq 0 ]] && install_alsa_xorg_input
-             setup_graphics_card 
+        "1") install_xorg_input
+			;
+		"2") setup_graphics_card 
              ;;
-        "2") install_de_wm
-             ;;
-        "3") install_nm
+        "3") install_de_wm
              ;;
         "4") install_dm
-             ;;            
-          *) main_menu_online
              ;;
+		"5") set_xkbmap
+			;;
+          *) main_menu_online
+			;;
     esac
     
     install_desktop_menu
@@ -2358,7 +2481,7 @@ edit_configs() {
         elif [[ -e $FILE ]]; then 
            nano $FILE
         else
-           dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SeeConfErrTitle" --msgbox "$_SeeConfErrBody1" 0 0
+           dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_SeeConfErrBody" 0 0
         fi
      
      edit_configs
@@ -2372,13 +2495,13 @@ main_menu_online() {
 	
     dialog --default-item ${HIGHLIGHT} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MMTitle" \
     --menu "$_MMBody" 0 0 8 \
- 	"1" "$_MMPrep" \
-	"2" "$_MMInstBse" \
-	"3" "$_MMConfBse" \
-	"4" "$_MMInstDE" \
-	"5" "$_InstAccOpt" \
-    "6" "$_MMRunMkinit" \
-    "7" "$_SeeConfOpt" \
+ 	"1" "$_PrepMenuTitle" \
+	"2" "$_InstBsMenuTitle" \
+	"3" "$_ConfBseMenuTitle" \
+	"4" "$_InstGrMenuTitle" \
+	"5" "$_InstNMMenuTitle" \
+    "6" "$_InstMultMenuTitle" \
+    "7" "$_SeeConfOptTitle" \
 	"8" "$_Done" 2>${ANSWER}
 
     HIGHLIGHT=$(cat ${ANSWER})
@@ -2400,12 +2523,12 @@ main_menu_online() {
              ;;
         "3") config_base_menu
              ;;          
-        "4") install_desktop_menu
+        "4") install_graphics_menu
              ;;
-        "5") install_acc_menu
+        "5") install_network_menu
 			;;
-        "6") run_mkinitcpio
-             ;;
+        "6") install_multimedia_menu
+			;;
         "7") edit_configs
              ;;            
           *) dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --yesno "$_CloseInstBody" 0 0
