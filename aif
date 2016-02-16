@@ -1085,7 +1085,7 @@ find_lvm_partitions() {
 
     LVM_PARTITIONS=""
     NUMBER_LVM_PARTITIONS=0
-    lvm_partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'lvm' | awk '{print $1 " " $2}' | sort -u)
+    lvm_partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep -v 'lvm' | awk '{print $1 " " $2}' | sort -u)
 	
     for i in ${lvm_partition_list[@]}; do
         LVM_PARTITIONS="${LVM_PARTITIONS} ${i}"
