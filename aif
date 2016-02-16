@@ -748,7 +748,7 @@ select_filesystem(){
 	# if f2fs selected modprobe and flag f2fs package for installation
 	[[ $FILESYSTEM == "mkfs.f2fs" ]] && modprobe f2fs && F2FS=1
 	
-	# If brtfs selected, modprove, ask if subvolumes are needed, and flag btrfs for installation 
+	# If brtfs selected, modprobe, ask if subvolumes are needed, and flag btrfs for installation 
 	if [[ $FILESYSTEM == "mkfs.btrfs -f" ]]; then
 		modprobe btrfs	
 		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --yesno "$_btrfsSVBody" 0 0
