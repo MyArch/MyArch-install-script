@@ -30,7 +30,6 @@ DM_INST=""							# Which DMs have been installed?
 DM_ENABLED=0						# Has a display manager been enabled?
 NM_INST=""							# Which NMs have been installed?
 NM_ENABLED=0						# Has a network connection manager been enabled?
-COMMON_INSTALLED=0   				# Has the common-packages option been taken?
 BOOTLOADER="n/a"      				# Which bootloader has been installed?
 KEYMAP="us"          				# Virtual console keymap. Default is "us"
 XKBMAP="us"      	    			# X11 keyboard layout. Default is "us"
@@ -72,7 +71,8 @@ VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 LUKS=0                  			# Luks Detected?
 
 # Installation
-MOUNTPOINT="/mnt"       			# Installation
+MOUNTPOINT="/mnt"       			# Installation: Root mount
+MOUNT=""							# Installation: All other mounts branching from Root
 BTRFS=0                     		# BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
 BTRFS_MNT=""                		# used for syslinux where /mnt is a btrfs subvolume
 F2FS=0								# F2FS used? "1" = yes.
@@ -432,11 +432,11 @@ set_hw_clock() {
 # Function will not allow incorrect UUID type for installed system.
 generate_fstab() {
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FstabTitle" --menu "$_FstabBody" 0 0 4 \
-	"genfstab -p" "Device Name" \
-	"genfstab -L -p" "Device Label" \
-	"genfstab -U -p" "UUID (BIOS)" \
-	"genfstab -t PARTUUID -p" "Part UUID (UEFI)" 2>${ANSWER}
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseFstab" --menu "$_FstabBody" 0 0 4 \
+	"genfstab -p" "$_FstabDevName" \
+	"genfstab -L -p" "$_FstabDevLabel" \
+	"genfstab -U -p" "$_FstabDevUUID" \
+	"genfstab -t PARTUUID -p" "$_FstabDevPtUUID" 2>${ANSWER}
 	
 	if [[ $(cat ${ANSWER}) != "" ]]; then
 		if ([[ $SYSTEM == "BIOS" ]] && [[ $(cat ${ANSWER}) == "genfstab -t PARTUUID -p" ]]) \
@@ -452,24 +452,23 @@ generate_fstab() {
 
 }
 
-# Adapted from AIS.
+
 set_hostname() {
 
-   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_HostNameTitle" --inputbox "$_HostNameBody" 0 0 "arch" 2>${ANSWER} || config_base_menu
-   HOST_NAME=$(cat ${ANSWER})
+   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseHost" --inputbox "$_HostNameBody" 0 0 "arch" 2>${ANSWER} || config_base_menu
 
-   echo "$HOST_NAME" > ${MOUNTPOINT}/etc/hostname 2>/tmp/.errlog
+   echo $(cat ${ANSWER}) > ${MOUNTPOINT}/etc/hostname 2>/tmp/.errlog
+   echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t$(cat ${HOST_NAME})\n::1\tlocalhost.localdomain\tlocalhost\t$(cat {HOST_NAME})" > ${MOUNTPOINT}/etc/hosts 2>>/tmp/.errlog
    check_for_error
-   echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t${HOST_NAME}\n::1\tlocalhost.localdomain\tlocalhost\t${HOST_NAME}" > ${MOUNTPOINT}/etc/hosts
 }
 
 # Adapted and simplified from the Manjaro 0.8 and Antergos 2.0 installers
 set_root_password() {
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PassRtTitle" --clear --insecure --passwordbox "$_PassRtBody" 0 0 2> ${ANSWER} || config_user_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody" 0 0 2> ${ANSWER} || config_user_menu
     PASSWD=$(cat ${ANSWER})
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PassRtTitle" --clear --insecure --passwordbox "$_PassRtBody2" 0 0 2> ${ANSWER} || config_user_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody2" 0 0 2> ${ANSWER} || config_user_menu
     PASSWD2=$(cat ${ANSWER})
     
     if [[ $PASSWD == $PASSWD2 ]]; then 
@@ -478,7 +477,7 @@ set_root_password() {
        rm /tmp/.passwd
        check_for_error
     else
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PassRtErrTitle" --msgbox "$_PassRtErrBody" 0 0
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PassRtErrBody" 0 0
        set_root_password
     fi
 
@@ -497,25 +496,25 @@ create_new_user() {
         done
         
         # Enter password. This step will only be reached where the loop has been skipped or broken.
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PassNUsrTitle" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
         PASSWD=$(cat ${ANSWER}) 
     
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PassNUsrTitle" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
         PASSWD2=$(cat ${ANSWER}) 
     
         # loop while passwords entered do not match.
         while [[ $PASSWD != $PASSWD2 ]]; do
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PassNUsrErrTitle" --msgbox "$_PassNUsrErrBody" 0 0
+              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PassNUsrErrBody" 0 0
               
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PassNUsrTitle" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
               PASSWD=$(cat ${ANSWER}) 
     
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PassNUsrTitle" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
               PASSWD2=$(cat ${ANSWER}) 
         done      
     
         # create new user. This step will only be reached where the password loop has been skipped or broken.  
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_NUsrSetTitle" --infobox "$_NUsrSetBody" 0 0
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --infobox "$_NUsrSetBody" 0 0
         sleep 2
         # Create the user, set password, then remove temporary password file
         arch_chroot "useradd ${USER} -m -g users -G wheel,storage,power,network,video,audio,lp -s /bin/bash" 2>/tmp/.errlog
@@ -594,9 +593,8 @@ confirm_mount_btrfs() {
     fi
 }
 
-# Revised to include device size in menu display. This function does not assume that the formatted device 
-# is the Root installation device as more than one device may be formatted. Root is set in the 
-# mount_partitions function, when the Root is chosen.
+# This function does not assume that the formatted device  is the Root installation device as 
+# more than one device may be formatted. Root is set in the mount_partitions function.
 select_device() {
 	
     DEVICE=""
@@ -611,22 +609,22 @@ select_device() {
  
   }
 
+create_partitions(){
+
 # Securely destroy all data on a given device.
 secure_wipe(){
 	
 	# Warn the user. If they proceed, wipe the selected device.
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PartOptWipe " --yesno "\nWARNING: ALL data on ${DEVICE} $_AutoPartWipeBody" 0 0
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PartOptWipe " --yesno "$_AutoPartWipeBody1 ${DEVICE} $_AutoPartWipeBody" 0 0
 	if [[ $? -eq 0 ]]; then
-	
 		clear
 		# Install wipe where not already installed. Much faster than dd
-		if [[ $(pacman -Qs wipe) == "" ]]; then
+		if [[ ! -e /usr/bin/wipefs ]]; then
 			pacman -Sy --noconfirm wipe 2>/tmp/.errlog
 			check_for_error
-			clear
 		fi
 		
-		echo -e "\n\nSecurly Wiping Device ${DEVICE}. Please be patient...\n\n"
+		clear
 		wipe -Ifre ${DEVICE}
 		
 		# Alternate dd command - requires pv to be installed
@@ -637,107 +635,66 @@ secure_wipe(){
     fi
 }
 
-# Originally adapted from AIS.
-create_partitions(){
-
-# This only creates the minimum number of partition(s) necessary. Users wishing for other schemes will
-# have to learn to use a partitioning application.
+# BIOS and UEFI
 auto_partition(){
-
-# Hooray for tac! Deleting partitions in reverse order deals with logical partitions easily.
-delete_partitions(){
 	
-	parted -s ${DEVICE} print | awk '/^ / {print $1}' > /tmp/.del_parts
-	
-	for del_part in $(tac /tmp/.del_parts); do
-		parted -s ${DEVICE} rm ${del_part} 2>/tmp/.errlog
-		check_for_error
-	done
-
-
-}
- 
- # Identify the partition table
- part_table=$(parted -s ${DEVICE} print | grep -i 'partition table' | awk '{print $3}')
-
- # Autopartition for BIOS systems 
- if [[ $SYSTEM == "BIOS" ]]; then
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Auto-Partition (BIOS/MBR) " --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBIOSBody2" 0 0
-	
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2" 0 0
 	if [[ $? -eq 0 ]]; then
-	    delete_partitions
-	    if [[ $part_table != "msdos" ]]; then
-		   parted -s ${DEVICE} mklabel msdos 2>/tmp/.errlog
-		   check_for_error
-		fi
-		parted -s ${DEVICE} mkpart primary ext3 1MiB 100% 2>/tmp/.errlog	
-		parted -s ${DEVICE} set 1 boot on 2>>/tmp/.errlog
+		
+		# Delete existing partitions
+		parted -s ${DEVICE} print | awk '/^ / {print $1}' > /tmp/.del_parts
+	
+		for del_part in $(tac /tmp/.del_parts); do
+			parted -s ${DEVICE} rm ${del_part} 2>/tmp/.errlog
+			check_for_error
+		done
+ 
+		# Identify the partition table
+		part_table=$(parted -s ${DEVICE} print | grep -i 'partition table' | awk '{print $3}')
+ 
+		# Create partition table if one does not already exist
+		([[ $SYSTEM == "BIOS" ]] && [[ $part_table != "msdos" ]]) && parted -s ${DEVICE} mklabel msdos 2>/tmp/.errlog
+		([[ $SYSTEM == "UEFI" ]] && [[ $part_table != "gpt" ]]) && parted -s ${DEVICE} mklabel gpt 2>/tmp/.errlog
 		check_for_error
-        echo -e "Partition Scheme:\n" > /tmp/.devlist
+		
+		# Create paritions (same basic partitioning scheme for BIOS and UEFI)
+		if [[ $SYSTEM == "BIOS" ]]; then
+			parted -s ${DEVICE} mkpart primary ext3 1MiB 513MiB 2>/tmp/.errlog
+		else
+			parted -s ${DEVICE} mkpart ESP fat32 1MiB 513MiB 2>/tmp/.errlog
+		fi
+		
+		parted -s ${DEVICE} set 1 boot on 2>>/tmp/.errlog
+		parted -s ${DEVICE} mkpart primary ext3 513MiB 100% 2>>/tmp/.errlog
+		check_for_error
+        
+        # Show created partitions
         lsblk ${DEVICE} -o NAME,TYPE,FSTYPE,SIZE > /tmp/.devlist
         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "" --textbox /tmp/.devlist 0 0
     else
         create_partitions
     fi
- 
- # Autopartition for UEFI systems   
- else
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Auto-Partition (UEFI/GPT) " --yesno "$_AutoPartBody1 $DEVICE $_AutoPartUEFIBody2" 0 0
-	
-	if [[ $? -eq 0 ]]; then
-	    delete_partitions
-	    if [[ $part_table != "gpt" ]]; then
-		   parted -s ${DEVICE} mklabel gpt 2>/tmp/.errlog
-		   check_for_error
-		fi
-		parted -s ${DEVICE} mkpart ESP fat32 1MiB 513MiB 2>/tmp/.errlog
-		parted -s ${DEVICE} set 1 boot on 2>>/tmp/.errlog
-		parted -s ${DEVICE} mkpart primary ext3 513MiB 100% 2>>/tmp/.errlog
-		echo -e "Partition Scheme:\n" > /tmp/.devlist
-        lsblk ${DEVICE} -o NAME,TYPE,FSTYPE,SIZE >> /tmp/.devlist
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "" --textbox /tmp/.devlist 0 0
-    else
-		create_partitions
-    fi
-    
- fi
 
 }
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PartToolTitle" \
-    --menu "$_PartToolBody" 0 0 8 \
-    "1" "$_PartOptWipe" \
-    "2" "$_PartOptAutoStandard" \
-    "3" "$_PartOptAutoLuks" \
- 	"4" $"Parted (BIOS & UEFI)" \
-	"5" $"CFDisk (BIOS/MBR)" \
-	"6" $"CGDisk (UEFI/GPT)" \
-	"7" $"FDisk  (BIOS & UEFI)" \
-	"8" $"GDisk  (UEFI/GPT)" 2>${ANSWER}	
+	# Partitioning Menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --menu "$_PartToolBody" 0 0 7 \
+    "$_PartOptWipe" "BIOS & UEFI" \
+    "$_PartOptAuto" "BIOS & UEFI" \
+ 	"parted" "BIOS & UEFI" \
+	"cfdisk" "BIOS/MBR" \
+	"cgdisk" "UEFI/GPT" \
+	"fdisk"  "BIOS & UEFI" \
+	"gdisk"  "UEFI/GPT" 2>${ANSWER}
 
-    case $(cat ${ANSWER}) in
-        "1") secure_wipe
-             ;; 
-        "2") auto_partition
-             ;;   
-        "3") luks_auto_partition
-             ;;
-        "4") clear
-             parted ${DEVICE}
-             ;;
-        "5") cfdisk ${DEVICE}
-             ;;
-        "6") cgdisk ${DEVICE}
-             ;;       
-        "7") clear
-             fdisk ${DEVICE}
-             ;;
-        "8") clear
-             gdisk ${DEVICE}
-             ;;
-          *) prep_menu
-             ;;
-    esac  	
+	clear
+	if ([[ $(cat ${ANSWER}) != $_PartOptWipe ]] &&  [[ $(cat ${ANSWER}) != $_PartOptAuto ]]); then
+		cat ${ANSWER} ${DEVICE}
+		prep_menu
+	else
+		[[ $(cat ${ANSWER}) == $_PartOptWipe ]] && secure_wipe && create_partitions
+		[[ $(cat ${ANSWER}) == $_PartOptAuto ]] && auto_partition
+	fi	
 }	
 
 # Revised to include partition sizes. Finds all available partitions and generate a list 
@@ -746,23 +703,22 @@ find_partitions() {
 
 	PARTITIONS=""
 	NUMBER_PARTITIONS=0
-	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm' | sed 's/part/\/dev\//g' | sed 's/lvm\|crypt/\/dev\/mapper\//g' |awk '{print $3$1 " " $2}' | sort -u)
+	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm\|crypt' | sed 's/part/\/dev\//g' | sed 's/lvm\|crypt/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
 
     for i in ${partition_list[@]}; do
         PARTITIONS="${PARTITIONS} ${i}"
         NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
     done
     
+    # Divide by two as partition sizes are also counted.
+    NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS / 2 ))
+    
     # Deal with incorrect partitioning
-    if [[ $NUMBER_PARTITIONS -lt 2 ]] && [[ $SYSTEM == "UEFI" ]]; then
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_UefiPartErrTitle" --msgbox "$_UefiPartErrBody" 0 0
+    if ([[ $SYSTEM == "UEFI" ]] && [[ $NUMBER_PARTITIONS -lt 2 ]]) || ([[ $SYSTEM == "BIOS" ]] && [[ $NUMBER_PARTITIONS -eq 0 ]]); then
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PartErrBody" 0 0
         create_partitions
     fi
     
-    if [[ $NUMBER_PARTITIONS -eq 0 ]] && [[ $SYSTEM == "BIOS" ]]; then
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_BiosPartErrTitle" --msgbox "$_BiosPartErrBody" 0 0	
-        create_partitions
-    fi
 }
 
 # Set static list of filesystems rather than on-the-fly. Partially as most require additional flags, and 
@@ -789,9 +745,10 @@ select_filesystem(){
 
 	FILESYSTEM=$(cat ${ANSWER})
 
+	# if f2fs selected modprobe and flag f2fs package for installation
 	[[ $FILESYSTEM == "mkfs.f2fs" ]] && modprobe f2fs && F2FS=1
 	
-	# If brtfs selected, ask if subvolumes are needed
+	# If brtfs selected, modprove, ask if subvolumes are needed, and flag btrfs for installation 
 	if [[ $FILESYSTEM == "mkfs.btrfs -f" ]]; then
 		modprobe btrfs	
 		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --yesno "$_btrfsSVBody" 0 0
@@ -812,6 +769,7 @@ btrfs_subvols() {
  echo "" > ${BTRFS_VOL_LIST}
  BTRFS_OSUB_NUM=1
  
+ # Name initial subvolume from which other (optional) subvolumes may branch from
  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --inputbox "$_btrfsMSubBody1 ${MOUNTPOINT}${MOUNT} $_btrfsMSubBody2" 0 0 "" 2>${ANSWER} || select_filesystem
  BTRFS_MSUB_VOL=$(cat ${ANSWER})
  # if root, then create boot flag for syslinux, systemd-boot and rEFInd bootloaders	
@@ -819,14 +777,14 @@ btrfs_subvols() {
 
  # Loop while subvolume is blank or has spaces.
  while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVErrTitle" --inputbox "$_btrfsSVErrBody" 0 0 "" 2>${ANSWER} || select_filesystem
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --inputbox "$_btrfsSVErrBody" 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_MSUB_VOL=$(cat ${ANSWER})
        # if root, then create flag for syslinux, systemd-boot and rEFInd bootloaders
        [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
  done
  
- # change dir depending on whether root partition or not
- [[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+ # change dir
+ cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  btrfs subvolume create ${BTRFS_MSUB_VOL} 2>>/tmp/.errlog
  cd
  umount ${PARTITION} 2>>/tmp/.errlog
@@ -835,17 +793,17 @@ btrfs_subvols() {
  # Get any mount options and mount
  btrfs_mount_opts
  if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  else
-    [[ ${MOUNT} == "" ]] &&	mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+    mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  fi
  
  # Check for error and confirm successful mount
  check_for_error  
- [[ ${MOUNT} == "" ]] && confirm_mount_btrfs ${MOUNTPOINT} || confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
+ confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
  
- # Now create the subvolumes   
- [[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+ # Now change dir and create the subvolumes   
+ cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
  check_for_error
  
  # Loop while the termination character has not been entered
@@ -855,7 +813,7 @@ btrfs_subvols() {
 
     # Loop while subvolume is blank or has spaces.
     while [[ ${#BTRFS_OSUB_VOL} -eq 0 ]] || [[ $BTRFS_SUB_VOL =~ \ |\' ]]; do
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVErrTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVErrBody ($BTRFS_OSUB_NUM)." 0 0 "" 2>${ANSWER} || select_filesystem
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVErrBody ($BTRFS_OSUB_NUM)." 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_OSUB_VOL=$(cat ${ANSWER})
     done
  
@@ -878,40 +836,70 @@ btrfs_mount_opts() {
 
 	echo "" > ${BTRFS_OPTS}
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsMntTitle" --checklist "$_btrfsMntBody" 0 0 16 \
-	"autodefrag," "-" off \
-	"compress=zlib," "-" off \
-	"compress=lzo," "-" off \
-	"compress=no," "-" off \
-	"compress-force=zlib," "-" off \
-	"compress-force=lzo," "-" off \
-	"discard," "-" off \
-	"noacl," "-" off \
-    "noatime," "-" off \
-	"nodatasum," "-" off \
-	"nospace_cache," "-" off \
-	"recovery," "-" off \
-	"skip_balance," "-" off \
-	"space_cache," "-" off \
-	"ssd," "-" off \
-	"ssd_spread," "-" off 2>${BTRFS_OPTS}
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --checklist "$_btrfsMntBody" 0 0 16 \
+	"autodefrag" "-" off \
+	"compress=zlib" "-" off \
+	"compress=lzo" "-" off \
+	"compress=no" "-" off \
+	"compress-force=zlib" "-" off \
+	"compress-force=lzo" "-" off \
+	"discard" "-" off \
+	"noacl" "-" off \
+    "noatime" "-" off \
+	"nodatasum" "-" off \
+	"nospace_cache" "-" off \
+	"recovery" "-" off \
+	"skip_balance" "-" off \
+	"space_cache" "-" off \
+	"ssd" "-" off \
+	"ssd_spread" "-" off 2>${BTRFS_OPTS}
 	
 	# Now clean up the file
-	sed -i 's/ //g' ${BTRFS_OPTS}
+	sed -i 's/ /,/g' ${BTRFS_OPTS}
 	sed -i '$s/,$//' ${BTRFS_OPTS}
 
    
    if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsMntTitle" --yesno "$_btrfsMntConfBody $(cat $BTRFS_OPTS)\n" 0 0 
+	  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_btrfsSVTitle" --yesno "$_btrfsMntConfBody $(cat $BTRFS_OPTS)\n" 0 0 
 	  [[ $? -eq 1 ]] && btrfs_mount_opts
    fi  
 
 }
 
+# Save repetition of code
+mount_current_partition(){
+	
+	# Make the mount directory
+	mkdir -p ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	
+	# If btrfs without subvolumes has been selected
+    [[ $BTRFS -eq 1 ]] && btrfs_mount_opts
+		
+	# If btrfs & btrfs mount options. Otherwise, standard mount
+	if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
+		mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+	else
+		mount ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+	fi
+	
+	# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
+	check_for_error
+	confirm_mount ${MOUNTPOINT}${MOUNT}
+	
+	 # Deal with BTRFS with subvolumes if applicable
+	[[ $BTRFS -eq 2 ]] && btrfs_subvols
+}
+	####								####
+	#### MOUNTING FUNCTION BEGINS HERE  ####
+	####								####
+
+	# prep variable
+	MOUNT=""
+
     # LVM Detection. If detected, activate.
     detect_lvm
     if [[ $LVM -eq 1 ]]; then
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmDetTitle" --infobox "$_LvmDetBody2" 0 0
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --infobox "$_LvmDetBody2" 0 0
        sleep 2   
        modprobe dm-mod 2>/tmp/.errlog
        check_for_error
@@ -924,7 +912,7 @@ btrfs_mount_opts() {
 	find_partitions
 	
 	# Identify and mount root
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelRootTitle" --menu "$_SelRootBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelRootBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
 	PARTITION=$(cat ${ANSWER})
     ROOT_PART=${PARTITION}
 
@@ -935,27 +923,12 @@ btrfs_mount_opts() {
 	[[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${PARTITION} >/dev/null 2>/tmp/.errlog
 	check_for_error
 	
-	# Make the root directory
-	mkdir -p ${MOUNTPOINT} 2>/tmp/.errlog
-
-    # If btrfs without subvolumes has been selected, get the mount options
-    [[ $BTRFS -eq 1 ]] && btrfs_mount_opts
-    
-    # If btrfs has been selected without subvolumes - and at least one btrfs mount option selected - then
-	# mount with options. Otherwise, basic mount.
-	if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	   mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
-	else
-	   mount ${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog
-    fi
-	  
-	# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
-	check_for_error
-    confirm_mount ${MOUNTPOINT}
-    [[ $BTRFS -eq 2 ]] && btrfs_subvols
+	# Make the directory and mount
+	mount_current_partition
 	
 	# Identify and create swap, if applicable
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelSwpTitle" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
+    
     if [[ $(cat ${ANSWER}) != "$_SelSwpNone" ]]; then    
        PARTITION=$(cat ${ANSWER})
        
@@ -968,7 +941,7 @@ btrfs_mount_opts() {
           swapon ${MOUNTPOINT}/swapfile >/dev/null 2>&1
        else
           # Only create a swap if not already in place
-          [[ $(lsblk -o FSTYPE  ${MOUNT_TYPE}${PARTITION} | grep -i "swap") != "swap" ]] &&  mkswap ${PARTITION} >/dev/null 2>/tmp/.errlog
+          [[ $(lsblk -o FSTYPE  ${PARTITION} | grep -i "swap") != "swap" ]] &&  mkswap ${PARTITION} >/dev/null 2>/tmp/.errlog
           swapon  ${PARTITION} >/dev/null 2>>/tmp/.errlog
           check_for_error
           # Since a partition was used, remove that partition from the list
@@ -980,31 +953,24 @@ btrfs_mount_opts() {
     # Extra Step for VFAT UEFI Partition. This cannot be in an LVM container.
     if [[ $SYSTEM == "UEFI" ]]; then
     
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SelUefiTitle" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || config_base_menu  
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || config_base_menu  
        PARTITION=$(cat ${ANSWER})
        UEFI_PART=${PARTITION}
        
        # If it is already a fat/vfat partition...
-       if [[ $(fsck -N /dev/$PARTITION | grep fat) ]]; then
-          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_FormUefiTitle" --yesno "$_FormUefiBody $PARTITION $_FormUefiBody2" 0 0 && mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
+       if [[ $(fsck -N $PARTITION | grep fat) ]]; then
+          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --yesno "$_FormUefiBody $PARTITION $_FormUefiBody2" 0 0 && mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
        else 
           mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
        fi
        check_for_error
-       
+             
        # Inform users of the mountpoint options and consequences       
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MntUefiTitle" --menu "$_MntUefiBody"  0 0 2 \
- 	   "1" $"/boot" \
-	   "2" $"/boot/efi" 2>${ANSWER}
-       
-       case $(cat ${ANSWER}) in
-        "1") UEFI_MOUNT="/boot"
-             ;;
-        "2") UEFI_MOUNT="/boot/efi"
-             ;;
-          *) config_base_menu
-             ;;
-       esac
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_MntUefiBody"  0 0 2 \
+ 	   "/boot" "systemd-boot"\
+	   "/boot/efi" "refind-efi" 2>${ANSWER}
+	   	   
+	   [[ $(cat ${ANSWER}) != "" ]] && UEFI_MOUNT=$(cat ${ANSWER}) || config_base_menu
        
        mkdir -p ${MOUNTPOINT}${UEFI_MOUNT} 2>/tmp/.errlog
        mount ${PARTITION} ${MOUNTPOINT}${UEFI_MOUNT} 2>>/tmp/.errlog
@@ -1015,59 +981,40 @@ btrfs_mount_opts() {
     
     # All other partitions
        while [[ $NUMBER_PARTITIONS > 0 ]]; do 
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtPartTitle" --menu "$_ExtPartBody" 0 0 4 "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || config_base_menu 
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_ExtPartBody" 0 0 4 \
+             "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || config_base_menu 
+             
              PARTITION=$(cat ${ANSWER})
              
-             if [[ $PARTITION == ${_Done} ]]; then
+             if [[ $PARTITION == $_Done ]]; then
                 break;
              else
                 MOUNT=""
+                select_filesystem
                 
-                select_filesystem 
                 [[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${PARTITION} >/dev/null 2>/tmp/.errlog
 	            check_for_error
 	            
-                # Don't give /boot as an example for UEFI systems!
-                if [[ $SYSTEM == "UEFI" ]]; then
-                   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --inputbox "$_ExtNameBodyUefi" 0 0 "/" 2>${ANSWER} || config_base_menu
-                else
-                   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --inputbox "$_ExtNameBodyBios" 0 0 "/" 2>${ANSWER} || config_base_menu
-                fi
+                # Ask user for mountpoint. Don't give /boot as an example for UEFI systems!
+                [[ $SYSTEM == "UEFI" ]] && MNT_EXAMPLES="/home\n/var" || MNT_EXAMPLES="/boot\n/home\n/var"
+				dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || config_base_menu
+                
                 MOUNT=$(cat ${ANSWER})
                 
-                # loop if the mountpoint specified is incorrect (is only '/', is blank, or has spaces). 
+                # loop while the mountpoint specified is incorrect (is only '/', is blank, or has spaces). 
                 while [[ ${MOUNT:0:1} != "/" ]] || [[ ${#MOUNT} -le 1 ]] || [[ $MOUNT =~ \ |\' ]]; do
-                      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtErrTitle" --msgbox "$_ExtErrBody" 0 0
+                      # Warn user about naming convention
+                      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_ExtErrBody" 0 0
+                      # Ask user for mountpoint again
+                      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || config_base_menu
                       
-                      # Don't give /boot as an example for UEFI systems!
-                      if [[ $SYSTEM == "UEFI" ]]; then
-                         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --inputbox "$_ExtNameBodyUefi" 0 0 "/" 2>${ANSWER} || config_base_menu
-                      else
-                         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ExtNameTitle $PARTITON " --inputbox "$_ExtNameBodyBios" 0 0 "/" 2>${ANSWER} || config_base_menu
-                      fi
                       MOUNT=$(cat ${ANSWER})                     
                 done
 
-                # Create directory and mount. This step will only be reached where the loop has been skipped or broken.
-                mkdir -p ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+                # Create directory and mount.
+                mount_current_partition
                 
-                # If btrfs without subvolumes has been selected, get the mount options
-                [[ $BTRFS -eq 1 ]] && btrfs_mount_opts
-    
-                # If btrfs has been selected without subvolumes - and at least one btrfs mount option selected - then
-	            # mount with options. Otherwise, basic mount.
-	            if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-					mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
-				else
-					mount ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
-				fi
-	  
-				# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
-				check_for_error
-				confirm_mount ${MOUNTPOINT}${MOUNT}
-				[[ $BTRFS -eq 2 ]] && btrfs_subvols
-                
-                # Determine if a seperate /boot is used, and if it is LVM or not
+                # Determine if a seperate /boot is used. Necessary LVM-realted bootloader configuration
                 LVM_SEP_BOOT=0
                 [[ $MOUNT == "/boot" ]] && LVM_SEP_BOOT=1 || LVM_SEP_BOOT=2
                 
@@ -2290,7 +2237,7 @@ config_base_menu() {
 	   SUB_MENU="config_base_menu"
 	   HIGHLIGHT_SUB=1
 	else
-	   if [[ $HIGHLIGHT_SUB != 9 ]]; then
+	   if [[ $HIGHLIGHT_SUB != 8 ]]; then
 	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
 	   fi
 	fi
