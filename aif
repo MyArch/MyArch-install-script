@@ -2302,7 +2302,7 @@ install_graphics_menu() {
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
         "1") install_xorg_input
-			;
+			;;
 		"2") setup_graphics_card 
              ;;
         "3") install_de_wm
