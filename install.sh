@@ -1985,9 +1985,6 @@ install_base_menu() {
     "4")
     install_bootloader
     ;;
-    "6")
-    install_wireless_packages
-    ;;
     *)
     main_menu_online
     ;;
