@@ -17,7 +17,7 @@ You can try it first in a virtual machine. Use it at your own risk !
 - Obviously, an arch liveCD (original or based on)
 - A working internet connection.
 - Logged in as 'root'.
-- This package : `dialog`
+- This package : `dialog wipe`
 
 If you find some packages not preinstalled in your favorite livecd, tell me, I will
  add them to the prerequisite packages.

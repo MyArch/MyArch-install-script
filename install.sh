@@ -285,7 +285,7 @@ configure_mirrorlist() {
       COUNTRY_LIST="${COUNTRY_LIST} ${i}"
     done
     DIALOG --title "$_MirrorbyCountry" --menu "$_MirrorCntryBody" 0 0 0 $COUNTRY_LIST 2>${ANSWER} || prep_menu
-    URL="https://www.archlinux.org/mirrorlist/?country=$(cat ${COUNTRY_CODE})&use_mirror_status=on"
+    URL="https://www.archlinux.org/mirrorlist/?country=$(cat ${ANSWER})&use_mirror_status=on"
     MIRROR_TEMP=$(mktemp --suffix=-mirrorlist)
     # Get latest mirror list and save to tmpfile
     DIALOG --title "$_MirrorGenTitle" --infobox "$_PlsWaitBody" 0 0
