@@ -230,26 +230,11 @@ _InstUefiBtTitle=" Install UEFI Bootloader "
 _InstUefiBtBody="\nrEFInd requires /boot/efi. systemd-boot requires /boot. Grub will work with either mountpoint.\n\nNOTE: rEFInd with LVM is not supported."
 
 # Set UEFI Grub as default
-_SetGrubDefTitle=" Set Grub as Default Bootloader? "
-_SetGrubDefBody="\nSome UEFI firmware may not detect Grub unless it is set as the default bootloader, resulting in an unbootable system in such instances.\n\nDo you wish to set Grub as the default bootloader?\n\nIt is recommended to select 'Yes', especially for beginners. This will copy the bootable grubx64.efi stub to"
-_SetGrubDefBody2="and rename it to bootx64.efi, as required.\n\nOtherwise select 'No', particularly if there is already a default bootloader, and/or where intending to use multiple bootloaders."
-
-# Set rEFInd as default
-_SetRefiDefTitle=" Set rEFInd as Default Bootloader? "
-_SetRefiDefBody="\nSome UEFI firmware may not detect rEFInd unless it is set as the default bootloader, resulting in an unbootable system in such instances.\n\nDo you wish to set rEFInd as the default bootloader?\n\nIt is recommended to select 'Yes', especially for beginners. This will install rEFInd to"
-_SetRefiDefBody2="with the bootx64.efi stub required.\n\nOtherwise select 'No', particularly if there is already a default bootloader, and/or where intending to use multiple bootloaders."
+_SetBootDefBody="\nSome UEFI firmware may not detect the bootloader unless it is set as default by copying its efi stub to"
+_SetBootDefBody2="and renaming it to bootx64.efi.\n\nIt is recommended to do so unless already using a default bootloader, or where intending to use multiple bootloaders.\n\nSet bootloader as default?\n\n"
 
 # efi file set for Grub or Refind
-_SetDefDoneTitle=" UEFI File Copied "
 _SetDefDoneBody="has been set as the default bootloader.\n\n"
-
-# rEFInd Mountpoint error
-_RefiErrTitle=" rEFInd UEFI Mountpoint "
-_RefiErrBody="\nThe rEFInd installation script will not work unless the UEFI partition has been mounted to /boot/efi. Please select either Gummiboot (recommended) or Grub.\n\n"
-
-# ALSA, Xorg, Input
-_AXITitle=" ALSA, Xorg, and Input "
-_AXIBody="Packages are first needed for sound (alsa), graphics (xorg), and input devices (xf86-input). Key packages have been pre-selected.\n\n"
 
 # Graphics Card Menu
 _GCtitle=" Graphics Card Menu "
