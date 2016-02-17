@@ -2218,16 +2218,14 @@ install_base_menu() {
 	case $(cat ${ANSWER}) in
 	"1") configure_mirrorlist
 		;;
-	"3") clear
+	"2") clear
 		 pacman-key --init
 		 pacman-key --populate archlinux
 		 pacman-key --refresh-keys
 		;;
-	"2") install_base
+	"3") install_base
 		;;
-	"3") install_bootloader
-		;;
-	"4") install_wireless_packages
+	"4") install_bootloader
 		;;
 	*) main_menu_online
 		;;
