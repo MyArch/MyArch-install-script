@@ -676,7 +676,7 @@ select_filesystem(){
   "mkfs.reiserfs -q" "reiserfs" \
   "mkfs.vfat -F32" "vfat" \
   "mkfs.xfs -f" "xfs" 2>${ANSWER}
-  FILESYSTEM=$(cat ${ANSWER})
+  [[ $(cat ${ANSWER}) == "" ]] && prep_menu || FILESYSTEM=$(cat ${ANSWER});
   # if f2fs selected modprobe and flag f2fs package for installation
   [[ $FILESYSTEM == "mkfs.f2fs" ]] && modprobe f2fs && F2FS=1
   # If brtfs selected, modprobe, ask if subvolumes are needed, and flag btrfs for installation
