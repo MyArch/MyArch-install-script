@@ -281,29 +281,29 @@ mirror_by_country() {
      COUNTRY_LIST="${COUNTRY_LIST} ${i}"
  done
 
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorbyCountry" --menu "$_MirrorCntryBody" 0 0 0 $COUNTRY_LIST 2>${ANSWER} || prep_menu
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --menu "$_MirrorCntryBody" 0 0 0 $COUNTRY_LIST 2>${ANSWER} || install_base_menu
 
  URL="https://www.archlinux.org/mirrorlist/?country=$(cat ${ANSWER})&use_mirror_status=on"
  MIRROR_TEMP=$(mktemp --suffix=-mirrorlist)
 
  # Get latest mirror list and save to tmpfile
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorGenTitle" --infobox "$_PlsWaitBody" 0 0
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --infobox "$_PlsWaitBody" 0 0
   
  curl -so ${MIRROR_TEMP} ${URL} 2>/tmp/.errlog
  check_for_error
  sed -i 's/^#Server/Server/g' ${MIRROR_TEMP}
  nano ${MIRROR_TEMP}
 
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorGenTitle" --yesno "$_MirrorGenQ" 0 0
+ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --yesno "$_MirrorGenQ" 0 0
 
  if [[ $? -eq 0 ]];then
     mv -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.orig
     mv -f ${MIRROR_TEMP} /etc/pacman.d/mirrorlist
     chmod +r /etc/pacman.d/mirrorlist
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorGenTitle" --infobox "$_MirrorGenDone" 0 0
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --infobox "$_MirrorGenDone" 0 0
 	sleep 2
  else
-    prep_menu
+    install_base_menu
  fi
 }
 
@@ -320,21 +320,21 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" \
              ;;
         "2") nano /etc/pacman.d/mirrorlist
              ;;
-        "3") dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorRankTitle" --infobox "$_MirrorRankBody $_PlsWaitBody" 0 0
+        "3") dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --infobox "$_MirrorRankBody $_PlsWaitBody" 0 0
              cp -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
              rankmirrors -n 10 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist 2>/tmp/.errlog
              check_for_error
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorRankTitle" --infobox "$_MirrorRankDone" 0 0
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --infobox "$_Done!" 0 0
 			 sleep 2
              ;;
          "4") if [[ -e /etc/pacman.d/mirrorlist.orig ]]; then       
 				 mv -f /etc/pacman.d/mirrorlist.orig /etc/pacman.d/mirrorlist
-				 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorRestTitle" --msgbox "$_MirrorRestDone" 0 0
+				 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --msgbox "$_MirrorRestDone" 0 0
 		      else
 		         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_MirrorNoneBody" 0 0
 		      fi
              ;;
-          *) prep_menu
+          *) install_base_menu
              ;;
     esac  	
 
@@ -384,8 +384,9 @@ set_locale() {
   done
 
   dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseSysLoc" --menu "$_localeBody" 0 0 12 ${LOCALES} 2>${ANSWER} || config_base_menu 
-  LOCALE=$(cat ${ANSWER})
   
+  LOCALE=$(cat ${ANSWER})
+
   echo "LANG=\"${LOCALE}\"" > ${MOUNTPOINT}/etc/locale.conf
   sed -i "s/#${LOCALE}/${LOCALE}/" ${MOUNTPOINT}/etc/locale.gen 2>/tmp/.errlog
   arch_chroot "locale-gen" >/dev/null 2>>/tmp/.errlog
@@ -465,10 +466,10 @@ set_hostname() {
 # Adapted and simplified from the Manjaro 0.8 and Antergos 2.0 installers
 set_root_password() {
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody" 0 0 2> ${ANSWER} || config_user_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody" 0 0 2> ${ANSWER} || config_base_menu
     PASSWD=$(cat ${ANSWER})
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody2" 0 0 2> ${ANSWER} || config_user_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody2" 0 0 2> ${ANSWER} || config_base_menu
     PASSWD2=$(cat ${ANSWER})
     
     if [[ $PASSWD == $PASSWD2 ]]; then 
@@ -486,30 +487,30 @@ set_root_password() {
 # Originally adapted from the Antergos 2.0 installer
 create_new_user() {
 
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_NUsrTitle" --inputbox "$_NUsrBody" 0 0 "" 2>${ANSWER} || config_user_menu
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_NUsrTitle" --inputbox "$_NUsrBody" 0 0 "" 2>${ANSWER} || config_base_menu
         USER=$(cat ${ANSWER})
         
         # Loop while user name is blank, has spaces, or has capital letters in it.
          while [[ ${#USER} -eq 0 ]] || [[ $USER =~ \ |\' ]] || [[ $USER =~ [^a-z0-9\ ] ]]; do
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_NUsrTitle" --inputbox "$_NUsrErrBody" 0 0 "" 2>${ANSWER} || config_user_menu
+              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_NUsrTitle" --inputbox "$_NUsrErrBody" 0 0 "" 2>${ANSWER} || config_base_menu
               USER=$(cat ${ANSWER})
         done
         
         # Enter password. This step will only be reached where the loop has been skipped or broken.
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
         PASSWD=$(cat ${ANSWER}) 
     
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
         PASSWD2=$(cat ${ANSWER}) 
     
         # loop while passwords entered do not match.
         while [[ $PASSWD != $PASSWD2 ]]; do
               dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PassNUsrErrBody" 0 0
               
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
               PASSWD=$(cat ${ANSWER}) 
     
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
               PASSWD2=$(cat ${ANSWER}) 
         done      
     
@@ -593,7 +594,7 @@ confirm_mount_btrfs() {
     fi
 }
 
-# This function does not assume that the formatted device  is the Root installation device as 
+# This function does not assume that the formatted device is the Root installation device as 
 # more than one device may be formatted. Root is set in the mount_partitions function.
 select_device() {
 	
@@ -1819,7 +1820,7 @@ install_ati(){
        "10") # Generic / Unknown
 			  pacstrap ${MOUNTPOINT} xf86-video-fbdev 2>/tmp/.errlog
              ;;
-          *) install_desktop_menu
+          *) install_graphics_menu
              ;;
     esac
     check_for_error
@@ -2044,19 +2045,23 @@ install_multimedia_menu(){
 install_alsa_pulse(){
 	# Prep Variables
 	echo "" > ${PACKAGES}
+	ALSA=""
 	PULSE_EXTRA=""
+	alsa=$(pacman -Ss alsa | awk '{print $1}' | grep "/alsa-" | sed "s/extra\///g" | sort -u)
 	pulse_extra=$(pacman -Ss pulseaudio- | awk '{print $1}' | sed "s/extra\///g" | grep "pulseaudio-" | sort -u)
+	
+	for i in ${alsa}; do
+		ALSA="${ALSA} ${i} - off"
+	done
+	
+	ALSA=$(echo $ALSA | sed "s/alsa-utils - off/alsa-utils - on/g" | sed "s/alsa-plugins - off/alsa-plugins - on/g")
+
 	for i in ${pulse_extra}; do
 		PULSE_EXTRA="${PULSE_EXTRA} ${i} - off"
 	done
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_AXITitle" --checklist "$_AXIBody$_UseSpaceBar" 0 0 10 \
-	"alsa-firmware" "-" off \
-	"alsa-plugins" "-" on \
-	"alsa-tools" "-" off \
-	"alsa-utils" "-" on \
-	"pulseaudio" "-" off \
-	$PULSE_EXTRA \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstMulSnd" --checklist "$_InstMulSndBody\n\n$_UseSpaceBar" 0 0 14 \
+	$ALSA $PULSE_EXTRA \
 	"paprefs" "pulseaudio GUI" off \
 	"pavucontrol" "pulseaudio GUI" off \
 	"ponymix" "pulseaudio CLI" off \
