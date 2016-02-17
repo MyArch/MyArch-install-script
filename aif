@@ -746,9 +746,7 @@ select_filesystem(){
 	"mkfs.vfat -F32" "vfat" \
 	"mkfs.xfs -f" "xfs" 2>${ANSWER}	
 
-	FILESYSTEM=$(cat ${ANSWER})
-
-	[[ $FILESYSTEM == "" ]] && break;
+	[[ $(cat ${ANSWER}) == "" ]] && prep_menu || FILESYSTEM=$(cat ${ANSWER});
 
 	# if f2fs selected modprobe and flag f2fs package for installation
 	[[ $FILESYSTEM == "mkfs.f2fs" ]] && modprobe f2fs && F2FS=1
