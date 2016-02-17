@@ -383,7 +383,7 @@ set_locale() {
       LOCALES="${LOCALES} ${i} -"
   done
 
-  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseSysLoc" --menu "$_localeBody" 0 0 16 ${LOCALES} 2>${ANSWER} || config_base_menu 
+  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseSysLoc" --menu "$_localeBody" 0 0 12 ${LOCALES} 2>${ANSWER} || config_base_menu 
   LOCALE=$(cat ${ANSWER})
   
   echo "LANG=\"${LOCALE}\"" > ${MOUNTPOINT}/etc/locale.conf
@@ -615,7 +615,7 @@ create_partitions(){
 secure_wipe(){
 	
 	# Warn the user. If they proceed, wipe the selected device.
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PartOptWipe " --yesno "$_AutoPartWipeBody1 ${DEVICE} $_AutoPartWipeBody" 0 0
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PartOptWipe " --yesno "$_AutoPartWipeBody1 ${DEVICE} $_AutoPartWipeBody2" 0 0
 	if [[ $? -eq 0 ]]; then
 		clear
 		# Install wipe where not already installed. Much faster than dd
@@ -746,7 +746,7 @@ select_filesystem(){
 	"mkfs.vfat -F32" "vfat" \
 	"mkfs.xfs -f" "xfs" 2>${ANSWER}	
 
-	[[ $(cat ${ANSWER}) == "" ]] && prep_menu || FILESYSTEM=$(cat ${ANSWER});
+	[[ $(cat ${ANSWER}) == "" ]] && prep_menu || FILESYSTEM=$(cat ${ANSWER})
 
 	# if f2fs selected modprobe and flag f2fs package for installation
 	[[ $FILESYSTEM == "mkfs.f2fs" ]] && modprobe f2fs && F2FS=1
@@ -833,8 +833,7 @@ btrfs_subvols() {
  cd
 }
 
-# This function allows for btrfs-specific mounting options to be applied. Written as a seperate function
-# for neatness.
+# This subfunction allows for btrfs-specific mounting options to be applied.
 btrfs_mount_opts() {
 
 	echo "" > ${BTRFS_OPTS}
@@ -869,7 +868,7 @@ btrfs_mount_opts() {
 
 }
 
-# Save repetition of code
+# Subfunction to save repetition of code
 mount_current_partition(){
 	
 	# Make the mount directory
@@ -956,7 +955,7 @@ mount_current_partition(){
     # Extra Step for VFAT UEFI Partition. This cannot be in an LVM container.
     if [[ $SYSTEM == "UEFI" ]]; then
     
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || config_base_menu  
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu  
        PARTITION=$(cat ${ANSWER})
        UEFI_PART=${PARTITION}
        
@@ -973,7 +972,7 @@ mount_current_partition(){
  	   "/boot" "systemd-boot"\
 	   "/boot/efi" "refind-efi" 2>${ANSWER}
 	   	   
-	   [[ $(cat ${ANSWER}) != "" ]] && UEFI_MOUNT=$(cat ${ANSWER}) || config_base_menu
+	   [[ $(cat ${ANSWER}) != "" ]] && UEFI_MOUNT=$(cat ${ANSWER}) || prep_menu
        
        mkdir -p ${MOUNTPOINT}${UEFI_MOUNT} 2>/tmp/.errlog
        mount ${PARTITION} ${MOUNTPOINT}${UEFI_MOUNT} 2>>/tmp/.errlog
@@ -985,7 +984,7 @@ mount_current_partition(){
     # All other partitions
        while [[ $NUMBER_PARTITIONS > 0 ]]; do 
              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_ExtPartBody" 0 0 4 \
-             "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || config_base_menu 
+             "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu 
              
              PARTITION=$(cat ${ANSWER})
              
@@ -1000,7 +999,7 @@ mount_current_partition(){
 	            
                 # Ask user for mountpoint. Don't give /boot as an example for UEFI systems!
                 [[ $SYSTEM == "UEFI" ]] && MNT_EXAMPLES="/home\n/var" || MNT_EXAMPLES="/boot\n/home\n/var"
-				dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || config_base_menu
+				dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || prep_menu
                 
                 MOUNT=$(cat ${ANSWER})
                 
@@ -1009,7 +1008,7 @@ mount_current_partition(){
                       # Warn user about naming convention
                       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_ExtErrBody" 0 0
                       # Ask user for mountpoint again
-                      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || config_base_menu
+                      dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || prep_menu
                       
                       MOUNT=$(cat ${ANSWER})                     
                 done
@@ -1047,8 +1046,7 @@ detect_lvm() {
  
 }
 
-# Where existing LVM is found, offer to deactivate it. Code adapted from the Manjaro installer.
-# NEED TO ADD COMMAND TO REMOVE LVM2 FSTYPE.
+# Where existing LVM is found, offer to deactivate it.
 deactivate_lvm() {
 
  LVM_DISABLE=0
@@ -1075,7 +1073,7 @@ deactivate_lvm() {
         done
         
         # This step will remove old lvm metadata on partitions where identified.
-        LVM_PT=$(lvmdiskscan | grep 'LVM physical volume' | grep 'sd\|hd\|vd\|nvme\|mmc' | sed 's/\/dev\///' | awk '{print $1}')
+        LVM_PT=$(lsblk -lno NAME,SIZE,TYPE | grep 'lvm' | awk '{print $1}' | sort -u)
         for i in ${LVM_PT}; do
             dd if=/dev/zero bs=512 count=512 of=/dev/${i} >/dev/null 2>&1
         done
@@ -1088,7 +1086,7 @@ find_lvm_partitions() {
 
     LVM_PARTITIONS=""
     NUMBER_LVM_PARTITIONS=0
-    lvm_partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|crypt' | awk '{print $1 " " $2}' | sort -u)
+    lvm_partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|crypt' | sed 's/part/\/dev\//g' | sed 's/crypt/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
 	
     for i in ${lvm_partition_list[@]}; do
         LVM_PARTITIONS="${LVM_PARTITIONS} ${i}"
@@ -1097,7 +1095,7 @@ find_lvm_partitions() {
     
     # Double-partitions will be counted due to counting size, so fix
     NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS / 2 ))
-    
+
 }
 
 # This simplifies the creation of the PV and VG into a single step.
@@ -1106,36 +1104,43 @@ create_lvm() {
 # subroutine to save a lot of repetition.
 check_lv_size() {
 
-  LV_SIZE_INVALID=0
-  LV_SIZE_TYPE=$(echo ${LVM_LV_SIZE:$(( ${#LVM_LV_SIZE} - 1 )):1})
-  chars=0
-  
-  # Check to see if anything was actually entered
-  [[ ${#LVM_LV_SIZE} -eq 0 ]] && LV_SIZE_INVALID=1
+	LV_SIZE_INVALID=0
+	chars=0
 
-  # Check if there are any non-numeric characters prior to the last one
-  while [[ $chars -lt $(( ${#LVM_LV_SIZE} - 1 )) ]]; do
-        if [[ ${LVM_LV_SIZE:chars:1} != [0-9] ]]; then
-           LV_SIZE_INVALID=1
-           break;
-        fi
-        chars=$(( chars + 1 ))
-  done
+	# Check to see if anything was actually entered and if first character is '0'
+	([[ ${#LVM_LV_SIZE} -eq 0 ]] || [[ ${LVM_LV_SIZE:0:1} -eq "0" ]]) && LV_SIZE_INVALID=1
 
-  # Check to see if first character is '0'
-  [[ ${LVM_LV_SIZE:0:1} -eq "0" ]] && LV_SIZE_INVALID=1
+	# If not invalid so far, check for non numberic characters other than the last character
+	if [[ $LV_SIZE_INVALID == 0 ]]; then
+		while [[ $chars -lt $(( ${#LVM_LV_SIZE} - 1 )) ]]; do
+			[[ ${LVM_LV_SIZE:chars:1} != [0-9] ]] && LV_SIZE_INVALID=1 && break;
+			chars=$(( chars + 1 ))
+		done
+	fi
+	
+	# If not invalid so far, check that last character is a M/m or G/g
+	if [[ $LV_SIZE_INVALID == 0 ]]; then
+		LV_SIZE_TYPE=$(echo ${LVM_LV_SIZE:$(( ${#LVM_LV_SIZE} - 1 )):1})
+		
+		case $LV_SIZE_TYPE in
+		"m"|"M"|"g"|"G") LV_SIZE_INVALID=0 ;;
+		*) LV_SIZE_INVALID=1 ;;
+		esac
+		
+	fi
 
-  # Check to see if last character is "G" or "M", and if so, whether the value is greater than
-  # or equal to the LV remaining Size. If not, convert into MB for VG space remaining.      
+	# If not invalid so far, check whether the value is greater than or equal to the LV remaining Size.
+	# If not, convert into MB for VG space remaining.      
   if [[ ${LV_SIZE_INVALID} -eq 0 ]]; then
+  
       case ${LV_SIZE_TYPE} in
-         "G") if [[ $(( $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) * 1000 )) -ge ${LVM_VG_MB} ]]; then
+         "G"|"g") if [[ $(( $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) * 1000 )) -ge ${LVM_VG_MB} ]]; then
                  LV_SIZE_INVALID=1
               else
                  LVM_VG_MB=$(( LVM_VG_MB - $(( $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) * 1000 )) ))
               fi
               ;;
-         "M") if [[ $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) -ge ${LVM_VG_MB} ]]; then
+         "M"|"m") if [[ $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) -ge ${LVM_VG_MB} ]]; then
                  LV_SIZE_INVALID=1
               else
                  LVM_VG_MB=$(( LVM_VG_MB - $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) ))
@@ -1149,8 +1154,8 @@ check_lv_size() {
 }
 
 	# Check that there is at least one partition available for LVM
-    if [[ $NUMBER_LVM_PARTITIONS -lt 1 ]]; then
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmPartErrTitle" --msgbox "$_LvmPartErrBody" 0 0
+    if [[ $NUMBER_LVM_PARTITIONS -eq 0 ]]; then
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_LvmPartErrBody" 0 0
         prep_menu
     fi
     
@@ -1159,43 +1164,42 @@ check_lv_size() {
     
     # Name the Volume Group
     LVM_VG=""
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmNameVgTitle" --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
     LVM_VG=$(cat ${ANSWER})
 
     # Loop while the Volume Group name starts with a "/", is blank, has spaces, or is already being used
     while [[ ${LVM_VG:0:1} == "/" ]] || [[ ${#LVM_VG} -eq 0 ]] || [[ $LVM_VG =~ \ |\' ]] || [[ $(lsblk | grep ${LVM_VG}) != "" ]]; do
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmNameVgErrTitle" --msgbox "$_LvmNameVgErr" 0 0
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_LvmNameVgErr" 0 0
               
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmNameVgTitle" --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
         LVM_VG=$(cat ${ANSWER})
     done
     
     # Select the first or only partition for the Volume Group
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmPvSelTitle" --menu "$_LvmPvSelBody" 0 0 4 ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu 
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --menu "$_LvmPvSelBody" 0 0 4 ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu 
     LVM_PARTITION=$(cat ${ANSWER})
     
-    # add the partition to the temporary file for the vgcreate command
-    # Remove selected partition from the list and deduct number of LVM viable partitions remaining
-    # FIX TO INCLUDE PARTITION SIZES
-    sed -i "s/x/\/dev\/${LVM_PARTITION} x/" /tmp/.vgcreate
-    LVM_PARTITIONS="$(echo $LVM_PARTITIONS | sed s/${LVM_PARTITION}$' -'//)"
+    # Add the partition to the temporary file for the vgcreate command.
+    # Remove selected partition from the list and deduct number of LVM viable partitions remaining.
+    sed -i "s/x/${LVM_PARTITION} x/" /tmp/.vgcreate
+    LVM_PARTITIONS=$(echo $LVM_PARTITIONS | sed "s~${LVM_PARTITION} [0-9]*[G-M]~~" | sed "s~${LVM_PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${LVM_PARTITION}$' -'~~)
     NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmPvCreateTitle" --infobox "\n$_Done\n\n" 0 0
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --infobox "\n$_Done\n\n" 0 0
     sleep 1
 
     # Where there are viable partitions still remaining, run loop
     while [[ $NUMBER_LVM_PARTITIONS -gt 0 ]]; do
 
-           dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmPvSelTitle" --menu "$_LvmPvSelBody" 0 0 4 $"Done" $"-" ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu 
+           dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --menu "$_LvmPvSelBody" 0 0 4 $"Done" $"-" ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu 
            LVM_PARTITION=$(cat ${ANSWER})
 
            if [[ $LVM_PARTITION == "Done" ]]; then
               break;
            else
-              sed -i "s/x/\/dev\/${LVM_PARTITION} x/" /tmp/.vgcreate
-              LVM_PARTITIONS="$(echo $LVM_PARTITIONS | sed s/${LVM_PARTITION}$' -'//)"
+              sed -i "s/x/${LVM_PARTITION} x/" /tmp/.vgcreate
+              LVM_PARTITIONS=$(echo $LVM_PARTITIONS | sed "s~${LVM_PARTITION} [0-9]*[G-M]~~" | sed "s~${LVM_PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${LVM_PARTITION}$' -'~~)
               NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmPvCreateTitle" --infobox "\n$_Done\n\n" 0 0
+              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --infobox "\n$_Done\n\n" 0 0
               sleep 1
            fi
 
@@ -1204,16 +1208,16 @@ check_lv_size() {
     # Once all the partitions have been selected, remove 'x' from the .vgcreate file, then use it in 'vgcreate' command.
     # Also determine the size of the VG, to use for creating LVs for it.
     VG_PARTS=$(cat /tmp/.vgcreate | sed 's/x//')
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmPvConfTitle" --yesno "$_LvmPvConfBody1${LVM_VG} $_LvmPvConfBody2${VG_PARTS}" 0 0
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --yesno "$_LvmPvConfBody1${LVM_VG} $_LvmPvConfBody2${VG_PARTS}" 0 0
     
     if [[ $? -eq 0 ]]; then
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmPvActTitle" --infobox "$_LvmPvActBody1${LVM_VG}.$_LvmPvActBody2" 0 0
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --infobox "$_LvmPvActBody1${LVM_VG}.$_LvmPvActBody2" 0 0
        sleep 2
        vgcreate -f ${LVM_VG} ${VG_PARTS} >/dev/null 2>/tmp/.errlog
        check_for_error
        VG_SIZE=$(vgdisplay | grep 'VG Size' | awk '{print $3}' | sed 's/\..*//')
        VG_SIZE_TYPE=$(vgdisplay | grep 'VG Size' | awk '{print $4}' | sed 's/\..*//')
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmPvDoneTitle" --msgbox "$_LvmPvDoneBody1 '${LVM_VG}' $_LvmPvDoneBody2 (${VG_SIZE} ${VG_SIZE_TYPE}).\n\n" 0 0
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --msgbox "$_LvmPvDoneBody1 '${LVM_VG}' $_LvmPvDoneBody2 (${VG_SIZE} ${VG_SIZE_TYPE}).\n\n" 0 0
        sleep 2
     else
        prep_menu
@@ -1223,14 +1227,14 @@ check_lv_size() {
     [[ ${VG_SIZE_TYPE:0:1} == "G" ]] && LVM_VG_MB=$(( VG_SIZE * 1000 )) || LVM_VG_MB=$VG_SIZE
     
     # Specify number of Logical volumes to create.
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmLvNumTitle" --inputbox "$_LvmLvNumBody1 ${LVM_VG}.$_LvmLvNumBody2" 0 0 "" 2>${ANSWER} || prep_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --inputbox "$_LvmLvNumBody1 ${LVM_VG}.$_LvmLvNumBody2" 0 0 "" 2>${ANSWER} || prep_menu
     NUMBER_LOGICAL_VOLUMES=$(cat ${ANSWER})
     
     # Loop if the number of LVs is no 1-9 (including non-valid characters)
     while [[ $NUMBER_LOGICAL_VOLUMES != [1-9] ]]; do
-          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmLvNumErrTitle" --msgbox "$_LvmLvNumErrBody" 0 0
+          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$ErrTitle" --msgbox "$_LvmLvNumErrBody" 0 0
  
-          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_LvmLvNumTitle" --inputbox "$_LvmLvNumBody1 ${LVM_VG}.$_LvmLvNumBody2" 0 0 "" 2>${ANSWER} || prep_menu
+          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --inputbox "$_LvmLvNumBody1 ${LVM_VG}.$_LvmLvNumBody2" 0 0 "" 2>${ANSWER} || prep_menu
           NUMBER_LOGICAL_VOLUMES=$(cat ${ANSWER})
     done
 
