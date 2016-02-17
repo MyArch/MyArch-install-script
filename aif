@@ -688,12 +688,15 @@ auto_partition(){
 	"gdisk"  "UEFI/GPT" 2>${ANSWER}
 
 	clear
-	if ([[ $(cat ${ANSWER}) != $_PartOptWipe ]] &&  [[ $(cat ${ANSWER}) != $_PartOptAuto ]]); then
-		cat ${ANSWER} ${DEVICE}
-		prep_menu
-	else
-		[[ $(cat ${ANSWER}) == $_PartOptWipe ]] && secure_wipe && create_partitions
-		[[ $(cat ${ANSWER}) == $_PartOptAuto ]] && auto_partition
+	# If something selected
+	if [[ $(cat ${ANSWER}) != "" ]]; then
+		if ([[ $(cat ${ANSWER}) != $_PartOptWipe ]] &&  [[ $(cat ${ANSWER}) != $_PartOptAuto ]]); then
+			cat ${ANSWER} ${DEVICE}
+			prep_menu
+		else
+			[[ $(cat ${ANSWER}) == $_PartOptWipe ]] && secure_wipe && create_partitions
+			[[ $(cat ${ANSWER}) == $_PartOptAuto ]] && auto_partition
+		fi
 	fi	
 }	
 
