@@ -445,7 +445,7 @@ generate_fstab() {
 			generate_fstab
 		fi
 		
-		$(cat ${ANSWER}) ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
+		cat ${ANSWER} ${MOUNTPOINT} > ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
 		check_for_error
 		[[ -f ${MOUNTPOINT}/swapfile ]] && sed -i "s/\\${MOUNTPOINT}//" ${MOUNTPOINT}/etc/fstab
 	fi
