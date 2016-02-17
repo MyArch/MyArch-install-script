@@ -194,6 +194,7 @@ check_requirements() {
     DIALOG --title "$_ConFailTitle" --msgbox "$_ConFailBody" 0 0
     exit 1
   fi
+  pacman -Syy
   # This will only be executed where neither of the above checks are true.
   # The error log is also cleared, just in case something is there from a previous use of the installer.
   DIALOG --title "$_ReqMetTitle" --msgbox "$_ReqMetBody" 0 0
@@ -1145,11 +1146,19 @@ install_base() {
   # "Standard" installation method
   if [[ $(cat ${ANSWER}) -eq 1 ]]; then
     DIALOG --title "$_InstBseTitle" --checklist "$_InstStandBseBody$_UseSpaceBar" 0 0 6 \
-    "linux" "-" on "linux-lts" "-" off "base-devel" "-" on $BTRF_CHECK $F2FS_CHECK "sudo" "-" on 2>${PACKAGES}
+    "linux" "-" on \
+    "linux-lts" "-" off \
+    "base-devel" "-" on \
+    $BTRF_CHECK $F2FS_CHECK \
+    "sudo" "-" on 2>${PACKAGES}
   elif [[ $(cat ${ANSWER}) -eq 2 ]]; then
     # "Advanced" installation method
     DIALOG --title "$_InstBseTitle" --checklist "$_InstAdvBseBody $_UseSpaceBar" 0 0 0 \
-    "linux" "base" on "linux-lts" "core" off $BASE_LIST $BASE_DEV_LIST $BTRF_CHECK $F2FS_CHECK 2>${PACKAGES}
+    "linux" "base" on \
+    "linux-lts" "core" off \
+    $BASE_LIST \
+    $BASE_DEV_LIST \
+    $BTRF_CHECK $F2FS_CHECK 2>${PACKAGES}
   fi
   # Determine kernel type(s) selected for installation.
   if 	[[ $(cat ${PACKAGES}) != "" ]]; then
@@ -2157,7 +2166,7 @@ install_base_menu() {
     "5")
     install_bootloader
     ;;
-    "6")
+    "8")
     install_wireless_packages
     ;;
     *)
