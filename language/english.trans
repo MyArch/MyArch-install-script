@@ -52,61 +52,29 @@ _PrepLUKS="Block Device Encryption (optional)"
 
 # Logical Volume Management
 _PrepLVM="Logical Volume Management (optional)"
-
 _LvmDetBody1="\nExisting Logical Volume Management (LVM) has been detected. Partitions already used for LVM cannot be selected. Do you wish to de-active existing LVM?\n\nSelect 'Yes' to remove existing LVM.\nSelect 'No' to keep it.\n"
 _LvmRmTitle=" Deactivating LVM "
 _LvmDetBody2="\nExisting Logical Volume Management (LVM) detected. Activating. Please Wait...\n\n"
 _LvmRmBody="\nDeactivating all existing Physical Volumes (PV), Volume Groups (VG), and Logical Volumes (LV).\n\nPlease wait...\n\n"
-
-_LvmPartErrTitle=" LVM Partition Error "
 _LvmPartErrBody="\nThere are no viable partitions available to use for Logical Volume Management. A minimum of one is required.\n\nIf LVM is already in use, deactivating it will allow the partition(s) used for its Physical Volume(s) to be used again.\n\n"
-
-_LvmNameVgTitle=" LVM - Name Volume Group "
 _LvmNameVgBody="\nEnter the name of the Volume Group (VG) to create.\n\nThe VG is the new 'virtual device / hard-disk' to create out of the partition(s) selected next.\n"
-
-_LvmNameVgErrTitle=" LVM - VG Name Error "
 _LvmNameVgErr="\nInvalid Name Entered. The Volume Group name may be alpha-numeric, but may not contain spaces, start with a '/', or already be in use.\n\n"
-
-_LvmPvSelTitle=" LVM - Select Partitions "
 _LvmPvSelBody="\nSelect the partition(s) to use for the Physical Volume (PV).\n"
-_LvmPvCreateTitle=" LVM - Parition Added "
-
-_LvmPvConfTitle=" LVM - Create Volume Group "
 _LvmPvConfBody1="\nConfirm creation of Volume Group "
 _LvmPvConfBody2="with the following partitions:\n\n"
-
-_LvmPvActTitle=" LVM - Creating VG "
 _LvmPvActBody1="\nCreating and activating Volume Group "
 _LvmPvActBody2="\n\nPlease wait...\n\n"
-
-_LvmPvDoneTitle=" LVM - VG Created "
 _LvmPvDoneBody1="\nVolume Group "
 _LvmPvDoneBody2="has been created"
-
-_LvmLvNumTitle=" LVM - Create Logical Volumes "
 _LvmLvNumBody1="\nEnter the number of Logical Volumes (LVs) to create in "
 _LvmLvNumBody2="Minimum is 1, maximum is 9.\n\nLVs are essentially partitions. The last (or only) LV will automatically use 100% of the remaining space in the Volume Group."
-
-_LvmLvNumErrTitle=" LVM - LV Number Error "
 _LvmLvNumErrBody="\nInvalid Number entered. Minimum is 1, maximum is 9.\n\n"
-
-_LvmLvNameTitle=" LVM - Name LV "
 _LvmLvNameBody1="\nEnter the name of the Logical Volume (LV) to create.\n\nThis is like setting a name / label for a partition.\n"
 _LvmLvNameBody2="\nNOTE: This LV will automatically use up all space remaining on the Volume Group"
-
-_LvmLvNameErrTitle=" LVM - Name LV Error "
 _LvmLvNameErrBody="\nInvalid Name Entered. The Logical Volume (LV) name may be alpha-numeric, but may not contain spaces or be preceeded with a '/'.\n\n"
-
-_LvmLvSizeTitle=" LVM - Set LV Size "
 _LvmLvSizeBody1="remaining"
 _LvmLvSizeBody2="\n\nEnter the size of the Logical Volume (LV) in Megabytes (M) or Gigabytes (G). For example, 100M will create a 100 Megabyte LV. 10G will create a 10 Gigabyte LV.\n"
-
-_LvmLvSizeErrTitle=" LVM - Set LV Size Error "
 _LvmLvSizeErrBody="\nInvalid value Entered. A numeric value must be entered with an 'M' (Megabytes) or a 'G' (Gigabytes) at the end.\n\nExamples include, 100M, 10G, or 250M. The value may also not be equal to or greater than the remaining size of the VG.\n\n"
-
-_LvmLvDoneTitle=" LVM - Logical Volume Created "
-
-_LvmCompTitle=" LVM - Process Complete "
 _LvmCompBody="\nDone! All Logical Volumes have been created for the Volume Group.\n\nDo you wish to view the new LVM scheme?\n\n"
 
 # Show devices and partitions
@@ -147,7 +115,7 @@ _VCKeymapBody="\nSelect Virtual Console Keymap."
 _XkbmapBody="\nSelect Desktop Environment Keymap."
 
 # Set Locale
-_localeBody="Select A Locale"
+_localeBody="Locales determine the languages displayed, time and date formats, etc.\n\nThe format is language_COUNTRY (e.g. en_US is english, United States; en_GB is english, Great Britain)."
 
 # Set Timezone
 _TimeZBody="\nThe time zone is used to correctly set your system clock."
@@ -184,7 +152,7 @@ _NUsrErrBody="\nAn incorrect user name was entered. Please try again.\n\n"
 
 # Set User
 _PassNUsrTitle="Set User Password"
-_PassNUsrBody="\nEnter password for" 
+_PassNUsrBody="\nEnter password for"
 _PassNUsrBody2="\nRe-enter password for"
 _NUsrSetBody="\nCreating User and setting groups...\n\n"
 _PassNUsrErrBody="\nThe User passwords entered do not match. Please try again.\n\n"
@@ -204,7 +172,7 @@ _PartToolBody="\nAn Auto-Partition option is available for beginners. CFDisk is 
 _PartOptAuto="Auto Partition"
 _PartOptWipe="Securely Wipe Device (optional)"
 _AutoPartWipeBody1="\nWARNING: ALL data on"
-_AutoPartWipeBody2="will be destroyed. This process may also take a long time depending on the size of the device.\n\nDo you wish to continue?\n"
+_AutoPartWipeBody2="will be destroyed using the command 'wipe -Ifre'. This process may also take a long time depending on the size of the device.\n\nDo you wish to continue?\n"
 
 # Partitioning Error
 _PartErrBody="\nBIOS systems require a minmum of one partition (ROOT).\n\nUEFI systems require a minimum of two partitions (ROOT and UEFI).\n\n"
