@@ -188,7 +188,7 @@ check_requirements() {
   sleep 2   
   clear
   echo "" > /tmp/.errlog
-
+  pacman -Syy
 }
 
 # Adapted from AIS. Checks if system is made by Apple, whether the system is BIOS or UEFI,
