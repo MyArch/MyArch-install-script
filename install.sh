@@ -5,82 +5,80 @@
 # Modified for MyArch by Nandcire
 #
 # This program is free software, provided under the GNU General Public License
-# as published by the Free Software Foundation. So feel free to copy, distribute,
-# or modify it as you wish.
+# as published by the Free Software Foundation. So feel free to copy,
+# distribute, or modify it as you wish.
 #
 
 ################################################################################
 ##
-## Variables
+##                            Installer Variables
 ##
 ################################################################################
 
-# Create a temporary file to store menu selections
+# Temporary files to store menu selections
 ANSWER="/tmp/.install"          # Basic menu selections
-PACKAGES="/tmp/.packages"       # Packages to install
+PACKAGES="/tmp/.pkgs"			      # Packages to install
 BTRFS_OPTS="/tmp/.btrfs_opts"   # BTRFS mount options
 # Save retyping
-VERSION="Installation script for Archlinux"
+VERSION="MyArch Installation Script"
 # Installation
-BASE_DEVEL=0            # Has base-devel group been installed ?
-DM_INST=""							# Which DMs have been installed?
-DM_ENABLED=0						# Has a display manager been enabled?
-NM_INST=""							# Which NMs have been installed?
-NM_ENABLED=0						# Has a network connection manager been enabled?
-BOOTLOADER="n/a"        # Which bootloader has been installed?
-KEYMAP="us"             # Virtual console keymap. Default is "us"
-XKBMAP="us"             # X11 keyboard layout. Default is "us"
-ZONE=""                 # For time
-SUBZONE=""              # For time
-LOCALE="en_US.UTF-8"    # System locale. Default is "en_US.UTF-8"
-KERNEL=0                   # Has the LTS Kernel been installed?
-GRAPHIC_CARD=""         # graphics card
-INTEGRATED_GC=""        # Integrated graphics card for NVIDIA
-NVIDIA_INST=0           # Indicates if NVIDIA proprietary driver has been installed
-NVIDIA=""               # NVIDIA driver(s) to install depending on kernel(s)
-VB_MOD=""               # Virtualbox guest modules to install depending on kernel
-SHOW_ONCE=0             # Show de_wm information only once
+DM_INST=""						# Which DMs have been installed?
+DM_ENABLED=0					# Has a display manager been enabled?
+NM_INST=""						# Which NMs have been installed?
+NM_ENABLED=0					# Has a network connection manager been enabled?
+BOOTLOADER="n/a"      # Which bootloader has been installed?
+KEYMAP="us"          	# Virtual console keymap. Default is "us"
+XKBMAP="us"      	    # X11 keyboard layout. Default is "us"
+ZONE=""               # For time
+SUBZONE=""            # For time
+LOCALE="en_US.UTF-8"  # System locale. Default is "en_US.UTF-8"
+KERNEL=0              # Installed Kernel. 1 = linux, 2 = linux-lts, 3 = both
+GRAPHIC_CARD=""				# graphics card
+INTEGRATED_GC=""			# Integrated graphics card for NVIDIA
+NVIDIA_INST=0         # Indicates if NVIDIA proprietary driver has been installed
+NVIDIA=""							# NVIDIA driver(s) to install depending on kernel(s)
+VB_MOD=""							# Virtualbox guest modules to install depending on kernel(s)
+SHOW_ONCE=0           # Show de_wm information only once
 # Architecture
-ARCHI=`uname -m`        # Display whether 32 or 64 bit system
-SYSTEM="Unknown"        # Display whether system is BIOS or UEFI. Default is "unknown"
-ROOT_PART=""            # ROOT partition
-UEFI_PART=""            # UEFI partition
-UEFI_MOUNT=""           # UEFI mountpoint
+ARCHI=`uname -m`  # Display whether 32 or 64 bit system
+SYSTEM="Unknown"  # Display whether system is BIOS or UEFI. Default is "unknown"
+ROOT_PART=""      # ROOT partition
+UEFI_PART=""			# UEFI partition
+UEFI_MOUNT=""     # UEFI mountpoint
 # Menu highlighting (automated step progression)
-HIGHLIGHT=0             # Highlight items for Main Menu
-HIGHLIGHT_SUB=0         # Highlight items for submenus
-SUB_MENU=""             # Submenu to be highlighted
+HIGHLIGHT=0       # Highlight items for Main Menu
+HIGHLIGHT_SUB=0	  # Highlight items for submenus
+SUB_MENU=""       # Submenu to be highlighted
 # Logical Volume Management
-LVM=0                   # Logical Volume Management Detected?
-LVM_ROOT=0              # LVM used for Root?
-LVM_SEP_BOOT=0          # 1 = Seperate /boot, 2 = seperate /boot & LVM
-LVM_DISABLE=0           # Option to allow user to deactive existing LVM
-LVM_VG=""               # Name of volume group to create
-LVM_VG_MB=0             # MB remaining of VG
-LVM_LV_NAME=""          # Name of LV to create
-LV_SIZE_INVALID=0       # Is LVM LV size entered valid?
-VG_SIZE_TYPE=""         # Is VG in Gigabytes or Megabytes?
+LVM=0                   			# Logical Volume Management Detected?
+LVM_ROOT=0              			# LVM used for Root?
+LVM_SEP_BOOT=0          			# 1 = Seperate /boot, 2 = seperate /boot & LVM
+LVM_DISABLE=0           			# Option to allow user to deactive existing LVM
+LVM_VG=""               			# Name of volume group to create
+LVM_VG_MB=0             			# MB remaining of VG
+LVM_LV_NAME=""          			# Name of LV to create
+LV_SIZE_INVALID=0       			# Is LVM LV size entered valid?
+VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 # LUKS
-LUKS=0                  # Luks Detected?
+LUKS=0                  			# Luks Detected?
 # Installation
-PACOPT=-1               # Option for confirmation with pacstrap
-MOUNTPOINT="/mnt"       # Installation: Root mount
-MOUNT=""                # Installation: All other mounts branching from Root
-BTRFS=0                 # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
-BTRFS_MNT=""            # used for syslinux where /mnt is a btrfs subvolume
-F2FS=0                   # F2FS used? "1" = yes.
+MOUNTPOINT="/mnt"     # Installation: Root mount
+MOUNT=""							# Installation: All other mounts branching from Root
+BTRFS=0               # BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
+BTRFS_MNT=""          # used for syslinux where /mnt is a btrfs subvolume
+F2FS=0								# F2FS used? "1" = yes.
 # Language Support
-CURR_LOCALE="en_US.UTF-8"   # Default Locale
-FONT=""                 # Set new font if necessary
+CURR_LOCALE="en_US.UTF-8"   		# Default Locale
+FONT=""                     		# Set new font if necessary
 # Edit Files
-FILE=""                 # Which file is to be opened?
-FILE2=""                # Which second file is to be opened?
+FILE=""               # Which file is to be opened?
+FILE2=""							# Which second file is to be opened?
 
-################################################################################
+######################################################################
 ##
-## Core Functions
+##                        Core Functions
 ##
-################################################################################
+######################################################################
 
 # General dialog function with backtitle
 DIALOG() {
@@ -90,88 +88,74 @@ DIALOG() {
 # Redefine pacstrap for asking during installation
 PACSTRAP() {
   if ! arch_chroot "pacman -Q $@" > /dev/null ; then
-    clear
     if [[ PACOPT == 0 ]] ; then
-      pacstrap -i ${MOUNTPOINT} "$@"
-    else
       pacstrap ${MOUNTPOINT} "$@"
+    else
+      pacstrap -i ${MOUNTPOINT} "$@"
     fi
   fi
 }
 
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
-  # Set english as base in case some language miss some translation
-  source ./language/english.trans
   DIALOG --title " Select Language " \
-  --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 12 \
-  "1" $"English		(en)" \
-  "2" $"Italian 		(it)" \
-  "3" $"Russian 		(ru)" \
-  "4" $"Turkish 		(tr)" \
-  "5" $"Dutch 		(nl)" \
-  "6" $"Greek 		(el)" \
-  "7" $"Danish 		(da)" \
-  "8" $"Hungarian 	(hu)" \
-  "9" $"Portuguese 	(pt)" \
-  "10" $"German	 	(de)" \
-  "11" $"French		(fr)" \
-  "12" $"Polish		(pl)" 2>${ANSWER}
+  --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 4 \
+  "1" $"English (en)" 2>${ANSWER}
+  #	"2" $"Italian 		(it)" \
+  # 	"3" $"Russian 		(ru)" \
+  # 	"4" $"Turkish 		(tr)" \
+  # 	"5" $"Dutch 		(nl)" \
+  # 	"6" $"Greek 		(el)" \
+  # 	"7" $"Danish 		(da)" \
+  # 	"8" $"Hungarian 	(hu)" \
+  # 	"9" $"Portuguese 	(pt)" \
+  #   "10" $"German	 	(de)" \
+  #   "11" $"French		(fr)" \
+  #   "12" $"Polish		(pl)" 2>${ANSWER}
   case $(cat ${ANSWER}) in
     "1")
+    source /aif-dev-master/english.trans
     CURR_LOCALE="en_US.UTF-8"
     ;;
-    "2")
-    source ./language/italian.trans
-    CURR_LOCALE="it_IT.UTF-8"
-    ;;
-    "3")
-    source ./language/russian.trans
-    CURR_LOCALE="ru_RU.UTF-8"
-    FONT="LatKaCyrHeb-14.psfu"
-    ;;
-    "4")
-    source ./language/turkish.trans
-    CURR_LOCALE="tr_TR.UTF-8"
-    FONT="LatKaCyrHeb-14.psfu"
-    ;;
-    "5")
-    source ./language/dutch.trans
-    CURR_LOCALE="nl_NL.UTF-8"
-    ;;
-    "6")
-    source ./language/greek.trans
-    CURR_LOCALE="el_GR.UTF-8"
-    FONT="iso07u-16.psfu"
-    ;;
-    "7")
-    source ./language/danish.trans
-    CURR_LOCALE="da_DK.UTF-8"
-    ;;
-    "8")
-    source ./language/hungarian.trans
-    CURR_LOCALE="hu_HU.UTF-8"
-    FONT="lat2-16.psfu"
-    ;;
-    "9")
-    source ./language/portuguese.trans
-    CURR_LOCALE="pt_BR.UTF-8"
-    ;;
-    "10")
-    source ./language/german.trans
-    CURR_LOCALE="de_DE.UTF-8"
-    ;;
-    "11")
-    source ./language/french.trans
-    CURR_LOCALE="fr_FR.UTF-8"
-    ;;
-    "12")
-    source ./language/polish.trans
-    CURR_LOCALE="pl_PL.UTF-8"
-    FONT="latarcyrheb-sun16"
-    ;;
-    *)
-    exit 0
+    #        "2") source /aif-dev-master/italian.trans
+    #             CURR_LOCALE="it_IT.UTF-8"
+    #             ;;
+    #        "3") source /aif-dev-master/russian.trans
+    #             CURR_LOCALE="ru_RU.UTF-8"
+    #             FONT="LatKaCyrHeb-14.psfu"
+    #             ;;
+    #        "4") source /aif-dev-master/turkish.trans
+    #             CURR_LOCALE="tr_TR.UTF-8"
+    #             FONT="LatKaCyrHeb-14.psfu"
+    #             ;;
+    #        "5") source /aif-dev-master/dutch.trans
+    #             CURR_LOCALE="nl_NL.UTF-8"
+    #             ;;
+    #        "6") source /aif-dev-master/greek.trans
+    #             CURR_LOCALE="el_GR.UTF-8"
+    #             FONT="iso07u-16.psfu"
+    #             ;;
+    #        "7") source /aif-dev-master/danish.trans
+    #             CURR_LOCALE="da_DK.UTF-8"
+    #             ;;
+    #        "8") source /aif-dev-master/hungarian.trans
+    #             CURR_LOCALE="hu_HU.UTF-8"
+    #             FONT="lat2-16.psfu"
+    #             ;;
+    #        "9") source /aif-dev-master/portuguese.trans
+    #             CURR_LOCALE="pt_BR.UTF-8"
+    #             ;;
+    #       "10") source /aif-dev-master/german.trans
+    #             CURR_LOCALE="de_DE.UTF-8"
+    #             ;;
+    #       "11") source /aif-dev-master/french.trans
+    #             CURR_LOCALE="fr_FR.UTF-8"
+    #             ;;
+    #       "12") source /aif-dev-master/polish.trans
+    #             CURR_LOCALE="pl_PL.UTF-8"
+    #             FONT="latarcyrheb-sun16"
+    #             ;;
+    *) exit 0
     ;;
   esac
   # Generate the chosen locale and set the language
@@ -187,26 +171,31 @@ check_requirements() {
   DIALOG --title "$_ChkTitle" --infobox "$_ChkBody" 0 0
   sleep 2
   if [[ `whoami` != "root" ]]; then
-    DIALOG --title "$_RtFailTitle" --msgbox "$_RtFailBody" 0 0
+    DIALOG --title "$_RtFailTitle" --infobox "$_RtFailBody" 0 0
+    sleep 2
     exit 1
   fi
   if [[ ! $(ping -c 1 google.com) ]]; then
-    DIALOG --title "$_ConFailTitle" --msgbox "$_ConFailBody" 0 0
+    DIALOG --title "$_ConFailTitle" --infobox "$_ConFailBody" 0 0
+    sleep 2
     exit 1
   fi
-  pacman -Syy
   # This will only be executed where neither of the above checks are true.
-  # The error log is also cleared, just in case something is there from a previous use of the installer.
-  DIALOG --title "$_ReqMetTitle" --msgbox "$_ReqMetBody" 0 0
+  # The error log is also cleared, just in case something is there from a
+  # previous use of the installer.
+  DIALOG --title "$_ReqMetTitle" --infobox "$_ReqMetBody" 0 0
+  sleep 2
   clear
   echo "" > /tmp/.errlog
+  pacman -Syy > /dev/null
 }
 
 # Adapted from AIS. Checks if system is made by Apple, whether the system is
 # BIOS or UEFI, and for LVM and/or LUKS.
 id_system() {
   # Apple System Detection
-  if [[ "$(cat /sys/class/dmi/id/sys_vendor)" == 'Apple Inc.' ]] || [[ "$(cat /sys/class/dmi/id/sys_vendor)" == 'Apple Computer, Inc.' ]]; then
+  if [[ "$(cat /sys/class/dmi/id/sys_vendor)" == 'Apple Inc.' ]] || \
+  [[ "$(cat /sys/class/dmi/id/sys_vendor)" == 'Apple Computer, Inc.' ]]; then
     modprobe -r -q efivars || true  # if MAC
   else
     modprobe -q efivarfs            # all others
@@ -230,7 +219,8 @@ arch_chroot() {
   arch-chroot $MOUNTPOINT /bin/bash -c "${1}"
 }
 
-# If there is an error, display it, clear the log and then go back to the main menu (no point in continuing).
+# If there is an error, display it, clear the log and then go back to the main
+# menu (no point in continuing).
 check_for_error() {
   if [[ $? -eq 1 ]] && [[ $(cat /tmp/.errlog | grep -i "error") != "" ]]; then
     DIALOG --title "$_ErrTitle" --msgbox "$(cat /tmp/.errlog)" 0 0
@@ -261,17 +251,9 @@ show_devices() {
   DIALOG --title "$_DevShowOpt" --textbox /tmp/.devlist 0 0
 }
 
-checklist_of_user() {
-  USER_LIST=""
-  user_list=$(ls ${MOUNTPOINT}/home/ | sed "s/lost+found//")
-  for i in ${user_list[@]}; do
-    USER_LIST="${USER_LIST} ${i} - off"
-  done
-}
-
 ################################################################################
 ##
-## Configuration Functions
+##                           Configuration Functions
 ##
 ################################################################################
 
@@ -285,7 +267,9 @@ configure_mirrorlist() {
     for i in ${countries_list}; do
       COUNTRY_LIST="${COUNTRY_LIST} ${i}"
     done
-    DIALOG --title "$_MirrorbyCountry" --menu "$_MirrorCntryBody" 0 0 0 $COUNTRY_LIST 2>${ANSWER} || prep_menu
+    DIALOG --title "$_MirrorbyCountry" \
+    --menu "$_MirrorCntryBody" 0 0 0 \
+    $COUNTRY_LIST 2>${ANSWER} || prep_menu
     URL="https://www.archlinux.org/mirrorlist/?country=$(cat ${ANSWER})&use_mirror_status=on"
     MIRROR_TEMP=$(mktemp --suffix=-mirrorlist)
     # Get latest mirror list and save to tmpfile
@@ -350,7 +334,8 @@ set_keymap() {
     KEYMAPS="${KEYMAPS} ${i} -"
   done
   DIALOG --title "$_VCKeymapTitle" \
-  --menu "$_VCKeymapBody" 20 40 16 ${KEYMAPS} 2>${ANSWER} || prep_menu
+  --menu "$_VCKeymapBody" 20 40 16 \
+  ${KEYMAPS} 2>${ANSWER} || prep_menu
   KEYMAP=$(cat ${ANSWER})
   loadkeys $KEYMAP 2>/tmp/.errlog
   check_for_error
@@ -364,7 +349,9 @@ set_xkbmap() {
   for i in ${keymaps_xkb}; do
     XKBMAP_LIST="${XKBMAP_LIST} ${i}"
   done
-  DIALOG --title "$_PrepKBLayout" --menu "$_XkbmapBody" 0 0 16 ${XKBMAP_LIST} 2>${ANSWER} || config_base_menu
+  DIALOG --title "$_PrepKBLayout" \
+  --menu "$_XkbmapBody" 0 0 16 \
+  ${XKBMAP_LIST} 2>${ANSWER} || config_base_menu
   XKBMAP=$(cat ${ANSWER} |sed 's/_.*//')
   echo -e "Section "\"InputClass"\"\nIdentifier "\"system-keyboard"\"\nMatchIsKeyboard "\"on"\"\nOption "\"XkbLayout"\" "\"${XKBMAP}"\"\nEndSection" > /tmp/00-keyboard.conf
 }
@@ -375,7 +362,9 @@ set_locale() {
   for i in $(cat /etc/locale.gen | grep -v "#  " | sed 's/#//g' | sed 's/ UTF-8//g' | grep .UTF-8); do
     LOCALES="${LOCALES} ${i} -"
   done
-  DIALOG --title "$_LocateTitle" --menu "$_localeBody" 0 0 16 ${LOCALES} 2>${ANSWER} || config_base_menu
+  DIALOG --title "$_ConfBseSysLoc" \
+  --menu "$_localeBody" 0 0 12 \
+  ${LOCALES} 2>${ANSWER} || config_base_menu
   LOCALE=$(cat ${ANSWER})
   echo "LANG=\"${LOCALE}\"" > ${MOUNTPOINT}/etc/locale.conf
   sed -i "s/#${LOCALE}/${LOCALE}/" ${MOUNTPOINT}/etc/locale.gen 2>/tmp/.errlog
@@ -389,7 +378,9 @@ set_timezone() {
   for i in $(cat /usr/share/zoneinfo/zone.tab | awk '{print $3}' | grep "/" | sed "s/\/.*//g" | sort -ud); do
     ZONE="$ZONE ${i} -"
   done
-  DIALOG --title "$_ConfBseTimeHC" --menu "$_TimeZBody" 0 0 10 ${ZONE} 2>${ANSWER} || config_base_menu
+  DIALOG --title "$_ConfBseTimeHC" \
+  --menu "$_TimeZBody" 0 0 10 \
+  ${ZONE} 2>${ANSWER} || config_base_menu
   ZONE=$(cat ${ANSWER})
   SUBZONE=""
   for i in $(cat /usr/share/zoneinfo/zone.tab | awk '{print $3}' | grep "${ZONE}/" | sed "s/${ZONE}\///g" | sort -ud); do
@@ -397,7 +388,7 @@ set_timezone() {
   done
   DIALOG --title "$_ConfBseTimeHC" --menu "$_TimeSubZBody" 0 0 11 ${SUBZONE} 2>${ANSWER} || config_base_menu
   SUBZONE=$(cat ${ANSWER})
-  DIALOG --title "$_ConfBseTimeHC" --yesno "$_TimeZQ ${ZONE}/${SUBZONE} ?" 0 0
+  DIALOG --title "$_ConfBseTimeHC" --yesno "$_TimeZQ ${ZONE}/${SUBZONE}?" 0 0
   if [[ $? -eq 0 ]]; then
     arch_chroot "ln -s /usr/share/zoneinfo/${ZONE}/${SUBZONE} /etc/localtime" 2>/tmp/.errlog
     check_for_error
@@ -407,15 +398,16 @@ set_timezone() {
 }
 
 set_hw_clock() {
-  DIALOG --title "$_ConfBseTimeHC" --menu "$_HwCBody" 0 0 2 \
-  "utc" "-" \
-  "localtime" "-" 2>${ANSWER}
+  DIALOG --title "$_ConfBseTimeHC" \
+  --menu "$_HwCBody" 0 0 2 \
+  "utc" "-" "localtime" "-" 2>${ANSWER}
   [[ $(cat ${ANSWER}) != "" ]] && arch_chroot "hwclock --systohc --$(cat ${ANSWER})"  2>/tmp/.errlog && check_for_error
 }
 
 # Function will not allow incorrect UUID type for installed system.
 generate_fstab() {
-  DIALOG --title "$_ConfBseFstab" --menu "$_FstabBody" 0 0 4 \
+  DIALOG --title "$_ConfBseFstab" \
+  --menu "$_FstabBody" 0 0 4 \
   "genfstab -p" "$_FstabDevName" \
   "genfstab -L -p" "$_FstabDevLabel" \
   "genfstab -U -p" "$_FstabDevUUID" \
@@ -433,7 +425,8 @@ generate_fstab() {
 }
 
 set_hostname() {
-  DIALOG --title "$_ConfBseHost" --inputbox "$_HostNameBody" 0 0 \
+  DIALOG --title "$_ConfBseHost" \
+  --inputbox "$_HostNameBody" 0 0 \
   "arch" 2>${ANSWER} || config_base_menu
   echo $(cat ${ANSWER}) > ${MOUNTPOINT}/etc/hostname 2>/tmp/.errlog
   echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t$(cat ${HOST_NAME})\n::1\tlocalhost.localdomain\tlocalhost\t$(cat {HOST_NAME})" > ${MOUNTPOINT}/etc/hosts 2>>/tmp/.errlog
@@ -442,9 +435,11 @@ set_hostname() {
 
 # Adapted and simplified from the Manjaro 0.8 and Antergos 2.0 installers
 set_root_password() {
-  DIALOG --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody" 0 0 2> ${ANSWER} || config_user_menu
+  DIALOG --title "$_ConfUsrRoot" --clear --insecure \
+  --passwordbox "$_PassRtBody" 0 0 2> ${ANSWER} || config_user_menu
   PASSWD=$(cat ${ANSWER})
-  DIALOG --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody2" 0 0 2> ${ANSWER} || config_user_menu
+  DIALOG --title "$_ConfUsrRoot" --clear --insecure \
+  --passwordbox "$_PassRtBody2" 0 0 2> ${ANSWER} || config_user_menu
   PASSWD2=$(cat ${ANSWER})
   if [[ $PASSWD == $PASSWD2 ]]; then
     echo -e "${PASSWD}\n${PASSWD}" > /tmp/.passwd
@@ -459,24 +454,32 @@ set_root_password() {
 
 # Originally adapted from the Antergos 2.0 installer
 create_new_user() {
-  DIALOG --title "$_NUsrTitle" --inputbox "$_NUsrBody" 0 0 "" 2>${ANSWER} || config_user_menu
+  DIALOG --title "$_NUsrTitle" \
+  --inputbox "$_NUsrBody" 0 0 \
+  "" 2>${ANSWER} || config_user_menu
   USER=$(cat ${ANSWER})
   # Loop while user name is blank, has spaces, or has capital letters in it.
   while [[ ${#USER} -eq 0 ]] || [[ $USER =~ \ |\' ]] || [[ $USER =~ [^a-z0-9\ ] ]]; do
-    DIALOG --title "$_NUsrTitle" --inputbox "$_NUsrErrBody" 0 0 "" 2>${ANSWER} || config_user_menu
+    DIALOG --title "$_NUsrTitle" \
+    --inputbox "$_NUsrErrBody" 0 0 \
+    "" 2>${ANSWER} || config_user_menu
     USER=$(cat ${ANSWER})
   done
   # Enter password. This step will only be reached where the loop has been skipped or broken.
-  DIALOG --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+  DIALOG --title "$_ConfUsrNew" --clear --insecure \
+  --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
   PASSWD=$(cat ${ANSWER})
-  DIALOG --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+  DIALOG --title "$_ConfUsrNew" --clear --insecure \
+  --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
   PASSWD2=$(cat ${ANSWER})
   # loop while passwords entered do not match.
   while [[ $PASSWD != $PASSWD2 ]]; do
     DIALOG --title "$_ErrTitle" --msgbox "$_PassNUsrErrBody" 0 0
-    DIALOG --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+    DIALOG --title "$_ConfUsrNew" --clear --insecure \
+    --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
     PASSWD=$(cat ${ANSWER})
-    DIALOG --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
+    DIALOG --title "$_ConfUsrNew" --clear --insecure \
+    --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_user_menu
     PASSWD2=$(cat ${ANSWER})
   done
   # create new user. This step will only be reached where the password loop has been skipped or broken.
@@ -507,7 +510,7 @@ run_mkinitcpio() {
 
 ################################################################################
 ##
-## System and Partitioning Functions
+##                   System and Partitioning Functions
 ##
 ################################################################################
 
@@ -556,7 +559,9 @@ select_device() {
   for i in ${devices_list[@]}; do
     DEVICE="${DEVICE} ${i}"
   done
-  DIALOG --title "$_DevSelTitle" --menu "$_DevSelBody" 0 0 4 ${DEVICE} 2>${ANSWER} || prep_menu
+  DIALOG --title "$_DevSelTitle" \
+  --menu "$_DevSelBody" 0 0 4 \
+  ${DEVICE} 2>${ANSWER} || prep_menu
   DEVICE=$(cat ${ANSWER})
 }
 
@@ -565,14 +570,13 @@ create_partitions(){
   # Securely destroy all data on a given device.
   secure_wipe(){
     # Warn the user. If they proceed, wipe the selected device.
-    DIALOG --title " $_PartOptWipe " --yesno "$_AutoPartWipeBody1 ${DEVICE} $_AutoPartWipeBody" 0 0
+    DIALOG --title " $_PartOptWipe " --yesno "$_AutoPartWipeBody1 ${DEVICE} $_AutoPartWipeBody2" 0 0
     if [[ $? -eq 0 ]]; then
       clear
       # Install wipe where not already installed. Much faster than dd
       if [[ ! -e /usr/bin/wipefs ]]; then
-        pacman -Sy --noconfirm wipe 2>/tmp/.errlog
+        pacman -Syy --noconfirm wipe 2>/tmp/.errlog
         check_for_error
-        clear
       fi
       clear
       wipe -Ifre ${DEVICE}
@@ -618,7 +622,8 @@ create_partitions(){
   }
 
   # Partitioning Menu
-  DIALOG --title "$_PrepPartDisk" --menu "$_PartToolBody" 0 0 7 \
+  DIALOG --title "$_PrepPartDisk" \
+  --menu "$_PartToolBody" 0 0 7 \
   "$_PartOptWipe" "BIOS & UEFI" \
   "$_PartOptAuto" "BIOS & UEFI" \
   "parted" "BIOS & UEFI" \
@@ -639,8 +644,8 @@ create_partitions(){
   fi
 }
 
-# Revised to include partition sizes. Finds all available partitions and
-# generate a list of them. This also includes partitions on different devices.
+# Revised to include partition sizes. Finds all available partitions and generate a list
+# of them. This also includes partitions on different devices.
 find_partitions() {
   PARTITIONS=""
   NUMBER_PARTITIONS=0
@@ -664,7 +669,8 @@ select_filesystem(){
   # Clear special FS type flags
   BTRFS=0
   F2FS=0
-  DIALOG --title "$_FSTitle" --menu "$_FSBody" 0 0 12 \
+  DIALOG --title "$_FSTitle" \
+  --menu "$_FSBody" 0 0 12 \
   "$_FSSkip" "-" \
   "mkfs.btrfs -f" "btrfs" \
   "mkfs.ext2 -q" "ext2" \
@@ -677,7 +683,7 @@ select_filesystem(){
   "mkfs.reiserfs -q" "reiserfs" \
   "mkfs.vfat -F32" "vfat" \
   "mkfs.xfs -f" "xfs" 2>${ANSWER}
-  [[ $(cat ${ANSWER}) == "" ]] && prep_menu || FILESYSTEM=$(cat ${ANSWER});
+  [[ $(cat ${ANSWER}) == "" ]] && prep_menu || FILESYSTEM=$(cat ${ANSWER})
   # if f2fs selected modprobe and flag f2fs package for installation
   [[ $FILESYSTEM == "mkfs.f2fs" ]] && modprobe f2fs && F2FS=1
   # If brtfs selected, modprobe, ask if subvolumes are needed, and flag btrfs for installation
@@ -750,8 +756,7 @@ mount_partitions() {
     cd
   }
 
-  # This function allows for btrfs-specific mounting options to be applied. Written as a seperate function
-  # for neatness.
+  # This subfunction allows for btrfs-specific mounting options to be applied.
   btrfs_mount_opts() {
     echo "" > ${BTRFS_OPTS}
     DIALOG --title "$_btrfsSVTitle" --checklist "$_btrfsMntBody" 0 0 16 \
@@ -780,7 +785,7 @@ mount_partitions() {
     fi
   }
 
-  # Save repetition of code
+  # Subfunction to save repetition of code
   mount_current_partition(){
     # Make the mount directory
     mkdir -p ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
@@ -848,11 +853,11 @@ mount_partitions() {
   fi
   # Extra Step for VFAT UEFI Partition. This cannot be in an LVM container.
   if [[ $SYSTEM == "UEFI" ]]; then
-    DIALOG --title "$_PrepMntPart" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || config_base_menu
+    DIALOG --title "$_PrepMntPart" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
     PARTITION=$(cat ${ANSWER})
     UEFI_PART=${PARTITION}
     # If it is already a fat/vfat partition...
-    if [[ $(fsck -N /dev/$PARTITION | grep fat) ]]; then
+    if [[ $(fsck -N $PARTITION | grep fat) ]]; then
       DIALOG --title "$_PrepMntPart" --yesno "$_FormUefiBody $PARTITION $_FormUefiBody2" 0 0 && mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
     else
       mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
@@ -862,7 +867,7 @@ mount_partitions() {
     DIALOG --title "$_PrepMntPart" --menu "$_MntUefiBody"  0 0 2 \
     "/boot" "systemd-boot"\
     "/boot/efi" "refind-efi" 2>${ANSWER}
-    [[ $(cat ${ANSWER}) != "" ]] && UEFI_MOUNT=$(cat ${ANSWER}) || config_base_menu
+    [[ $(cat ${ANSWER}) != "" ]] && UEFI_MOUNT=$(cat ${ANSWER}) || prep_menu
     mkdir -p ${MOUNTPOINT}${UEFI_MOUNT} 2>/tmp/.errlog
     mount ${PARTITION} ${MOUNTPOINT}${UEFI_MOUNT} 2>>/tmp/.errlog
     check_for_error
@@ -871,7 +876,7 @@ mount_partitions() {
   # All other partitions
   while [[ $NUMBER_PARTITIONS > 0 ]]; do
     DIALOG --title "$_PrepMntPart" --menu "$_ExtPartBody" 0 0 4 \
-    "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || config_base_menu
+    "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu
     PARTITION=$(cat ${ANSWER})
     if [[ $PARTITION == $_Done ]]; then
       break;
@@ -880,13 +885,16 @@ mount_partitions() {
       select_filesystem
       [[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${PARTITION} >/dev/null 2>/tmp/.errlog
       check_for_error
+      # Ask user for mountpoint. Don't give /boot as an example for UEFI systems!
+      [[ $SYSTEM == "UEFI" ]] && MNT_EXAMPLES="/home\n/var" || MNT_EXAMPLES="/boot\n/home\n/var"
+      DIALOG --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || prep_menu
       MOUNT=$(cat ${ANSWER})
       # loop while the mountpoint specified is incorrect (is only '/', is blank, or has spaces).
       while [[ ${MOUNT:0:1} != "/" ]] || [[ ${#MOUNT} -le 1 ]] || [[ $MOUNT =~ \ |\' ]]; do
         # Warn user about naming convention
         DIALOG --title "$_ErrTitle" --msgbox "$_ExtErrBody" 0 0
         # Ask user for mountpoint again
-        DIALOG --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || config_base_menu
+        DIALOG --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || prep_menu
         MOUNT=$(cat ${ANSWER})
       done
       # Create directory and mount.
@@ -900,7 +908,7 @@ mount_partitions() {
 
 ################################################################################
 ##
-## Logical Volume Management Functions
+##                   Logical Volume Management Functions
 ##
 ################################################################################
 
@@ -916,8 +924,7 @@ detect_lvm() {
   fi
 }
 
-# Where existing LVM is found, offer to deactivate it. Code adapted from the Manjaro installer.
-# NEED TO ADD COMMAND TO REMOVE LVM2 FSTYPE.
+# Where existing LVM is found, offer to deactivate it.
 deactivate_lvm() {
   LVM_DISABLE=0
   if [[ $LVM -eq 1 ]]; then
@@ -937,7 +944,7 @@ deactivate_lvm() {
       pvremove -f ${i} >/dev/null 2>&1
     done
     # This step will remove old lvm metadata on partitions where identified.
-    LVM_PT=$(lvmdiskscan | grep 'LVM physical volume' | grep 'sd\|hd\|vd\|nvme\|mmc' | sed 's/\/dev\///' | awk '{print $1}')
+    LVM_PT=$(lsblk -lno NAME,SIZE,TYPE | grep 'lvm' | awk '{print $1}' | sort -u)
     for i in ${LVM_PT}; do
       dd if=/dev/zero bs=512 count=512 of=/dev/${i} >/dev/null 2>&1
     done
@@ -948,11 +955,13 @@ deactivate_lvm() {
 find_lvm_partitions() {
   LVM_PARTITIONS=""
   NUMBER_LVM_PARTITIONS=0
-  lvm_partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|crypt' | awk '{print $1 " " $2}' | sort -u)
+  lvm_partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|crypt' | sed 's/part/\/dev\//g' | sed 's/crypt/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
   for i in ${lvm_partition_list[@]}; do
     LVM_PARTITIONS="${LVM_PARTITIONS} ${i}"
     NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS + 1 ))
   done
+  # Double-partitions will be counted due to counting size, so fix
+  NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS / 2 ))
 }
 
 # This simplifies the creation of the PV and VG into a single step.
@@ -961,32 +970,40 @@ create_lvm() {
   # subroutine to save a lot of repetition.
   check_lv_size() {
     LV_SIZE_INVALID=0
-    LV_SIZE_TYPE=$(echo ${LVM_LV_SIZE:$(( ${#LVM_LV_SIZE} - 1 )):1})
     chars=0
-    # Check to see if anything was actually entered
-    [[ ${#LVM_LV_SIZE} -eq 0 ]] && LV_SIZE_INVALID=1
-    # Check if there are any non-numeric characters prior to the last one
-    while [[ $chars -lt $(( ${#LVM_LV_SIZE} - 1 )) ]]; do
-      if [[ ${LVM_LV_SIZE:chars:1} != [0-9] ]]; then
+    # Check to see if anything was actually entered and if first character is '0'
+    ([[ ${#LVM_LV_SIZE} -eq 0 ]] || [[ ${LVM_LV_SIZE:0:1} -eq "0" ]]) && LV_SIZE_INVALID=1
+    # If not invalid so far, check for non numberic characters other than the last character
+    if [[ $LV_SIZE_INVALID == 0 ]]; then
+      while [[ $chars -lt $(( ${#LVM_LV_SIZE} - 1 )) ]]; do
+        [[ ${LVM_LV_SIZE:chars:1} != [0-9] ]] && LV_SIZE_INVALID=1 && break;
+        chars=$(( chars + 1 ))
+      done
+    fi
+    # If not invalid so far, check that last character is a M/m or G/g
+    if [[ $LV_SIZE_INVALID == 0 ]]; then
+      LV_SIZE_TYPE=$(echo ${LVM_LV_SIZE:$(( ${#LVM_LV_SIZE} - 1 )):1})
+      case $LV_SIZE_TYPE in
+        "m"|"M"|"g"|"G")
+        LV_SIZE_INVALID=0
+        ;;
+        *)
         LV_SIZE_INVALID=1
-        break;
-      fi
-      chars=$(( chars + 1 ))
-    done
-    # Check to see if first character is '0'
-    [[ ${LVM_LV_SIZE:0:1} -eq "0" ]] && LV_SIZE_INVALID=1
-    # Check to see if last character is "G" or "M", and if so, whether the value is greater than
-    # or equal to the LV remaining Size. If not, convert into MB for VG space remaining.
+        ;;
+      esac
+    fi
+    # If not invalid so far, check whether the value is greater than or equal to the LV remaining Size.
+    # If not, convert into MB for VG space remaining.
     if [[ ${LV_SIZE_INVALID} -eq 0 ]]; then
       case ${LV_SIZE_TYPE} in
-        "G")
+        "G"|"g")
         if [[ $(( $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) * 1000 )) -ge ${LVM_VG_MB} ]]; then
           LV_SIZE_INVALID=1
         else
           LVM_VG_MB=$(( LVM_VG_MB - $(( $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) * 1000 )) ))
         fi
         ;;
-        "M")
+        "M"|"m")
         if [[ $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) -ge ${LVM_VG_MB} ]]; then
           LV_SIZE_INVALID=1
         else
@@ -1001,60 +1018,59 @@ create_lvm() {
   }
 
   # Check that there is at least one partition available for LVM
-  if [[ $NUMBER_LVM_PARTITIONS -lt 1 ]]; then
-    DIALOG --title "$_LvmPartErrTitle" --msgbox "$_LvmPartErrBody" 0 0
+  if [[ $NUMBER_LVM_PARTITIONS -eq 0 ]]; then
+    DIALOG --title "$_ErrTitle" --msgbox "$_LvmPartErrBody" 0 0
     prep_menu
   fi
   # Create a temporary file to store the partition(s) selected. This is later used for the vgcreate command. 'x' is used as a marker.
   echo "x" > /tmp/.vgcreate
   # Name the Volume Group
   LVM_VG=""
-  DIALOG --title "$_LvmNameVgTitle" --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
+  DIALOG --title "$_PrepLVM" --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
   LVM_VG=$(cat ${ANSWER})
   # Loop while the Volume Group name starts with a "/", is blank, has spaces, or is already being used
   while [[ ${LVM_VG:0:1} == "/" ]] || [[ ${#LVM_VG} -eq 0 ]] || [[ $LVM_VG =~ \ |\' ]] || [[ $(lsblk | grep ${LVM_VG}) != "" ]]; do
-    DIALOG --title "$_LvmNameVgErrTitle" --msgbox "$_LvmNameVgErr" 0 0
+    DIALOG --title "$_ErrTitle" --msgbox "$_LvmNameVgErr" 0 0
 
-    DIALOG --title "$_LvmNameVgTitle" --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
+    DIALOG --title "$_PrepLVM" --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
     LVM_VG=$(cat ${ANSWER})
   done
   # Select the first or only partition for the Volume Group
-  DIALOG --title "$_LvmPvSelTitle" --menu "$_LvmPvSelBody" 0 0 4 ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu
+  DIALOG --title "$_PrepLVM" --menu "$_LvmPvSelBody" 0 0 4 ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu
   LVM_PARTITION=$(cat ${ANSWER})
-  # add the partition to the temporary file for the vgcreate command
-  # Remove selected partition from the list and deduct number of LVM viable partitions remaining
-  # FIX TO INCLUDE PARTITION SIZES
-  sed -i "s/x/\/dev\/${LVM_PARTITION} x/" /tmp/.vgcreate
-  LVM_PARTITIONS="$(echo $LVM_PARTITIONS | sed s/${LVM_PARTITION}$' -'//)"
+  # Add the partition to the temporary file for the vgcreate command.
+  # Remove selected partition from the list and deduct number of LVM viable partitions remaining.
+  sed -i "s~x~${LVM_PARTITION} x~" /tmp/.vgcreate
+  LVM_PARTITIONS=$(echo $LVM_PARTITIONS | sed "s~${LVM_PARTITION} [0-9]*[G-M]~~" | sed "s~${LVM_PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${LVM_PARTITION}$' -'~~)
   NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
-  DIALOG --title "$_LvmPvCreateTitle" --infobox "\n$_Done\n\n" 0 0
+  DIALOG --title "$_PrepLVM" --infobox "\n$_Done\n\n" 0 0
   sleep 1
   # Where there are viable partitions still remaining, run loop
   while [[ $NUMBER_LVM_PARTITIONS -gt 0 ]]; do
-    DIALOG --title "$_LvmPvSelTitle" --menu "$_LvmPvSelBody" 0 0 4 $"Done" $"-" ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu
+    DIALOG --title "$_PrepLVM" --menu "$_LvmPvSelBody" 0 0 4 $"Done" $"-" ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu
     LVM_PARTITION=$(cat ${ANSWER})
     if [[ $LVM_PARTITION == "Done" ]]; then
       break;
     else
-      sed -i "s/x/\/dev\/${LVM_PARTITION} x/" /tmp/.vgcreate
-      LVM_PARTITIONS="$(echo $LVM_PARTITIONS | sed s/${LVM_PARTITION}$' -'//)"
+      sed -i "s~x~${LVM_PARTITION} x~" /tmp/.vgcreate
+      LVM_PARTITIONS=$(echo $LVM_PARTITIONS | sed "s~${LVM_PARTITION} [0-9]*[G-M]~~" | sed "s~${LVM_PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${LVM_PARTITION}$' -'~~)
       NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
-      DIALOG --title "$_LvmPvCreateTitle" --infobox "\n$_Done\n\n" 0 0
+      DIALOG --title "$_PrepLVM" --infobox "\n$_Done\n\n" 0 0
       sleep 1
     fi
   done
   # Once all the partitions have been selected, remove 'x' from the .vgcreate file, then use it in 'vgcreate' command.
   # Also determine the size of the VG, to use for creating LVs for it.
   VG_PARTS=$(cat /tmp/.vgcreate | sed 's/x//')
-  DIALOG --title "$_LvmPvConfTitle" --yesno "$_LvmPvConfBody1${LVM_VG} $_LvmPvConfBody2${VG_PARTS}" 0 0
+  DIALOG --title "$_PrepLVM" --yesno "$_LvmPvConfBody1${LVM_VG} $_LvmPvConfBody2${VG_PARTS}" 0 0
   if [[ $? -eq 0 ]]; then
-    DIALOG --title "$_LvmPvActTitle" --infobox "$_LvmPvActBody1${LVM_VG}.$_LvmPvActBody2" 0 0
+    DIALOG --title "$_PrepLVM" --infobox "$_LvmPvActBody1${LVM_VG}.$_LvmPvActBody2" 0 0
     sleep 2
     vgcreate -f ${LVM_VG} ${VG_PARTS} >/dev/null 2>/tmp/.errlog
     check_for_error
     VG_SIZE=$(vgdisplay | grep 'VG Size' | awk '{print $3}' | sed 's/\..*//')
     VG_SIZE_TYPE=$(vgdisplay | grep 'VG Size' | awk '{print $4}' | sed 's/\..*//')
-    DIALOG --title "$_LvmPvDoneTitle" --msgbox "$_LvmPvDoneBody1 '${LVM_VG}' $_LvmPvDoneBody2 (${VG_SIZE} ${VG_SIZE_TYPE}).\n\n" 0 0
+    DIALOG --title "$_PrepLVM" --msgbox "$_LvmPvDoneBody1 '${LVM_VG}' $_LvmPvDoneBody2 (${VG_SIZE} ${VG_SIZE_TYPE}).\n\n" 0 0
     sleep 2
   else
     prep_menu
@@ -1062,60 +1078,60 @@ create_lvm() {
   # Convert the VG size into GB and MB. These variables are used to keep tabs on space available and remaining
   [[ ${VG_SIZE_TYPE:0:1} == "G" ]] && LVM_VG_MB=$(( VG_SIZE * 1000 )) || LVM_VG_MB=$VG_SIZE
   # Specify number of Logical volumes to create.
-  DIALOG --title "$_LvmLvNumTitle" --inputbox "$_LvmLvNumBody1 ${LVM_VG}.$_LvmLvNumBody2" 0 0 "" 2>${ANSWER} || prep_menu
+  DIALOG --title "$_PrepLVM" --inputbox "$_LvmLvNumBody1 ${LVM_VG}.$_LvmLvNumBody2" 0 0 "" 2>${ANSWER} || prep_menu
   NUMBER_LOGICAL_VOLUMES=$(cat ${ANSWER})
-  # Loop if the number of LVs is no 1-9 (including non-valid characters)
+  # Loop if the number of LVs is not 1-9 (including non-valid characters)
   while [[ $NUMBER_LOGICAL_VOLUMES != [1-9] ]]; do
-    DIALOG --title "$_LvmLvNumErrTitle" --msgbox "$_LvmLvNumErrBody" 0 0
-    DIALOG --title "$_LvmLvNumTitle" --inputbox "$_LvmLvNumBody1 ${LVM_VG}.$_LvmLvNumBody2" 0 0 "" 2>${ANSWER} || prep_menu
+    DIALOG --title "$ErrTitle" --msgbox "$_LvmLvNumErrBody" 0 0
+    DIALOG --title "$_PrepLVM" --inputbox "$_LvmLvNumBody1 ${LVM_VG}.$_LvmLvNumBody2" 0 0 "" 2>${ANSWER} || prep_menu
     NUMBER_LOGICAL_VOLUMES=$(cat ${ANSWER})
   done
   # Loop while the number of LVs is greater than 1. This is because the size of the last LV is automatic.
   while [[ $NUMBER_LOGICAL_VOLUMES -gt 1 ]]; do
-    DIALOG --title "$_LvmLvNameTitle" --inputbox "$_LvmLvNameBody1" 0 0 "lvol" 2>${ANSWER} || prep_menu
+    DIALOG --title "$_PrepLVM" --inputbox "$_LvmLvNameBody1" 0 0 "lvol" 2>${ANSWER} || prep_menu
     LVM_LV_NAME=$(cat ${ANSWER})
     # Loop if preceeded with a "/", if nothing is entered, if there is a space, or if that name already exists.
     while [[ ${LVM_LV_NAME:0:1} == "/" ]] || [[ ${#LVM_LV_NAME} -eq 0 ]] || [[ ${LVM_LV_NAME} =~ \ |\' ]] || [[ $(lsblk | grep ${LVM_LV_NAME}) != "" ]]; do
-      DIALOG --title "$_LvmLvNameErrTitle" --msgbox "$_LvmLvNameErrBody" 0 0
-      DIALOG --title "$_LvmLvNameTitle" --inputbox "$_LvmLvNameBody1" 0 0 "lvol" 2>${ANSWER} || prep_menu
+      DIALOG --title "$_ErrTitle" --msgbox "$_LvmLvNameErrBody" 0 0
+      DIALOG --title "$_PrepLVM" --inputbox "$_LvmLvNameBody1" 0 0 "lvol" 2>${ANSWER} || prep_menu
       LVM_LV_NAME=$(cat ${ANSWER})
     done
-    DIALOG --title "$_LvmLvSizeTitle" --inputbox "\n${LVM_VG}: ${VG_SIZE}${VG_SIZE_TYPE} (${LVM_VG_MB}MB $_LvmLvSizeBody1).$_LvmLvSizeBody2" 0 0 "" 2>${ANSWER} || prep_menu
+    DIALOG --title "$_PrepLVM" --inputbox "\n${LVM_VG}: ${VG_SIZE}${VG_SIZE_TYPE} (${LVM_VG_MB}MB $_LvmLvSizeBody1).$_LvmLvSizeBody2" 0 0 "" 2>${ANSWER} || prep_menu
     LVM_LV_SIZE=$(cat ${ANSWER})
     check_lv_size
     # Loop while an invalid value is entered.
     while [[ $LV_SIZE_INVALID -eq 1 ]]; do
-      DIALOG --title "$_LvmLvSizeErrTitle" --msgbox "$_LvmLvSizeErrBody" 0 0
-      DIALOG --title "$_LvmLvSizeTitle" --inputbox "\n${LVM_VG}: ${VG_SIZE}${VG_SIZE_TYPE} (${LVM_VG_MB}MB $_LvmLvSizeBody1).$_LvmLvSizeBody2" 0 0 "" 2>${ANSWER} || prep_menu
+      DIALOG --title "$_ErrTitle" --msgbox "$_LvmLvSizeErrBody" 0 0
+      DIALOG --title "$_PrepLVM" --inputbox "\n${LVM_VG}: ${VG_SIZE}${VG_SIZE_TYPE} (${LVM_VG_MB}MB $_LvmLvSizeBody1).$_LvmLvSizeBody2" 0 0 "" 2>${ANSWER} || prep_menu
       LVM_LV_SIZE=$(cat ${ANSWER})
       check_lv_size
     done
     # Create the LV
     lvcreate -L ${LVM_LV_SIZE} ${LVM_VG} -n ${LVM_LV_NAME} 2>/tmp/.errlog
     check_for_error
-    DIALOG --title "$_LvmLvDoneTitle" --msgbox "\n$_Done\n\nLV ${LVM_LV_NAME} (${LVM_LV_SIZE}) $_LvmPvDoneBody2.\n\n" 0 0
+    DIALOG --title "$_PrepLVM" --msgbox "\n$_Done\n\nLV ${LVM_LV_NAME} (${LVM_LV_SIZE}) $_LvmPvDoneBody2.\n\n" 0 0
     NUMBER_LOGICAL_VOLUMES=$(( NUMBER_LOGICAL_VOLUMES - 1 ))
   done
   # Now the final LV. Size is automatic.
-  DIALOG --title "$_LvmLvNameTitle" --inputbox "$_LvmLvNameBody1 $_LvmLvNameBody2 (${LVM_VG_MB}MB)." 0 0 "lvol" 2>${ANSWER} || prep_menu
+  DIALOG --title "$_PrepLVM" --inputbox "$_LvmLvNameBody1 $_LvmLvNameBody2 (${LVM_VG_MB}MB)." 0 0 "lvol" 2>${ANSWER} || prep_menu
   LVM_LV_NAME=$(cat ${ANSWER})
   # Loop if preceeded with a "/", if nothing is entered, if there is a space, or if that name already exists.
   while [[ ${LVM_LV_NAME:0:1} == "/" ]] || [[ ${#LVM_LV_NAME} -eq 0 ]] || [[ ${LVM_LV_NAME} =~ \ |\' ]] || [[ $(lsblk | grep ${LVM_LV_NAME}) != "" ]]; do
-    DIALOG --title "$_LvmLvNameErrTitle" --msgbox "$_LvmLvNameErrBody" 0 0
-    DIALOG --title "$_LvmLvNameTitle" --inputbox "$_LvmLvNameBody1 $_LvmLvNameBody2 (${LVM_VG_MB}MB)." 0 0 "lvol" 2>${ANSWER} || prep_menu
+    DIALOG --title "$_ErrTitle" --msgbox "$_LvmLvNameErrBody" 0 0
+    DIALOG --title "$_PrepLVM" --inputbox "$_LvmLvNameBody1 $_LvmLvNameBody2 (${LVM_VG_MB}MB)." 0 0 "lvol" 2>${ANSWER} || prep_menu
     LVM_LV_NAME=$(cat ${ANSWER})
   done
   # Create the final LV
   lvcreate -l +100%FREE ${LVM_VG} -n ${LVM_LV_NAME} 2>/tmp/.errlog
   check_for_error
   NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
-  DIALOG --title "$_LvmCompTitle" --yesno "$_LvmCompBody" 0 0 \
+  DIALOG --title "$_PrepLVM" --yesno "$_LvmCompBody" 0 0 \
   && show_devices || prep_menu
 }
 
 ################################################################################
 ##
-## Installation Functions
+##                          Installation Functions
 ##
 ################################################################################
 
@@ -1146,19 +1162,11 @@ install_base() {
   # "Standard" installation method
   if [[ $(cat ${ANSWER}) -eq 1 ]]; then
     DIALOG --title "$_InstBseTitle" --checklist "$_InstStandBseBody$_UseSpaceBar" 0 0 6 \
-    "linux" "-" on \
-    "linux-lts" "-" off \
-    "base-devel" "-" on \
-    $BTRF_CHECK $F2FS_CHECK \
-    "sudo" "-" on 2>${PACKAGES}
+    "linux" "-" on "linux-lts" "-" off "base-devel" "-" on $BTRF_CHECK $F2FS_CHECK "sudo" "-" on 2>${PACKAGES}
   elif [[ $(cat ${ANSWER}) -eq 2 ]]; then
     # "Advanced" installation method
     DIALOG --title "$_InstBseTitle" --checklist "$_InstAdvBseBody $_UseSpaceBar" 0 0 0 \
-    "linux" "base" on \
-    "linux-lts" "core" off \
-    $BASE_LIST \
-    $BASE_DEV_LIST \
-    $BTRF_CHECK $F2FS_CHECK 2>${PACKAGES}
+    "linux" "base" on "linux-lts" "core" off $BASE_LIST $BASE_DEV_LIST $BTRF_CHECK $F2FS_CHECK 2>${PACKAGES}
   fi
   # Determine kernel type(s) selected for installation.
   if 	[[ $(cat ${PACKAGES}) != "" ]]; then
@@ -1167,6 +1175,7 @@ install_base() {
     [[ $(cat ${PACKAGES} | grep \^linux$" ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1
     [[ $(cat ${PACKAGES} | grep \^linux$" ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
     if [[ $KERNEL -gt 0 ]]; then
+      clear
       [[ $(cat ${ANSWER}) -eq 1 ]] && PACSTRAP $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) 2>/tmp/.errlog
       [[ $(cat ${ANSWER}) -eq 2 ]] && PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
@@ -1180,49 +1189,13 @@ install_base() {
   fi
 }
 
-# Install an AUR helper for managing AUR packages
-install_aur() {
-  local archfrrepo="[archlinuxfr]
-  SigLevel = Never
-  Server = http:/:repo.archlinux.fr/\$arch"
-  if [[ $BASE_DEVEL -eq 0 ]] ; then
-    DIALOG --title "$_NeedBaseDevelTitle" \
-    --yesno "$_NeedBaseDevelBody" 0 0
-    if [[ $? == 0 ]]; then
-      PACSTRAP base-devel
-      [[ $? -eq 0 ]] && BASE_DEVEL=1
-      check_for_error
-    else
-      install_base_menu
-    fi
-  fi
-  DIALOG --title "$_InstAurTitle" \
-  --menu "$_InstAurBody" 0 0 10 \
-  "1" "Yaourt" \
-  "99" "$_Back" 2>${ANSWER}
-  case $(cat ${ANSWER}) in
-    "1")
-    clear
-    arch_chroot "echo ${archfrrepo} >> /etc/pacman.conf" 2>/tmp/.errlog
-    arch_chroot "pacman -Syy" 2>>/tmp/.errlog
-    check_for_error
-    PACSTRAP yaourt
-    ;;
-    *)
-    install_base_menu
-    ;;
-  esac
-  check_for_error
-}
-
 install_bootloader() {
 
   # Grub auto-detects installed kernels, etc. Syslinux does not, hence the extra code for it.
   bios_bootloader() {
     DIALOG --title "$_InstBiosBtTitle" --menu "$_InstBiosBtBody" 0 0 3 \
-    "grub" "-" \
-    "grub + os-prober" "-" \
-    "syslinux" "-" 2>${PACKAGES}
+    "grub" "-" "grub + os-prober" "-" "syslinux" "-" 2>${PACKAGES}
+    clear
     # If something has been selected, act
     if [[ $(cat ${PACKAGES}) != "" ]]; then
       sed -i 's/+\|\"//g' ${PACKAGES}
@@ -1245,8 +1218,7 @@ install_bootloader() {
       else
         # Syslinux
         DIALOG --title "$_InstSysTitle" --menu "$_InstSysBody" 0 0 2 \
-        "syslinux-install_update -iam" "[MBR]" \
-        "syslinux-install_update -i" "[/]" 2>${PACKAGES}
+        "syslinux-install_update -iam" "[MBR]" "syslinux-install_update -i" "[/]" 2>${PACKAGES}
         # If an installation method has been chosen, run it
         if [[ $(cat ${PACKAGES}) != "" ]]; then
           arch_chroot "$(cat ${PACKAGES})" 2>/tmp/.errlog
@@ -1279,7 +1251,8 @@ install_bootloader() {
     case $(cat ${ANSWER}) in
       "1")
       # Grub2
-      PACSTRAP grub os-prober efibootmgr dosfstools
+      clear
+      PACSTRAP grub os-prober efibootmgr dosfstools 2>/tmp/.errlog
       check_for_error
       DIALOG --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
       sleep 1
@@ -1302,7 +1275,8 @@ install_bootloader() {
       # Ensure that UEFI partition has been mounted to /boot/efi due to bug in script. Could "fix" it for installation, but
       # This could result in unknown consequences should the script be updated at some point.
       if [[ $UEFI_MOUNT == "/boot/efi" ]]; then
-        PACSTRAP refind-efi efibootmgr dosfstools
+        clear
+        PACSTRAP refind-efi efibootmgr dosfstools 2>/tmp/.errlog
         check_for_error
         DIALOG --title "$_SetRefiDefTitle" --yesno "$_SetRefiDefBody ${UEFI_MOUNT}/EFI/boot $_SetRefiDefBody2" 0 0
         if [[ $? -eq 0 ]]; then
@@ -1327,14 +1301,15 @@ install_bootloader() {
       ;;
       "3")
       # systemd-boot
-      PACSTRAP efibootmgr dosfstools
+      clear
+      PACSTRAP efibootmgr dosfstools 2>/tmp/.errlog
       arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>>/tmp/.errlog
       check_for_error
       # Deal with LVM Root
       if [[ $(echo $ROOT_PART | grep "/dev/mapper/") == "" ]]; then
         sysdb_root=$(blkid -s PARTUUID ${ROOT_PART} | sed 's/.*=//g' | sed 's/"//g')
       else
-        sysdb_root=$ROOT_PAR
+        sysdb_root=$ROOT_PART
       fi
       # Deal with LTS Kernel
       if [[ $LTS -eq 1 ]]; then
@@ -1387,19 +1362,22 @@ install_network_menu() {
     "ipw2200-fw" "Intel PRO/Wireless 2200" off \
     "zd1211-firmware" "ZyDAS ZD1211(b) 802.11a/b/g USB WLAN" off 2>${PACKAGES}
     if [[ $(cat ${PACKAGES}) != "" ]]; then
+      clear
       PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
     fi
   }
 
   install_cups(){
-    DIALOG --title " $_InstNMMenuCups " --checklist "$_InstCupsBody\n\n$_UseSpaceBar" 0 0 11 \
+    DIALOG --title " $_InstNMMenuCups " \
+    --checklist "$_InstCupsBody\n\n$_UseSpaceBar" 0 0 11 \
     "cups" "-" on \
     "cups-pdf" "-" off \
     "ghostscript" "-" on \
     "gsfonts" "-" on \
     "samba" "-" off 2>${PACKAGES}
     if [[ $(cat ${PACKAGES}) != "" ]]; then
+      clear
       PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
       if [[ $(cat ${PACKAGES} | grep "cups") != "" ]]; then
@@ -1422,7 +1400,8 @@ install_network_menu() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_InstNMMenuTitle " --menu "$_InstNMMenuBody" 0 0 5 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_InstNMMenuTitle " \
+  --menu "$_InstNMMenuBody" 0 0 5 \
   "1" "$_SeeWirelessDev" \
   "2" "$_InstNMMenuPkg" \
   "3" "$_InstNMMenuNM" \
@@ -1488,7 +1467,7 @@ setup_graphics_card() {
 
   # Save repetition
   install_intel(){
-    PACSTRAP xf86-video-intel libva-intel-driver intel-ucode
+    PACSTRAP xf86-video-intel libva-intel-driver intel-ucode 2>/tmp/.errlog
     sed -i 's/MODULES=""/MODULES="i915"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
     # Intel microcode (Grub, Syslinux and systemd-boot). rEFInd is yet to be added.
     # Done as seperate if statements in case of multiple bootloaders.
@@ -1510,7 +1489,7 @@ setup_graphics_card() {
 
   # Save repetition
   install_ati(){
-    PACSTRAP xf86-video-ati
+    PACSTRAP xf86-video-ati 2>/tmp/.errlog
     sed -i 's/MODULES=""/MODULES="radeon"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
   }
 
@@ -1572,7 +1551,7 @@ setup_graphics_card() {
     "3")
     # Nouveau / NVIDIA
     [[ $INTEGRATED_GC == "ATI" ]] &&  install_ati || install_intel
-    PACSTRAP xf86-video-nouveau
+    PACSTRAP xf86-video-nouveau 2>/tmp/.errlog
     sed -i 's/MODULES=""/MODULES="nouveau"/' ${MOUNTPOINT}/etc/mkinitcpio.conf
     ;;
     "4")
@@ -1583,6 +1562,7 @@ setup_graphics_card() {
     [[ $KERNEL == 3 ]] && NVIDIA="nvidia nvidia-lts"
     [[ $KERNEL == 2 ]] && NVIDIA="nvidia-lts"
     [[ $KERNEL == 1 ]] && NVIDIA="nvidia"
+    clear
     PACSTRAP ${NVIDIA} nvidia-libgl nvidia-utils pangox-compat 2>/tmp/.errlog
     NVIDIA_INST=1
     ;;
@@ -1594,6 +1574,7 @@ setup_graphics_card() {
     [[ $KERNEL == 3 ]] && NVIDIA="nvidia-340xx nvidia-340xx-lts"
     [[ $KERNEL == 2 ]] && NVIDIA="nvidia-340xx-lts"
     [[ $KERNEL == 1 ]] && NVIDIA="nvidia-340xx"
+    clear
     PACSTRAP ${NVIDIA} nvidia-340xx-libgl nvidia-340xx-utils 2>/tmp/.errlog
     NVIDIA_INST=1
     ;;
@@ -1605,12 +1586,13 @@ setup_graphics_card() {
     [[ $KERNEL == 3 ]] && NVIDIA="nvidia-304xx nvidia-304xx-lts"
     [[ $KERNEL == 2 ]] && NVIDIA="nvidia-304xx-lts"
     [[ $KERNEL == 1 ]] && NVIDIA="nvidia-304xx"
+    clear
     PACSTRAP ${NVIDIA} nvidia-304xx-libgl nvidia-304xx-utils 2>/tmp/.errlog
     NVIDIA_INST=1
     ;;
     "7")
     # Via
-    PACSTRAP xf86-video-openchrome
+    PACSTRAP xf86-video-openchrome 2>/tmp/.errlog
     ;;
     "8")
     # VirtualBox
@@ -1619,6 +1601,7 @@ setup_graphics_card() {
     [[ $KERNEL == 2 ]] && VB_MOD="virtualbox-guest-modules-lts"
     [[ $KERNEL == 1 ]] && VB_MOD="virtualbox-guest-modules"
     DIALOG --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
+    clear
     PACSTRAP virtualbox-guest-utils ${VB_MOD} 2>/tmp/.errlog
     # Load modules and enable vboxservice.
     arch_chroot "modprobe -a vboxguest vboxsf vboxvideo"
@@ -1627,11 +1610,11 @@ setup_graphics_card() {
     ;;
     "9")
     # VMWare
-    PACSTRAP xf86-video-vmware xf86-input-vmmouse
+    PACSTRAP xf86-video-vmware xf86-input-vmmouse 2>/tmp/.errlog
     ;;
     "10")
     # Generic / Unknown
-    PACSTRAP xf86-video-fbdev
+    PACSTRAP xf86-video-fbdev 2>/tmp/.errlog
     ;;
     *)
     install_desktop_menu
@@ -1693,6 +1676,7 @@ install_de_wm() {
   "windowmaker" "-" off 2>${PACKAGES}
   # If something has been selected, install
   if [[ $(cat ${PACKAGES}) != "" ]]; then
+    clear
     sed -i 's/+\|\"//g' ${PACKAGES}
     PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
     check_for_error
@@ -1718,6 +1702,7 @@ install_de_wm() {
     "xterm" "-" on 2>${PACKAGES}
     # If at least one package, install.
     if [[ $(cat ${PACKAGES}) != "" ]]; then
+      clear
       PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
     fi
@@ -1808,7 +1793,7 @@ install_nm() {
       # If no match found, install and enable NM
       if [[ $NM_ENABLED -eq 0 ]]; then
         # Where networkmanager selected, add network-manager-applet
-        sed -i 's/NetworkManager/networkmanager network-manager-applet/' ${PACKAGES}
+        sed -i 's/NetworkManager/networkmanager network-manager-applet/g' ${PACKAGES}
         PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
         # Where networkmanager selected, now remove network-manager-applet
         sed -i 's/networkmanager network-manager-applet/NetworkManager/g' ${PACKAGES}
@@ -1885,186 +1870,30 @@ install_multimedia_menu(){
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-
   DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstMultMenuTitle" --menu "$_InstMultMenuBody" 0 0 5 \
   "1" "$_InstMulSnd" \
   "2" "$_InstMulCodec" \
   "3" "$_InstMulAcc" \
   "4" "$_InstMulCust" \
   "5" "$_Back" 2>${ANSWER}
-
   HIGHLIGHT_SUB=$(cat ${ANSWER})
   case $(cat ${ANSWER}) in
-    "1")
-    install_alsa_pulse
+    "1") install_alsa_pulse
     ;;
-    "2")
-    install_codecs
+    "2") install_codecs
     ;;
-    "3")
-    install_acc_menu
+    "3") install_acc_menu
     ;;
-    "4")
-    install_cust_pkgs
+    "4") install_cust_pkgs
     ;;
-    *)
-    main_menu_online
+    *) main_menu_online
     ;;
   esac
-}
-
-# Let the user choose a shell
-install_shell() {
-
-  zsh_config() {
-    DIALOG --title "$_ZshConfMenuTitle" \
-    --menu "$_ZshConfMenuBody" 0 0 10 \
-    "1" "Vanilla" \
-    "2" "ohMyZsh" \
-    "3" "antigen" 2>${ANSWER}
-    case $(cat ${ANSWER}) in
-      "2" | "3")
-      arch_chroot "pacman -Q git curl" 2>/tmp/.errlog
-      check_for_error
-      if [ $? == 1 ] ; then
-        if DIALOG --yesno "$_ZshConfInstAdd" 0 0 ; then
-          PACSTRAP git curl
-        else
-          install_add_menu
-        fi
-      fi
-      checklist_of_user
-      if [[ -n $USER_LIST ]] ; then
-        DIALOG --title "$_ZshConfUserTitle" --checklist "$_ZshConfUserBody" 0 0 10 \
-        ${USER_LIST} 2>${ANSWER} || install_add_menu
-        for i in $(cat ${ANSWER}); do
-          if [[ $(cat ${ANSWER}) == "2" ]]; then
-            arch_chroot "git clone git://github.com/robbyrussell/oh-my-zsh.git /home/${i}/.oh-my-zsh" 2>/tmp/.errlog
-            arch_chroot "cp /home/${i}/.oh-my-zsh/templates/zshrc.zsh-template /home/${i}/.zshrc" 2>>/tmp/.errlog
-          else
-            arch_chroot "git clone https://github.com/zsh-users/antigen.git /home/${i}/.antigen" 2>/tmp/.errlog
-          fi
-          check_for_error
-        done
-      fi
-      ;;
-      *)
-      install_add_menu
-      ;;
-    esac
-    install_add_menu
-  }
-
-  DIALOG --title "$_InstShellTitle" \
-  --menu "$_InstShellBody" 0 0 10 \
-  "1" "bash" \
-  "2" "dash" \
-  "3" "fish" \
-  "4" "mksh" \
-  "5" "tcsh" \
-  "6" "zsh" \
-  "99" "$_Back" 2>${ANSWER}
-  case $(cat ${ANSWER}) in
-    "1")
-    PACSTRAP bash
-    SH="bash"
-    ;;
-    "2")
-    PACSTRAP dash
-    SH="dash"
-    ;;
-    "3")
-    PACSTRAP fish
-    SH="fish"
-    ;;
-    "4")
-    PACSTRAP mksh
-    SH="mksh"
-    ;;
-    "5")
-    PACSTRAP tcsh
-    SH="tcsh"
-    ;;
-    "6")
-    PACSTRAP zsh
-    zsh_config
-    SH="zsh"
-    ;;
-    *)
-    install_add_menu
-    ;;
-  esac
-  check_for_error
-  # Ask for changing user's shell
-  checklist_of_user
-  if [[ -n $USER_LIST ]] && DIALOG --yesno "$_InstShellChsh" 0 0 ; then
-    DIALOG --title "$_ChangeShTitle" --checklist "$_ChangeShBody" 0 0 10 \
-    ${USER_LIST} 2>${ANSWER} || install_add_menu
-    for i in $(cat ${ANSWER}); do
-      arch_chroot "chsh -s /bin/${SH} ${i}" 2>/tmp/.errlog
-      check_for_error
-    done
-  fi
-}
-
-# Let the user install an editor
-install_editor() {
-  DIALOG --title "$_InstEditorTitle" \
-  --menu "$_InstEditorBody" 0 0 10 \
-  "1" "emacs" \
-  "2" "emacs without X" \
-  "3" "vim" \
-  "99" "$_Back" 2>${ANSWER}
-  case $(cat ${ANSWER}) in
-    "1")
-    PACSTRAP emacs
-    ;;
-    "2")
-    PACSTRAP emacs-nox
-    ;;
-    "3")
-    PACSTRAP vim
-    ;;
-    *)
-    install_add_menu
-    ;;
-  esac
-  check_for_error
-}
-
-# Let the user install a browser
-install_browser() {
-  DIALOG --title "$_InstBrowserTitle" \
-  --menu "$_InstBrowserBody" 0 0 10 \
-  "1" "Chromium" \
-  "2" "Firefox" \
-  "3" "Opera" \
-  "99" "$_Back" 2>${ANSWER}
-  case $(cat ${ANSWER}) in
-    "1")
-    PACSTRAP chromium
-    ;;
-    "2")
-    PACSTRAP firefox
-    ;;
-    "3")
-    PACSTRAP opera
-    ;;
-    *)
-    install_add_menu
-    ;;
-  esac
-  check_for_error
-}
-
-test() {
-  ping -c 3 google.com > /tmp/.outfile &
-  DIALOG --title "checking" --no-kill --tailboxbg /tmp/.outfile 20 60
 }
 
 ################################################################################
 ##
-## Main Interfaces
+##                             Main Interfaces
 ##
 ################################################################################
 
@@ -2129,23 +1958,16 @@ install_base_menu() {
     SUB_MENU="install_base_menu"
     HIGHLIGHT_SUB=1
   else
-    if [[ $HIGHLIGHT_SUB != 6 ]]; then
+    if [[ $HIGHLIGHT_SUB != 5 ]]; then
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  if [ $PACOPT == -1 ] && DIALOG --yesno "$_InstAskPac" 0 0 ; then
-    PACOPT=0
-  elif [ $PACOPT == -1 ]; then
-    PACOPT=1
-  fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstBsMenuTitle" \
-  --menu "$_InstBseMenuBody" 0 0 5 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstBsMenuTitle" --menu "$_InstBseMenuBody" 0 0 5 \
   "1"	"$_PrepMirror" \
   "2" "$_PrepPacKey" \
   "3" "$_InstBse" \
-  "4" "$_InstAur" \
-  "5" "$_InstBootldr" \
-  "6" "$_Back" 2>${ANSWER}
+  "4" "$_InstBootldr" \
+  "5" "$_Back" 2>${ANSWER}
   HIGHLIGHT_SUB=$(cat ${ANSWER})
   case $(cat ${ANSWER}) in
     "1")
@@ -2161,12 +1983,9 @@ install_base_menu() {
     install_base
     ;;
     "4")
-    install_aur
-    ;;
-    "5")
     install_bootloader
     ;;
-    "8")
+    "6")
     install_wireless_packages
     ;;
     *)
@@ -2296,40 +2115,6 @@ install_acc_menu() {
   fi
 }
 
-# Install additional software
-install_add_menu() {
-  if [[ $SUB_MENU != "install_add_menu" ]]; then
-    SUB_MENU="install_add_menu"
-    HIGHLIGHT_SUB=1
-  else
-    if [[ $HIGHLIGHT_SUB != 99 ]]; then
-      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
-    fi
-  fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstAddMenuTitle" \
-  --menu "$_InstAddMenuBody" 0 0 10 \
-  "1" "Shell" \
-  "2" "Editor" \
-  "3" "Browser" \
-  "99" "$_Back" 2>${ANSWER}
-  case $(cat ${ANSWER}) in
-    "1")
-    install_shell
-    ;;
-    "2")
-    install_editor
-    ;;
-    "3")
-    install_browser
-    ;;
-    *)
-    main_menu_online
-    ;;
-  esac
-  check_for_error
-  install_add_menu
-}
-
 edit_configs() {
   # Clear the file variables
   FILE=""
@@ -2343,8 +2128,7 @@ edit_configs() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_SeeConfOptTitle" \
-  --menu "$_SeeConfOptBody" 0 0 10 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_SeeConfOptTitle" --menu "$_SeeConfOptBody" 0 0 10 \
   "1" "/etc/vconsole.conf" \
   "2" "/etc/locale.conf" \
   "3" "/etc/hostname" \
@@ -2396,22 +2180,18 @@ edit_configs() {
     ;;
     "9")
     case $DM in
-      "LXDM")
-      FILE="${MOUNTPOINT}/etc/lxdm/lxdm.conf"
+      "LXDM") FILE="${MOUNTPOINT}/etc/lxdm/lxdm.conf"
       ;;
-      "LightDM")
-      FILE="${MOUNTPOINT}/etc/lightdm/lightdm.conf"
+      "LightDM") FILE="${MOUNTPOINT}/etc/lightdm/lightdm.conf"
       ;;
-      "SDDM")
-      FILE="${MOUNTPOINT}/etc/sddm.conf"
+      "SDDM") FILE="${MOUNTPOINT}/etc/sddm.conf"
       ;;
-      "SLiM")
-      FILE="${MOUNTPOINT}/etc/slim.conf"
+      "SLiM") FILE="${MOUNTPOINT}/etc/slim.conf"
       ;;
     esac
     ;;
     *)
-    main_menu_online
+     main_menu_online
     ;;
   esac
   # open file(s) with nano
@@ -2436,16 +2216,15 @@ main_menu_online() {
   "3" "$_ConfBseMenuTitle" \
   "4" "$_InstGrMenuTitle" \
   "5" "$_InstNMMenuTitle" \
-  "6" "$_MMAddSoft" \
-  "7" "$_InstMultMenuTitle" \
-  "8" "$_SeeConfOptTitle" \
-  "9" "$_Done" 2>${ANSWER}
+  "6" "$_InstMultMenuTitle" \
+  "7" "$_SeeConfOptTitle" \
+  "8" "$_Done" 2>${ANSWER}
   HIGHLIGHT=$(cat ${ANSWER})
   # Depending on the answer, first check whether partition(s) are mounted and whether base has been installed
   if [[ $(cat ${ANSWER}) -eq 2 ]]; then
     check_mount
   fi
-  if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 7 ]]; then
+  if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 6 ]]; then
     check_mount
     check_base
   fi
@@ -2457,7 +2236,7 @@ main_menu_online() {
     install_base_menu
     ;;
     "3")
-    config_base_menu
+     config_base_menu
     ;;
     "4")
     install_graphics_menu
@@ -2466,12 +2245,9 @@ main_menu_online() {
     install_network_menu
     ;;
     "6")
-    install_add_menu
-    ;;
-    "7")
     install_multimedia_menu
     ;;
-    "8")
+    "7")
     edit_configs
     ;;
     *)
@@ -2490,11 +2266,13 @@ main_menu_online() {
 
 ################################################################################
 ##
-## Execution
+##                              Execution
 ##
 ################################################################################
 
 id_system
+DIALOG --title " Development Installer Warning " \
+--msgbox "\nWARNING: This Development branch of the Architect installer is currently being re-coded. During this process functions may not work properly or even at all.\n\nPlease use the STABLE branch by closing the installer and rebooting, or by selecting the 'Virtual Console' option, and then entering /initialise at the command prompt to start again.\n\nOtherwise, proceed at your own risk.\n" 0 0
 select_language
 check_requirements
 greeting
