@@ -1428,100 +1428,68 @@ uefi_bootloader() {
 	[[ -z $(mount | grep /sys/firmware/efi/efivars) ]] && mount -t efivarfs efivarfs /sys/firmware/efi/efivars
      
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstUefiBtTitle" --menu "$_InstUefiBtBody" 0 0 3 \
-    "grub" "-" "refind-efi" "-" "[systemd-boot]" "-" 2>${PACKAGES}
+    "grub" "-" "refind-efi" "-" "systemd-boot" "-" 2>${PACKAGES}
 
-     case $(cat ${ANSWER}) in
-     "1") # Grub2
-          clear
-          pacstrap ${MOUNTPOINT} grub os-prober efibootmgr dosfstools 2>/tmp/.errlog
-          check_for_error
-          
-          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
-          sleep 1
-          arch_chroot "grub-install --target=x86_64-efi --efi-directory=${UEFI_MOUNT} --bootloader-id=arch_grub --recheck" 2>/tmp/.errlog
-          arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
-          check_for_error
+	if [[ $(cat ${PACKAGES}) != "" ]]; then
+		
+		clear
+		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES} | grep -v "systemd-boot") efibootmgr dosfstools 2>/tmp/.errlog
+		check_for_error
 
-          # Ask if user wishes to set Grub as the default bootloader and act accordingly
-          dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SetGrubDefTitle" --yesno "$_SetGrubDefBody ${UEFI_MOUNT}/EFI/boot $_SetGrubDefBody2" 0 0
-          
-          if [[ $? -eq 0 ]]; then
-             arch_chroot "mkdir ${UEFI_MOUNT}/EFI/boot" 2>/tmp/.errlog
-             arch_chroot "cp -r ${UEFI_MOUNT}/EFI/arch_grub/grubx64.efi ${UEFI_MOUNT}/EFI/boot/bootx64.efi" 2>>/tmp/.errlog
-             check_for_error
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SetDefDoneTitle" --infobox "\nGrub $_SetDefDoneBody" 0 0
-             sleep 2
-          fi
-          
-          BOOTLOADER="Grub"
-          ;;
- 
-      "2") # rEFInd
-           # Ensure that UEFI partition has been mounted to /boot/efi due to bug in script. Could "fix" it for installation, but
-           # This could result in unknown consequences should the script be updated at some point.
-           if [[ $UEFI_MOUNT == "/boot/efi" ]]; then      
-              clear
-              pacstrap ${MOUNTPOINT} refind-efi efibootmgr dosfstools 2>/tmp/.errlog
-              check_for_error   
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SetRefiDefTitle" --yesno "$_SetRefiDefBody ${UEFI_MOUNT}/EFI/boot $_SetRefiDefBody2" 0 0
+		case $(cat ${PACKAGES}) in
+		"grub") 
+				arch_chroot "grub-install --target=x86_64-efi --efi-directory=${UEFI_MOUNT} --bootloader-id=arch_grub --recheck --debug" 2>/tmp/.errlog
+				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
+				check_for_error
+
+				# Ask if user wishes to set Grub as the default bootloader and act accordingly
+				dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstUefiBtTitle" --yesno "$_SetBootDefBody ${UEFI_MOUNT}/EFI/boot $_SetBootDefBody2" 0 0
+			
+				if [[ $? -eq 0 ]]; then
+					arch_chroot "mkdir ${UEFI_MOUNT}/EFI/boot" 2>/tmp/.errlog
+					arch_chroot "cp -r ${UEFI_MOUNT}/EFI/arch_grub/grubx64.efi ${UEFI_MOUNT}/EFI/boot/bootx64.efi" 2>>/tmp/.errlog
+					check_for_error
+					dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstUefiBtTitle" --infobox "\nGrub $_SetDefDoneBody" 0 0
+					sleep 2
+				fi
+				;;
+		"refind-efi") # rEFInd - add support for LVM booting
+					dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstUefiBtTitle" --yesno "$_SetBootDefBody ${UEFI_MOUNT}/EFI/boot $_SetBootDefBody2" 0 0
+				
+					clear
+					[[ $? -eq 0 ]] && arch_chroot "refind-install --usedefault ${UEFI_PART} --alldrivers" 2>/tmp/.errlog \
+					|| arch_chroot "refind-install" 2>/tmp/.errlog
+					check_for_error
               
-              if [[ $? -eq 0 ]]; then
-                 clear
-                 arch_chroot "refind-install --usedefault ${UEFI_PART} --alldrivers" 2>/tmp/.errlog
-              else   
-                 clear
-                 arch_chroot "refind-install" 2>/tmp/.errlog
-              fi   
-              
-              check_for_error
-              
-              # Now generate config file to pass kernel parameters. Default read only (ro) changed to read-write (rw),
-              # and amend where using btfs subvol root       
-              arch_chroot "refind-mkrlconf" 2>/tmp/.errlog
-              check_for_error
-              sed -i 's/ro /rw /g' ${MOUNTPOINT}/boot/refind_linux.conf
-              [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/refind_linux.conf
-              
-              BOOTLOADER="rEFInd"
-           else 
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_RefiErrTitle" --msgbox "$_RefiErrBody" 0 0
-              uefi_bootloader
-           fi
-           ;;
-         
-     "3") # systemd-boot
-          clear
-          pacstrap ${MOUNTPOINT} efibootmgr dosfstools 2>/tmp/.errlog
-          arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>>/tmp/.errlog
-          check_for_error
+					# Now generate config file to pass kernel parameters. Default read only (ro) changed to read-write (rw),
+					# and amend where using btfs subvol root       
+					arch_chroot "refind-mkrlconf" 2>/tmp/.errlog
+					check_for_error
+					sed -i 's/ro /rw /g' ${MOUNTPOINT}${UEFI_MOUNT}/refind_linux.conf
+					[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}${UEFI_MOUNT}/refind_linux.conf
+					;;
+		"systemd-boot")
+					arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>/tmp/.errlog
+					check_for_error
           
-          # Deal with LVM Root
-          if [[ $(echo $ROOT_PART | grep "/dev/mapper/") == "" ]]; then
-			sysdb_root=$(blkid -s PARTUUID ${ROOT_PART} | sed 's/.*=//g' | sed 's/"//g')
-          else
-             sysdb_root=$ROOT_PART 
-          fi
-           
-          # Deal with LTS Kernel
-          if [[ $LTS -eq 1 ]]; then
-            echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=PARTUUID=${sysdb_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
-          else
-            echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux\ninitrd\t/initramfs-linux.img\noptions\troot=PARTUUID=${sysdb_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
-          fi
-          
-          # Fix LVM Root installations, and deal with btrfs root subvolume mounting
-          [[ $LVM_ROOT -eq 1 ]] && sed -i "s/PARTUUID=//g" ${MOUNTPOINT}/boot/loader/entries/arch.conf
-          [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/loader/entries/arch.conf
-          
-          BOOTLOADER="systemd-boot"
-          # Set the loader file  
-          echo -e "default  arch\ntimeout  5" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf 2>/tmp/.errlog
-          check_for_error
-          ;;
-          
-      *) install_base_menu
-         ;;
-      esac 
+					# Deal with LVM Root
+					[[ $(echo $ROOT_PART | grep "/dev/mapper/") != "" ]] && sysdb_root=$ROOT_PART \
+					|| sysdb_root=$"PARTUUID="$(blkid -s PARTUUID ${ROOT_PART} | sed 's/.*=//g' | sed 's/"//g')
+					
+					# Create default config files
+					echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${sysdb_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
+					echo -e "default  arch\ntimeout  5" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf 2>/tmp/.errlog				
+
+					# Amend for kernel(s) installed and btrfs mount options
+					[[ $KERNEL -eq 2 ]] && sed - i "s/linux/linux-lts//g" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog
+					[[ $KERNEL -eq 3 ]] && echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${sysdb_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf 2>>/tmp/.errlog
+					[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/loader/entries/arch.conf 2>>/tmp/.errlog
+					check_for_error
+					;;
+		*) install_base_menu
+					;;
+		esac
+	fi
 
 }
 
