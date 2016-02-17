@@ -748,6 +748,8 @@ select_filesystem(){
 
 	FILESYSTEM=$(cat ${ANSWER})
 
+	[[ $FILESYSTEM == "" ]] && break;
+
 	# if f2fs selected modprobe and flag f2fs package for installation
 	[[ $FILESYSTEM == "mkfs.f2fs" ]] && modprobe f2fs && F2FS=1
 	
