@@ -2061,7 +2061,7 @@ install_alsa_pulse(){
 	done
 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstMulSnd" --checklist "$_InstMulSndBody\n\n$_UseSpaceBar" 0 0 14 \
-	$ALSA $PULSE_EXTRA \
+	$ALSA "pulseaudio" "-" off $PULSE_EXTRA \
 	"paprefs" "pulseaudio GUI" off \
 	"pavucontrol" "pulseaudio GUI" off \
 	"ponymix" "pulseaudio CLI" off \
