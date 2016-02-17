@@ -429,7 +429,7 @@ set_hostname() {
   --inputbox "$_HostNameBody" 0 0 \
   "arch" 2>${ANSWER} || config_base_menu
   echo $(cat ${ANSWER}) > ${MOUNTPOINT}/etc/hostname 2>/tmp/.errlog
-  echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t$(cat ${HOST_NAME})\n::1\tlocalhost.localdomain\tlocalhost\t$(cat {HOST_NAME})" > ${MOUNTPOINT}/etc/hosts 2>>/tmp/.errlog
+  echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t$(cat ${ANSWER})\n::1\tlocalhost.localdomain\tlocalhost\t$(cat {ANSWER})" > ${MOUNTPOINT}/etc/hosts 2>>/tmp/.errlog
   check_for_error
 }
 
@@ -2188,7 +2188,7 @@ edit_configs() {
     esac
     ;;
     *)
-     main_menu_online
+    main_menu_online
     ;;
   esac
   # open file(s) with nano
@@ -2233,7 +2233,7 @@ main_menu_online() {
     install_base_menu
     ;;
     "3")
-     config_base_menu
+    config_base_menu
     ;;
     "4")
     install_graphics_menu
