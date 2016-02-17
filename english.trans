@@ -101,17 +101,15 @@ _MirrorEdit="Manually edit mirrorlist"
 _MirrorRankTitle="Run RankMirrors"
 _MirrorRestTitle="Restore original mirrorlist"
 _MirrorRankBody="\nFinding the fastest servers from the mirrorlist."
-_MirrorRankDone="\nThe mirrorlist has been sorted by the fastest servers.\n\n"
 _MirrorRestDone="\nThe original mirrorlist has been restored.\n\n"
 _MirrorNoneBody="\nA copy of the original mirrorlist was not found.\n\n"
 _MirrorCntryBody="\nA list of mirrors by the selected country will be generated.\n"
-_MirrorGenTitle=" Generating Mirrorlist "
 _MirrorGenQ="Use generated mirrorlist for installer?"
 _MirrorGenDone="\nOriginal Mirrorlist has been saved as:\n\n/etc/pacman.d/mirrorlist.orig\n\n"
 
 # Set Keymap (vconsole)
 _VCKeymapTitle="Set Virtual Console"
-_VCKeymapBody="\nSelect Virtual Console Keymap."
+_VCKeymapBody="\nA virtual console is a shell prompt in a non-graphical environment. Its keymap is independent of a desktop environment / terminal."
 
 # Set Xkbmap (environment)
 _XkbmapBody="\nSelect Desktop Environment Keymap."
@@ -122,7 +120,7 @@ _localeBody="Locales determine the languages displayed, time and date formats, e
 # Set Timezone
 _TimeZBody="\nThe time zone is used to correctly set your system clock."
 _TimeSubZBody="\nSelect the city nearest to you."
-_TimeZQ="Set Time Zone as"
+_TimeZQ="\nSet Time Zone as"
 
 # Set Hardware Clock
 _HwCBody="\nUTC is the universal time standard, and is recommended unless dual-booting with Windows."
@@ -312,7 +310,7 @@ _ConfBseMenuTitle="Configure Base"
 _ConfBseBody="\nBasic configuration of the base."
 _ConfBseFstab="Generate FSTAB"
 _ConfBseHost="Set Hostname"
-_ConfBseTimeHC="Set Timezone and Hardware Clock"
+_ConfBseTimeHC="Set Timezone and Clock"
 _ConfBseSysLoc="Set System Locale"
 _MMRunMkinit="Run Mkinitcpio"
 
@@ -345,6 +343,7 @@ _InstCupsQ="\nEnable org.cups.cupsd.service on installed system?\n\n"
 _InstMultMenuTitle="Install Multimedia Support"
 _InstMultMenuBody="la la la"
 _InstMulSnd="Install Sound Driver(s)"
+_InstMulSndBody="\nALSA provides kernel driven sound card drivers. PulseAudio serves as a proxy to ALSA."
 _InstMulCodec="Install Codecs"
 _InstMulAcc="Install Accessibility Packages"
 _InstMulAccBody="\nSelect desired accessibility packages.\n\n"
