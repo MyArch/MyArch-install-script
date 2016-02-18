@@ -159,6 +159,8 @@ _PassNUsrErrBody="\nThe User passwords entered do not match. Please try again.\n
 _MntStatusTitle="Mount Status"
 _MntStatusSucc="\nMount Successful!\n\n"
 _MntStatusFail="\nMount Failed!\n\n"
+_WarnMount1="\nIMPORTANT: Partitions can be mounted without formatting them by selecting the"
+_WarnMount2="option listed at the top of the file system menu.\n\nEnsure the correct choices for mounting and formatting are made as no warnings will be provided, with the exception of the UEFI boot partition.\n\n"
 
 # Select Device (installation)
 _DevSelTitle="Select Device"
