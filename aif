@@ -1312,19 +1312,11 @@ install_base() {
 	BTRF_CHECK=""
 	F2FS_CHECK=""
 	BASE_LIST=""
+	BASE_DEV_LIST=""
 	
 	# Need a seperate base-devel package list as there are so many duplicates with the base group.
-	base_list=$(echo $(pacman -Sqg base) | sed s/" linux "/" "/ | sort -u)
-	BASE_DEV_LIST=$(echo "autoconf automake binutils bison fakeroot flex gcc groff libtool m4 make patch pkg-config sudo" \
-				| sed s/" "/" base-devel on "/g | sed s/$/" base-devel on "/g)
-
-	for i in ${base_list}; do
-		BASE_LIST="${BASE_LIST} ${i} base on"
-	done
-
-	# If btrfs and/or f2fs was used, auto-select the necessary packages for installation 
-	[[ $BTRFS -gt 0 ]] && BTRF_CHECK=$(echo "btrfs-progs" "-" on) || BTRF_CHECK=$(echo "btrfs-progs" "-" off)
-	[[ $F2FS -gt 0 ]] && F2FS_CHECK=$(echo "f2fs-tools" "-" on) || F2FS_CHECK=$(echo "f2fs-tools" "-" off)
+	base_list=$(pacman -Sqg base | sed s/" linux "/" "/ | sort -u)
+	base_dev_list="autoconf automake binutils bison fakeroot flex gcc groff libtool m4 make patch pkg-config sudo"
 
 	# User to select "standard" or "advanced" installation Method
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --menu "$_InstBseBody" 0 0 2 \
@@ -1333,24 +1325,45 @@ install_base() {
 
 	# "Standard" installation method
 	if [[ $(cat ${ANSWER}) -eq 1 ]]; then
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --checklist "$_InstStandBseBody$_UseSpaceBar" 0 0 6 \
-		"linux" "-" on "linux-lts" "-" off "base-devel" "-" on $BTRF_CHECK $F2FS_CHECK "sudo" "-" on 2>${PACKAGES}
-	elif [[ $(cat ${ANSWER}) -eq 2 ]]; then
+		
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --checklist "$_InstStandBseBody$_UseSpaceBar" 0 0 3 \
+		"linux" "-" on "linux-lts" "-" off "base-devel" "-" on 2>${PACKAGES}
+	
 	# "Advanced" installation method
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --checklist "$_InstAdvBseBody $_UseSpaceBar" 0 0 0 \
-		"linux" "base" on "linux-lts" "core" off $BASE_LIST $BASE_DEV_LIST $BTRF_CHECK $F2FS_CHECK 2>${PACKAGES}
+	elif [[ $(cat ${ANSWER}) -eq 2 ]]; then
+
+		# Ask user to wait while package descriptions are gathered (because it takes ages)
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstAdvBase" --infobox "$_InstAdvWait $_PlsWaitBody" 0 0
+
+		# Add btrfs and f2fs packages to list and check if used
+		BTRF_CHECK=$(echo "btrfs-progs" $(pacman -Si btrfs-progs | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off)
+		F2FS_CHECK=$(echo "f2fs-tools" $(pacman -Si f2fs-tools | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off)
+		[[ $BTRFS -eq 1 ]] && BTRF_CHECK=$(echo $BTRFS_CHECK | sed "s/ off/ on/g")
+		[[ $F2FS -eq 1 ]] && F2FS_CHECK=$(echo $F2FS_CHECK | sed "s/ off/ on/g")
+
+		# Gather package descriptions for base group
+		for i in ${base_list}; do
+			BASE_LIST="${BASE_LIST} ${i} $(pacman -Si ${i} | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") on"
+		done
+	
+		# Gather package descriptions for base-devel group
+		for i in ${base_dev_list}; do
+			BASE_DEV_LIST="${BASE_DEV_LIST} ${i} $(pacman -Si ${i} | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") on"
+		done	
+	
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --checklist "$_InstAdvBseBody $_UseSpaceBar" 0 0 20 \
+		"linux" $(pacman -Si linux | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") on \
+		"linux-lts" $(pacman -Si linux-lts | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
+		$BASE_LIST $BASE_DEV_LIST $BTRF_CHECK $F2FS_CHECK 2>${PACKAGES}
     fi
     
-    # Determine kernel type(s) selected for installation.
+    # If a selection made, act
     if 	[[ $(cat ${PACKAGES}) != "" ]]; then
-		[[ $(cat ${PACKAGES} | grep \^linux$" ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3
-		[[ $(cat ${PACKAGES} | grep \^linux$" ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2
-		[[ $(cat ${PACKAGES} | grep \^linux$" ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1
-		[[ $(cat ${PACKAGES} | grep \^linux$" ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
-	
-		if [[ $KERNEL -gt 0 ]]; then
+    
+		# Ensure there is a kernel selected or pre-installed
+		if ([[ -e /boot/initramfs-linux.img ]] || [[ -e /boot/initramfs-linux-lts.img ]]); then
 			clear
-			[[ $(cat ${ANSWER}) -eq 1 ]] && pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) 2>/tmp/.errlog
+			[[ $(cat ${ANSWER}) -eq 1 ]] && pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) btrfs-progs f2fs-tools sudo 2>/tmp/.errlog
 			[[ $(cat ${ANSWER}) -eq 2 ]] && pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
 			check_for_error
 		
@@ -1516,16 +1529,18 @@ install_network_menu() {
 # ntp not exactly wireless, but this menu is the best fit.
 install_wireless_packages(){
 
-	WIRELESS_PACKAGES="dialog iw rp-pppoe wireless_tools wpa_actiond"
-	if [[ $(lspci | grep -i "Network Controller") != "" ]]; then
-		WIRELESS_PACKAGES=$(echo $WIRELESS_PACKAGES | sed s/" "/" wifi on "/g | sed s/$/" wifi on "/g)
-	else
-		WIRELESS_PACKAGES=$(echo $WIRELESS_PACKAGES | sed s/" "/" wifi off "/g | sed s/$/" wifi off "/g)
-	fi
+	WIRELESS_PACKAGES=""
+	wireless_pkgs="dialog iw rp-pppoe wireless_tools wpa_actiond"
+	
+	for i in ${wireless_pkgs}; do
+		WIRELESS_PACKAGES="${WIRELESS_PACKAGES} ${i} $(pacman -Si ${i} | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") on"
+	done
+	# If no wireless, uncheck wireless pkgs
+	[[ $(lspci | grep -i "Network Controller") == "" ]] && WIRELESS_PACKAGES=$(echo $WIRELESS_PACKAGES | sed "s/ on/ off/g")
 	
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstNMMenuPkg " --checklist "$_InstNMMenuPkgBody\n\n$_UseSpaceBar" 0 0 11 \
 	$WIRELESS_PACKAGES \
-	"ntp" "-" off \
+	"ntp" $(pacman -Si ntp | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
 	"b43-fwcutter" "Broadcom 802.11b/g/n" off \
 	"bluez-firmware" "Broadcom BCM203x / STLC2300 Bluetooth" off \
 	"ipw2100-fw" "Intel PRO/Wireless 2100" off \
@@ -1608,7 +1623,7 @@ install_xorg_input() {
 
 	echo "" > ${PACKAGES}
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstGrMenuDS" --checklist "$_InstGrMenuDSBody$_UseSpaceBar" 0 0 11 \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstGrMenuDS" --checklist "$_InstGrMenuDSBody\n\n$_UseSpaceBar" 0 0 11 \
 	"wayland" "-" off \
 	"xorg-server" "-" on \
 	"xorg-server-common" "-" off \
