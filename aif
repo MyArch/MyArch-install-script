@@ -1487,12 +1487,12 @@ uefi_bootloader() {
    
 					# Manually generate boot entry as "refind-mkrlconf" script isn't very good
 					sed -i "s/#scanfor/scanfor/g" ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>/tmp/.errlog
-					echo -e "menuentry \"Arch Linux\" {\n\ticon\t/EFI/refind/icons/os_arch.png\n\tvolume\t\"Arch Linux\"\n\tloader\t/boot/vmlinuz-linux\n\tinitrd\t/boot/initramfs-linux.img\n\toptions\t\"root=${bl_root} rw add_efi_memmap\"\n\tsubmenuentry \"Boot using fallback initramfs\" {\n\t\tinitrd /boot/initramfs-linux-fallback.img\n\t\t}\n\tsubmenuentry \"Boot to terminal\" {\n\t\tadd_options \"systemd.unit=multi-user.target\"\n\t\t}" >> ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
+					#echo -e "menuentry \"Arch Linux\" {\n\ticon\t/EFI/refind/icons/os_arch.png\n\tvolume\t\"Arch Linux\"\n\tloader\t/boot/vmlinuz-linux\n\tinitrd\t/boot/initramfs-linux.img\n\toptions\t\"root=${bl_root} rw add_efi_memmap\"\n\tsubmenuentry \"Boot using fallback initramfs\" {\n\t\tinitrd /boot/initramfs-linux-fallback.img\n\t\t}\n\tsubmenuentry \"Boot to terminal\" {\n\t\tadd_options \"systemd.unit=multi-user.target\"\n\t\t}" >> ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
 					
 					# Amend for kernel(s) installed and btrfs mount options
-					[[ $KERNEL -eq 2 ]] && sed - i "s/linux/linux-lts//g" ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
-					[[ $KERNEL -eq 3 ]] && echo -e "menuentry \"Arch Linux\" {\n\ticon\t/EFI/refind/icons/os_arch.png\n\tvolume\t\"Arch Linux-LTS\"\n\tloader\t/boot/vmlinuz-linux-lts\n\tinitrd\t/boot/initramfs-linux-lts.img\n\toptions\t\"root=${bl_root} rw add_efi_memmap\"\n\tsubmenuentry \"Boot using fallback initramfs\" {\n\t\tinitrd /boot/initramfs-linux-lts-fallback.img\n\t\t}\n\tsubmenuentry \"Boot to terminal\" {\n\t\tadd_options \"systemd.unit=multi-user.target\"\n\t\t}" >> ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
-					[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
+					#[[ $KERNEL -eq 2 ]] && sed - i "s/linux/linux-lts//g" ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
+					#[[ $KERNEL -eq 3 ]] && echo -e "menuentry \"Arch Linux\" {\n\ticon\t/EFI/refind/icons/os_arch.png\n\tvolume\t\"Arch Linux-LTS\"\n\tloader\t/boot/vmlinuz-linux-lts\n\tinitrd\t/boot/initramfs-linux-lts.img\n\toptions\t\"root=${bl_root} rw add_efi_memmap\"\n\tsubmenuentry \"Boot using fallback initramfs\" {\n\t\tinitrd /boot/initramfs-linux-lts-fallback.img\n\t\t}\n\tsubmenuentry \"Boot to terminal\" {\n\t\tadd_options \"systemd.unit=multi-user.target\"\n\t\t}" >> ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
+					#[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
 					check_for_error
 					;;
 		"systemd-boot")
