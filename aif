@@ -1359,9 +1359,12 @@ install_base() {
     
     # If a selection made, act
     if 	[[ $(cat ${PACKAGES}) != "" ]]; then
-    
-		# Ensure there is a kernel selected or pre-installed
-		if ([[ -e /boot/initramfs-linux.img ]] || [[ -e /boot/initramfs-linux-lts.img ]]); then
+		[[ $(cat ${PACKAGES} | grep \^linux$" ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3
+		[[ $(cat ${PACKAGES} | grep \^linux$" ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2
+		[[ $(cat ${PACKAGES} | grep \^linux$" ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1
+		[[ $(cat ${PACKAGES} | grep \^linux$" ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
+	
+		if [[ $KERNEL -gt 0 ]]; then
 			clear
 			[[ $(cat ${ANSWER}) -eq 1 ]] && pacstrap ${MOUNTPOINT} $(pacman -Sqg base | sed 's/linux//' | sed 's/util-/util-linux/') $(cat ${PACKAGES}) btrfs-progs f2fs-tools sudo 2>/tmp/.errlog
 			[[ $(cat ${ANSWER}) -eq 2 ]] && pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
