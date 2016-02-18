@@ -324,7 +324,7 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" \
              cp -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
              rankmirrors -n 10 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist 2>/tmp/.errlog
              check_for_error
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --infobox "$_Done!" 0 0
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --infobox "\n$_Done!\n\n" 0 0
 			 sleep 2
              ;;
          "4") if [[ -e /etc/pacman.d/mirrorlist.orig ]]; then       
@@ -1448,7 +1448,7 @@ uefi_bootloader() {
     #Ensure again that efivarfs is mounted
 	[[ -z $(mount | grep /sys/firmware/efi/efivars) ]] && mount -t efivarfs efivarfs /sys/firmware/efi/efivars
 
-	# Deal with LVM Root for systemd-boot and refind config files
+	# Deal with LVM Root
 	[[ $(echo $ROOT_PART | grep "/dev/mapper/") != "" ]] && bl_root=$ROOT_PART \
 	|| bl_root=$"PARTUUID="$(blkid -s PARTUUID ${ROOT_PART} | sed 's/.*=//g' | sed 's/"//g')
 
@@ -1486,23 +1486,16 @@ uefi_bootloader() {
 					[[ $? -eq 0 ]] && arch_chroot "refind-install --usedefault ${UEFI_PART} --alldrivers" 2>/tmp/.errlog \
 					|| arch_chroot "refind-install" 2>/tmp/.errlog
 					check_for_error
-   
-					# Now generate config file to pass kernel parameters. Default read only (ro) changed to read-write (rw),
-					# and amend where using btfs subvol root       
-					arch_chroot "refind-mkrlconf" 2>/tmp/.errlog
-					check_for_error
-					sed -i 's/ro /rw /g' ${MOUNTPOINT}/boot/refind_linux.conf
-					[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/refind_linux.conf
-   
-					# Manually generate boot entry as "refind-mkrlconf" script isn't very good
-					#sed -i "s/#scanfor/scanfor/g" ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>/tmp/.errlog
-					#echo -e "menuentry \"Arch Linux\" {\n\ticon\t/EFI/refind/icons/os_arch.png\n\tvolume\t\"Arch Linux\"\n\tloader\t/boot/vmlinuz-linux\n\tinitrd\t/boot/initramfs-linux.img\n\toptions\t\"root=${bl_root} rw add_efi_memmap\"\n\tsubmenuentry \"Boot using fallback initramfs\" {\n\t\tinitrd /boot/initramfs-linux-fallback.img\n\t\t}\n\tsubmenuentry \"Boot to terminal\" {\n\t\tadd_options \"systemd.unit=multi-user.target\"\n\t\t}" >> ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
 					
-					# Amend for kernel(s) installed and btrfs mount options
-					#[[ $KERNEL -eq 2 ]] && sed - i "s/linux/linux-lts//g" ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
-					#[[ $KERNEL -eq 3 ]] && echo -e "menuentry \"Arch Linux\" {\n\ticon\t/EFI/refind/icons/os_arch.png\n\tvolume\t\"Arch Linux-LTS\"\n\tloader\t/boot/vmlinuz-linux-lts\n\tinitrd\t/boot/initramfs-linux-lts.img\n\toptions\t\"root=${bl_root} rw add_efi_memmap\"\n\tsubmenuentry \"Boot using fallback initramfs\" {\n\t\tinitrd /boot/initramfs-linux-lts-fallback.img\n\t\t}\n\tsubmenuentry \"Boot to terminal\" {\n\t\tadd_options \"systemd.unit=multi-user.target\"\n\t\t}" >> ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
-					#[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf 2>>/tmp/.errlog
-					#check_for_error
+					# Deal with LVM Root
+					bl_root=$(echo $bl_root | sed "s/PARTUUID=/UUID=/g")
+
+					# Create simple config file
+					echo -e "\"Boot with standard options\" \"root=$bl_root rw\"" > ${MOUNTPOINT}/boot/refind_linux.conf 2>/tmp/.errlog
+					
+					# Deal with btrfs subvolume
+					[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/refind_linux.conf
+					check_for_error
 					;;
 		"systemd-boot")
 					arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>/tmp/.errlog
