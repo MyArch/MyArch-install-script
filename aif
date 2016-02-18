@@ -1358,11 +1358,13 @@ install_base() {
     fi
     
     # If a selection made, act
-    if 	[[ $(cat ${PACKAGES}) != "" ]]; then
-		[[ $(cat ${PACKAGES} | grep \^linux$" ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3
-		[[ $(cat ${PACKAGES} | grep \^linux$" ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2
-		[[ $(cat ${PACKAGES} | grep \^linux$" ") != "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1
-		[[ $(cat ${PACKAGES} | grep \^linux$" ") == "" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
+    [[ $(cat ${PACKAGES}) != "" ]]; then
+    
+		# Determine kernel installation
+		[[ $(cat ${PACKAGES} | awk '{print $1}') == "linux" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=3
+		[[ $(cat ${PACKAGES} | awk '{print $1}') != "linux" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") != "" ]] && KERNEL=2
+		[[ $(cat ${PACKAGES} | awk '{print $1}') == "linux" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=1
+		[[ $(cat ${PACKAGES} | awk '{print $1}') != "linux" ]] && [[ $(cat ${PACKAGES} | grep "linux-lts") == "" ]] && KERNEL=0
 	
 		if [[ $KERNEL -gt 0 ]]; then
 			clear
