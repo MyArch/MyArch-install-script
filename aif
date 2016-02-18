@@ -898,6 +898,9 @@ mount_current_partition(){
 
 	# prep variable
 	MOUNT=""
+	
+	# Warn users that they CAN mount partitions without formatting them!
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --msgbox "$_WarnMount1 '$_FSSkip' $_WarnMount2" 0 0
 
     # LVM Detection. If detected, activate.
     detect_lvm
@@ -1472,7 +1475,7 @@ uefi_bootloader() {
 					arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>/tmp/.errlog
 					check_for_error
           
-					# Deal with LVM Root
+					# Deal with LVM Root (could use for refind?)
 					[[ $(echo $ROOT_PART | grep "/dev/mapper/") != "" ]] && sysdb_root=$ROOT_PART \
 					|| sysdb_root=$"PARTUUID="$(blkid -s PARTUUID ${ROOT_PART} | sed 's/.*=//g' | sed 's/"//g')
 					
@@ -1492,7 +1495,9 @@ uefi_bootloader() {
 	fi
 
 }
-
+	#									#
+	# Bootloader function begins here	#
+	#									#
     check_mount
     # Set the default PATH variable
     arch_chroot "PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/core_perl" 2>/tmp/.errlog
