@@ -197,12 +197,8 @@ _SelUefiBody="\nSelect UEFI Partition. This is a special partition for booting U
 _FormUefiBody="The UEFI partition"
 _FormUefiBody2="has already been formatted.\n\nReformat? Doing so will erase ALL data already on that partition.\n\n"
 
-# UEFI Options
-_OptUefiTitle=" UEFI Mountpoint Options "
-_OptUefiBody="\nThe bootloader(s) that can be installed later will depend on where the UEFI partition is mounted.\n\n- Grub2 and systemd-boot have no UEFI mount preference.\n- rEFInd requires mount at /boot/efi.\n\nNOTE: rEFInd with LVM is not supported, and installations must be updated manually. rEFInd is therefore recommended for experienced users.\n"
-
 # UEFI Mountpoint - Translate
-_MntUefiBody="\nSelect UEFI Mountpoint. refind-efi requires /boot/efi. systemd-boot requires /boot. Grub will work with either mountpoint."
+_MntUefiBody="\nSelect UEFI Mountpoint.\n\nsystemd-boot requires /boot. Grub will work with either mountpoint."
 
 # Extra Partitions
 _ExtPartBody="\nSelect additional partitions in any order, or 'Done' to finish."
@@ -230,11 +226,11 @@ _InstSysBody="\nInstall syslinux to Master Boot Record (MBR) or to Root (/)?\n\n
 
 # Install UEFI Bootloader
 _InstUefiBtTitle=" Install UEFI Bootloader "
-_InstUefiBtBody="\nrEFInd requires /boot/efi. systemd-boot requires /boot. Grub will work with either mountpoint.\n\nNOTE: rEFInd with LVM is not supported."
+_InstUefiBtBody="\nsystemd-boot requires /boot. Grub will work with either mountpoint."
 _SetBootDefBody="\nSome UEFI firmware may not detect the bootloader unless it is set as default by copying its efi stub to"
 _SetBootDefBody2="and renaming it to bootx64.efi.\n\nIt is recommended to do so unless already using a default bootloader, or where intending to use multiple bootloaders.\n\nSet bootloader as default?\n\n"
 
-# efi file set for Grub or Refind
+# efi file set for Grub
 _SetDefDoneBody="has been set as the default bootloader.\n\n"
 
 # Graphics Card Menu
