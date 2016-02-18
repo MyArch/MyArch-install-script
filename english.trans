@@ -219,7 +219,8 @@ _InstBseBody="\nSelect installation method.\n\nStandard: Select kernel(s) and op
 _InstStandBseBody="\nAt least one kernel (linux or linux-lts) must be selected. The base package group will be installed automatically. The base-devel package group is required to use the Arch User Repository (AUR).\n\n"
 _InstStandBase="Standard Installation"
 _InstAdvBase="Advanced Installation"
-_InstAdvBseBody="WARNING: This is for experienced users only. Newer users should use the 'standard' installation option.\n"
+_InstAdvBseBody="WARNING: This is for experienced users only. Newer users should use the 'standard' installation option."
+_InstAdvWait="\nGathering package descriptions."
 
 # Install BIOS Bootloader
 _InstBiosBtTitle=" Install BIOS Bootloader "
