@@ -1603,13 +1603,12 @@ install_cups(){
     esac
 }
 
-# Install alsa, xorg and input drivers. Also copy the xkbmap configuration file created earlier to the installed system
-# This will run only once.
+# Install xorg and input drivers. Also copy the xkbmap configuration file created earlier to the installed system
 install_xorg_input() {
 
 	echo "" > ${PACKAGES}
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_AXITitle" --checklist "$_AXIBody$_UseSpaceBar" 0 0 11 \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstGrMenuDS" --checklist "$_InstGrMenuDSBody$_UseSpaceBar" 0 0 11 \
 	"wayland" "-" off \
 	"xorg-server" "-" on \
 	"xorg-server-common" "-" off \

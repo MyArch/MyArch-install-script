@@ -166,7 +166,7 @@ _WarnMount2="option listed at the top of the file system menu.\n\nEnsure the cor
 _DevSelTitle="Select Device"
 _DevSelBody="\nDevices (/dev/) are available hard-disks and USB-sticks to install on. The first is /sda, the second /sdb, and so on.\n\nWhere using a USB-stick to boot Architect, be careful as it will also be listed!"
 
-# Partitioning Tool - Translate
+# Partitioning Tool
 _PartToolTitle="Partitioning Tool"
 _PartToolBody="\nAn Auto-Partition option is available for beginners. CFDisk is recomended for BIOS, Parted for UEFI.\n\nDO NOT select a UEFI/GPT-only partitioning tool for a BIOS/MBR system as this could cause serious problems, including an unbootable installation."
 _PartOptAuto="Auto Partition"
@@ -230,8 +230,6 @@ _InstSysBody="\nInstall syslinux to Master Boot Record (MBR) or to Root (/)?\n\n
 # Install UEFI Bootloader
 _InstUefiBtTitle=" Install UEFI Bootloader "
 _InstUefiBtBody="\nrEFInd requires /boot/efi. systemd-boot requires /boot. Grub will work with either mountpoint.\n\nNOTE: rEFInd with LVM is not supported."
-
-# Set UEFI Grub as default
 _SetBootDefBody="\nSome UEFI firmware may not detect the bootloader unless it is set as default by copying its efi stub to"
 _SetBootDefBody2="and renaming it to bootx64.efi.\n\nIt is recommended to do so unless already using a default bootloader, or where intending to use multiple bootloaders.\n\nSet bootloader as default?\n\n"
 
@@ -275,7 +273,7 @@ _InstNMErrBody="\nNetwork connection manager has been installed and enabled.\n\n
 
 # Welcome
 _WelTitle=" Welcome to"
-_WelBody="\nADD THAT IMPORTANT PACKAGES WILL BE PRE-CHKED FOR THE USER. This installer will download the latest packages from the Arch repositories. Installations are vanilla, so only the minimal necessary configuration is undertaken.\n\nHighlight options by pressing their numbers or by using the up/down arrow keys before pressing [enter] to confirm.\n\nSwitch between buttons by using [Tab] or the left/right arrow keys before pressing [enter] to confirm.\n"
+_WelBody="\nThis installer will download the latest packages from the Arch repositories. Only the minimal necessary configuration is undertaken.\n\nMENU OPTIONS: Select by pressing the option number or by using the up/down arrow keys before pressing [enter] to confirm. Switch between buttons by using [Tab] or the left/right arrow keys before pressing [enter] to confirm. Long lists can be navigated using the [pg up] and [pg down] keys, and/or by pressing the first letter of the desired option.\n\nCONFIGURATION & PACKAGE OPTIONS: Default packages in checklists will be pre-checked. Use the [Spacebar] to de/select."
 
 # Preparation Menu
 _PrepMenuTitle="Prepare Installation"
@@ -309,6 +307,7 @@ _ConfUsrNew="Add New User(s)"
 _InstGrMenuTitle="Install Graphical Interface"
 _InstGrMenuBody="\nPrior to installing a desktop environment, graphics, input, and sound drivers MUST be installed first. This will include installing graphics card drivers."
 _InstGrMenuDS="Install Display Server"
+_InstGrMenuDSBody="In addition to xorg and wayland options, drivers for input devices (xf86-input-) are also listed."
 _InstGrMenuDD="Install Display Driver"
 _InstGrMenuGE="Install Graphical Environment"
 _InstGrMenuDM="Install Display Manager"
