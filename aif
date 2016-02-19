@@ -683,6 +683,8 @@ secure_wipe(){
 			check_for_error
 		fi
 		
+		detect_lvm
+		deactivate_lvm
 		clear
 		wipe -Ifre ${DEVICE}
 		
@@ -696,13 +698,15 @@ secure_wipe(){
 
 # BIOS and UEFI
 auto_partition(){
-	
+
 	LUKS_ROOT_PART=""
 	
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2" 0 0
 	if [[ $? -eq 0 ]]; then
 		
-		# Delete existing partitions
+		# Deal with LVM and delete existing partitions
+		detect_lvm
+		deactivate_lvm
 		parted -s ${DEVICE} print | awk '/^ / {print $1}' > /tmp/.del_parts
 	
 		for del_part in $(tac /tmp/.del_parts); do
@@ -731,7 +735,10 @@ auto_partition(){
         
         # Extra steps for Encrypted Root
         if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
-			LUKS_ROOT_PART=${DEVICE}\2
+			modprobe -a dm-mod dm_crypt
+			
+			# Presumably the root partition will be bigger than 512MB.
+			LUKS_ROOT_PART=$(lsblk -lno SIZE,NAME,TYPE ${DEVICE} | grep "part" | sort -n -r | awk '{print $2}' | head -1)
 			LUKS_ROOT_NAME="cryptroot"
 			
         	set_luks_password
@@ -958,14 +965,6 @@ mount_current_partition(){
 
     # LVM Detection. If detected, activate.
     detect_lvm
-    if [[ $LVM -eq 1 ]]; then
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --infobox "$_LvmDetBody2" 0 0
-       sleep 2   
-       modprobe dm-mod 2>/tmp/.errlog
-       check_for_error
-       vgscan >/dev/null 2>&1
-       vgchange -ay >/dev/null 2>&1
-    fi
 
 	# Ensure partitions are unmounted (i.e. where mounted previously), and then list available partitions
 	INCLUDE_PART='part\|lvm\|crypt'
@@ -1107,17 +1106,6 @@ set_luks_password(){
 
 luks_menu() {
 
-
-
-# Easy option
-luks_auto(){
-	
-	set_luks_password
-    echo $PASSWD | cryptsetup -q luksFormat ${LUKS_ROOT_PART}
-	echo $PASSWD | cryptsetup open ${LUKS_ROOT_PART} cryptroot
-
-}
-
 	# Check there are at least two viable partitions for LUKS.
 	INCLUDE_PART='part\|lvm'
 	find_partitions
@@ -1162,11 +1150,18 @@ detect_lvm() {
   LVM_VG=$(vgs -o vg_name --noheading 2>/dev/null)
   LVM_LV=$(lvs -o vg_name,lv_name --noheading --separator - 2>/dev/null)
   
-  if [[ $LVM_LV = "" ]] && [[ $LVM_VG = "" ]] && [[ $LVM_PV = "" ]]; then
-     LVM=0
-  else
-     LVM=1
-  fi
+	if [[ $LVM_LV = "" ]] && [[ $LVM_VG = "" ]] && [[ $LVM_PV = "" ]]; then
+	# LVM may not be detected if used with encryption
+	([[ $LUKS_ROOT_PART == "" ]] && [[ LVM -ne 1 ]]) && LVM=0
+	else
+		# Flag LVM for mkinitcpio configuration and "activate" LVM
+		LVM=1
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --infobox "$_LvmDetBody2" 0 0
+		modprobe dm-mod 2>/tmp/.errlog
+		check_for_error
+		vgscan >/dev/null 2>&1
+		vgchange -ay >/dev/null 2>&1
+	fi
  
 }
 
@@ -1201,7 +1196,13 @@ deactivate_lvm() {
         for i in ${LVM_PT}; do
             dd if=/dev/zero bs=512 count=512 of=/dev/${i} >/dev/null 2>&1
         done
-    fi
+        
+        LVM=0
+        vgscan >/dev/null 2>&1
+		vgchange -ay >/dev/null 2>&1
+    else
+		prep_menu
+	fi
 
 }
 
