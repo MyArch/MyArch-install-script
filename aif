@@ -735,6 +735,7 @@ auto_partition(){
 			LUKS_ROOT_NAME="cryptroot"
 			
         	set_luks_password
+        	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_Encrypted $_PartOptAuto" --infobox "$_LuksWaitBody $LUKS_ROOT_PART\n\n$_PlsWaitBody" 0 0
 			echo $PASSWD | cryptsetup -q luksFormat ${LUKS_ROOT_PART} 2>/tmp/.errlog
 			check_for_error
 			echo $PASSWD | cryptsetup open ${LUKS_ROOT_PART} $LUKS_ROOT_NAME 2>/tmp/.errlog

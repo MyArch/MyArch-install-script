@@ -63,6 +63,7 @@ _LuksLvm="LVM on LUKS"
 _LuksPartErrBody="\nA minimum of two partitions are required for encryption:\n\n1. Root (/) - standard or lvm partition types.\n\n2. Boot (/boot or /boot/efi) - standard partition types only (no encryption or lvm).\n"
 _SelLuksRootBody="\nSelect the ROOT (/) partition to encrypt. This is where Arch will be installed.\n\n"
 _LuksPassBody="\nEnter a password to encrypt the Root partition. This should not be the same as the Root or user account passwords.\n"
+_LuksWaitBody="Creating encrypted Root partition on"
 
 # Logical Volume Management
 _PrepLVM="Logical Volume Management (optional)"
