@@ -43,6 +43,12 @@ NVIDIA_INST=0         				# Indicates if NVIDIA proprietary driver has been inst
 NVIDIA=""							# NVIDIA driver(s) to install depending on kernel(s)
 VB_MOD=""							# Virtualbox guest modules to install depending on kernel(s)
 SHOW_ONCE=0           				# Show de_wm information only once
+MOUNTPOINT="/mnt"       			# Installation: Root mount
+MOUNT=""							# Installation: All other mounts branching from Root
+BTRFS=0                     		# BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
+BTRFS_MNT=""                		# used for syslinux where /mnt is a btrfs subvolume
+F2FS=0								# F2FS used? "1" = yes.
+INCLUDE_PART='part\|lvm\|crypt'		# Partition types to include for display and selection.
 
 # Architecture
 ARCHI=`uname -m`     				# Display whether 32 or 64 bit system
@@ -69,8 +75,9 @@ VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 
 # LUKS
 LUKS=0                  			# Luks Detected?
+LUKS_ROOT_PART=""					# If encrypted, root partition
+LUKS_ROOT_NAME=""					# Name given to encrypted root partition
 
-# Installation
 MOUNTPOINT="/mnt"       			# Installation: Root mount
 MOUNT=""							# Installation: All other mounts branching from Root
 BTRFS=0                     		# BTRFS used? "1" = btrfs alone, "2" = btrfs + subvolume(s)
@@ -213,8 +220,6 @@ id_system() {
       SYSTEM="BIOS"
     fi
          
-    # Encryption (LUKS) Detection
-    [[ $(lsblk -o TYPE | grep "crypt") == "" ]] && LUKS=0 || LUKS=1
 
 }   
  
@@ -275,7 +280,7 @@ configure_mirrorlist() {
 mirror_by_country() {
 
  COUNTRY_LIST=""
- countries_list="AU Australia AT Austria BY Belarus BE Belgium BR Brazil BG Bulgaria CA Canada CL Chile CN China CO Colombia CZ Czech_Republic DK Denmark EE Estonia FI Finland FR France DE Germany GB United_Kingdom GR Greece HU Hungary IN India IE Ireland IL Israel IT Italy JP Japan KZ Kazakhstan KR Korea LV Latvia LU Luxembourg MK Macedonia NL Netherlands NC New_Caledonia NZ New_Zealand NO Norway PL Poland PT Portugal RO Romania RU Russia RS Serbia SG Singapore SK Slovakia ZA South_Africa ES Spain LK Sri_Lanka SE Sweden CH Switzerland TW Taiwan TR Turkey UA Ukraine US United_States UZ Uzbekistan VN Vietnam"
+ countries_list="AU Australia AT Austria BA Bosnia_Herzegovina BY Belarus BE Belgium BR Brazil BG Bulgaria CA Canada CL Chile CN China CO Colombia CZ Czech_Republic DK Denmark EE Estonia FI Finland FR France DE Germany GB United_Kingdom GR Greece HU Hungary IN India IE Ireland IL Israel IT Italy JP Japan KZ Kazakhstan KR Korea LV Latvia LU Luxembourg MK Macedonia NL Netherlands NC New_Caledonia NZ New_Zealand NO Norway PL Poland PT Portugal RO Romania RU Russia RS Serbia SG Singapore SK Slovakia ZA South_Africa ES Spain LK Sri_Lanka SE Sweden CH Switzerland TW Taiwan TR Turkey UA Ukraine US United_States UZ Uzbekistan VN Vietnam"
 
  for i in ${countries_list}; do
      COUNTRY_LIST="${COUNTRY_LIST} ${i}"
@@ -307,25 +312,36 @@ mirror_by_country() {
  fi
 }
 
-dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" \
+
+
+	if [[ $SUB_MENU != "mirror_menu" ]]; then
+	   SUB_MENU="mirror_menu"
+	   HIGHLIGHT_SUB=1
+	else
+	   if [[ $HIGHLIGHT_SUB != 5 ]]; then
+	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
+	   fi
+	fi
+
+dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" \
     --menu "$_MirrorlistBody" 0 0 5 \
 	"1" "$_MirrorbyCountry" \
-	"2" "$_MirrorEdit" \
-	"3" "$_MirrorRankTitle" \
+	"2" "$_MirrorRankTitle" \
+	"3" "$_MirrorEdit" \
 	"4" "$_MirrorRestTitle" \
 	"5" "$_Back" 2>${ANSWER}	
 
     case $(cat ${ANSWER}) in
         "1") mirror_by_country
              ;;
-        "2") nano /etc/pacman.d/mirrorlist
-             ;;
-        "3") dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --infobox "$_MirrorRankBody $_PlsWaitBody" 0 0
+        "2") dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --infobox "$_MirrorRankBody $_PlsWaitBody" 0 0
              cp -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
              rankmirrors -n 10 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist 2>/tmp/.errlog
              check_for_error
              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_MirrorlistTitle" --infobox "\n$_Done!\n\n" 0 0
 			 sleep 2
+             ;;
+        "3") nano /etc/pacman.d/mirrorlist
              ;;
          "4") if [[ -e /etc/pacman.d/mirrorlist.orig ]]; then       
 				 mv -f /etc/pacman.d/mirrorlist.orig /etc/pacman.d/mirrorlist
@@ -469,7 +485,7 @@ set_root_password() {
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody" 0 0 2> ${ANSWER} || config_base_menu
     PASSWD=$(cat ${ANSWER})
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody2" 0 0 2> ${ANSWER} || config_base_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
     PASSWD2=$(cat ${ANSWER})
     
     if [[ $PASSWD == $PASSWD2 ]]; then 
@@ -478,7 +494,7 @@ set_root_password() {
        rm /tmp/.passwd
        check_for_error
     else
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PassRtErrBody" 0 0
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PassErrBody" 0 0
        set_root_password
     fi
 
@@ -500,17 +516,17 @@ create_new_user() {
         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
         PASSWD=$(cat ${ANSWER}) 
     
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
+        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
         PASSWD2=$(cat ${ANSWER}) 
     
         # loop while passwords entered do not match.
         while [[ $PASSWD != $PASSWD2 ]]; do
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PassNUsrErrBody" 0 0
+              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PassErrBody" 0 0
               
               dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
               PASSWD=$(cat ${ANSWER}) 
     
-              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody2 $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
+              dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
               PASSWD2=$(cat ${ANSWER}) 
         done      
     
@@ -536,7 +552,9 @@ run_mkinitcpio() {
 	clear
 
 	# If $LVM is being used, add the lvm2 hook
-	[[ $LVM -eq 1 ]] && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
+	([[ $LVM -eq 1 ]] && [[ $LUKS_ROOT_PART == "" ]]) && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
+    ([[ $LVM -eq 1 ]] && [[ $LUKS_ROOT_PART != "" ]]) && sed -i 's/block filesystems/block encrypt lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
+    ([[ $LVM -eq 0 ]] && [[ $LUKS_ROOT_PART != "" ]]) && sed -i 's/block filesystems/block encrypt filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
     
 	# Amend command depending on kernel(s) installed
 	([[ $KERNEL -eq 1 ]] || [[ $KERNEL -eq 3 ]]) && arch_chroot "mkinitcpio -p linux" 2>/tmp/.errlog
@@ -610,6 +628,47 @@ select_device() {
  
   }
 
+# Finds all available partitions according to type(s) specified and generates a list 
+# of them. This also includes partitions on different devices.
+find_partitions() {
+
+	PARTITIONS=""
+	NUMBER_PARTITIONS=0
+	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep $INCLUDE_PART | sed 's/part/\/dev\//g' | sed 's/lvm\|crypt/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
+
+    for i in ${partition_list}; do
+        PARTITIONS="${PARTITIONS} ${i}"
+        NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
+    done
+    
+    # Double-partitions will be counted due to counting sizes, so fix    
+    NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS / 2 ))
+
+	# Deal with partitioning schemes appropriate to mounting, lvm, and/or luks.
+	case $INCLUDE_PART in
+	'part\|lvm\|crypt') # Deal with incorrect partitioning for main mounting function
+
+		if ([[ $SYSTEM == "UEFI" ]] && [[ $NUMBER_PARTITIONS -lt 2 ]]) || ([[ $SYSTEM == "BIOS" ]] && [[ $NUMBER_PARTITIONS -eq 0 ]]); then
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PartErrBody" 0 0
+			create_partitions
+		fi
+		;;
+	'part\|crypt') # Ensure there is at least one partition for LVM 
+		if [[ $NUMBER_PARTITIONS -eq 0 ]]; then
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_LvmPartErrBody" 0 0
+			create_partitions
+		fi
+		;;
+	'part\|lvm') # Ensure there are at least two partitions for LUKS
+		if [[ $NUMBER_PARTITIONS -lt 2 ]]; then
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_LuksPartErrBody" 0 0
+			create_partitions
+		fi
+		;;
+	esac
+    
+}
+
 create_partitions(){
 
 # Securely destroy all data on a given device.
@@ -638,6 +697,8 @@ secure_wipe(){
 
 # BIOS and UEFI
 auto_partition(){
+	
+	LUKS_ROOT_PART=""
 	
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2" 0 0
 	if [[ $? -eq 0 ]]; then
@@ -669,6 +730,22 @@ auto_partition(){
 		parted -s ${DEVICE} mkpart primary ext3 513MiB 100% 2>>/tmp/.errlog
 		check_for_error
         
+        # Extra steps for Encrypted Root
+        if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
+			LUKS_ROOT_PART=${DEVICE}\2
+			LUKS_ROOT_NAME="cryptroot"
+			
+        	set_luks_password
+			echo $PASSWD | cryptsetup -q luksFormat ${LUKS_ROOT_PART} 2>/tmp/.errlog
+			check_for_error
+			echo $PASSWD | cryptsetup open ${LUKS_ROOT_PART} $LUKS_ROOT_NAME 2>/tmp/.errlog
+			check_for_error
+			vgcreate lvmvolgroup ${LUKS_ROOT_PART} 2>/tmp/.errlog
+			lvcreate -l +100%FREE lvmvolgroup -n $LUKS_ROOT_NAME 2>>/tmp/.errlog
+			check_for_error
+			LVM_ROOT=1
+		fi
+
         # Show created partitions
         lsblk ${DEVICE} -o NAME,TYPE,FSTYPE,SIZE > /tmp/.devlist
         dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "" --textbox /tmp/.devlist 0 0
@@ -679,9 +756,10 @@ auto_partition(){
 }
 
 	# Partitioning Menu
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --menu "$_PartToolBody" 0 0 7 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --menu "$_PartToolBody" 0 0 8 \
     "$_PartOptWipe" "BIOS & UEFI" \
-    "$_PartOptAuto" "BIOS & UEFI" \
+    "$_Standard $_PartOptAuto" "BIOS & UEFI" \
+    "$_Encrypted $_PartOptAuto" "BIOS & UEFI" \
  	"parted" "BIOS & UEFI" \
 	"cfdisk" "BIOS/MBR" \
 	"cgdisk" "UEFI/GPT" \
@@ -691,39 +769,15 @@ auto_partition(){
 	clear
 	# If something selected
 	if [[ $(cat ${ANSWER}) != "" ]]; then
-		if ([[ $(cat ${ANSWER}) != $_PartOptWipe ]] &&  [[ $(cat ${ANSWER}) != $_PartOptAuto ]]); then
+		if ([[ $(cat ${ANSWER}) != $_PartOptWipe ]] &&  [[ $(cat ${ANSWER}) != "$_Standard $_PartOptAuto" ]] &&  [[ $(cat ${ANSWER}) != "$_Encrypted $_PartOptAuto" ]]); then
 			cat ${ANSWER} ${DEVICE}
 			prep_menu
 		else
 			[[ $(cat ${ANSWER}) == $_PartOptWipe ]] && secure_wipe && create_partitions
-			[[ $(cat ${ANSWER}) == $_PartOptAuto ]] && auto_partition
+			([[ $(cat ${ANSWER}) == "$_Standard $_PartOptAuto" ]] || [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]) && auto_partition
 		fi
 	fi	
 }	
-
-# Revised to include partition sizes. Finds all available partitions and generate a list 
-# of them. This also includes partitions on different devices.
-find_partitions() {
-
-	PARTITIONS=""
-	NUMBER_PARTITIONS=0
-	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|lvm\|crypt' | sed 's/part/\/dev\//g' | sed 's/lvm\|crypt/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
-
-    for i in ${partition_list[@]}; do
-        PARTITIONS="${PARTITIONS} ${i}"
-        NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
-    done
-    
-    # Divide by two as partition sizes are also counted.
-    NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS / 2 ))
-    
-    # Deal with incorrect partitioning
-    if ([[ $SYSTEM == "UEFI" ]] && [[ $NUMBER_PARTITIONS -lt 2 ]]) || ([[ $SYSTEM == "BIOS" ]] && [[ $NUMBER_PARTITIONS -eq 0 ]]); then
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PartErrBody" 0 0
-        create_partitions
-    fi
-    
-}
 
 # Set static list of filesystems rather than on-the-fly. Partially as most require additional flags, and 
 # partially because some don't seem to be viable.
@@ -914,6 +968,7 @@ mount_current_partition(){
     fi
 
 	# Ensure partitions are unmounted (i.e. where mounted previously), and then list available partitions
+	INCLUDE_PART='part\|lvm\|crypt'
     umount_partitions
 	find_partitions
 	
@@ -923,7 +978,7 @@ mount_current_partition(){
     ROOT_PART=${PARTITION}
 
     # Identify if root is LVM
-    [[ $(echo $ROOT_PART | grep "/dev/mapper/") == "" ]] && LVM_ROOT=0 || LVM_ROOT=1
+    [[ $(lsblk -lno TYPE | grep "lvm") != "" ]] && LVM_ROOT=0 || LVM_ROOT=1
     	
 	select_filesystem
 	[[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${PARTITION} >/dev/null 2>/tmp/.errlog
@@ -1030,6 +1085,71 @@ mount_current_partition(){
 
 ######################################################################
 ##																	##
+##             Encryption (dm_crypt) Functions				    	##
+##																	##
+######################################################################
+
+# Save repetition of code.
+set_luks_password(){
+
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --clear --insecure --passwordbox "$_LuksPassBody" 0 0 2> ${ANSWER} || config_base_menu
+    PASSWD=$(cat ${ANSWER})
+    
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --clear --insecure --passwordbox "$_LuksPassBody2" 0 0 2> ${ANSWER} || config_base_menu
+    PASSWD2=$(cat ${ANSWER})
+    
+    if [[ $PASSWD != $PASSWD2 ]]; then 
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PassErrBody" 0 0
+       set_luks_password
+    fi
+
+}
+
+luks_menu() {
+
+
+
+# Easy option
+luks_auto(){
+	
+	set_luks_password
+    echo $PASSWD | cryptsetup -q luksFormat ${LUKS_ROOT_PART}
+	echo $PASSWD | cryptsetup open ${LUKS_ROOT_PART} cryptroot
+
+}
+
+	# Check there are at least two viable partitions for LUKS.
+	INCLUDE_PART='part\|lvm'
+	find_partitions
+	modprobe -a dm-mod dm_crypt
+
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --menu "$_LuksMenuBody" 0 0 5 \
+	"$_LuksHelp" "-" \
+	"$_LuksDefault" "$_LuksLvm" \
+	"$_LuksPlain" "LUKS" \
+	"$_Back" "-" 2>${ANSWER}	
+
+	case $(cat ${ANSWER}) in
+	"1") echo "" > /dev/null # add help page
+		;;
+	"2") echo "" > /dev/null # add help page
+		;;
+	"3") echo "" > /dev/null # add help page
+		;;
+	"4") echo "" > /dev/null # add help page
+		;;
+	*) prep_menu
+		;;
+	esac
+    
+	luks_menu 	
+
+}
+
+
+
+######################################################################
+##																	##
 ##             Logical Volume Management Functions			    	##
 ##																	##
 ######################################################################
@@ -1082,23 +1202,6 @@ deactivate_lvm() {
             dd if=/dev/zero bs=512 count=512 of=/dev/${i} >/dev/null 2>&1
         done
     fi
-
-}
-
-# Find and create a list of partitions that can be used for LVM. Partitions already used are excluded.
-find_lvm_partitions() {
-
-    LVM_PARTITIONS=""
-    NUMBER_LVM_PARTITIONS=0
-    lvm_partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep 'part\|crypt' | sed 's/part/\/dev\//g' | sed 's/crypt/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
-	
-    for i in ${lvm_partition_list[@]}; do
-        LVM_PARTITIONS="${LVM_PARTITIONS} ${i}"
-        NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS + 1 ))
-    done
-    
-    # Double-partitions will be counted due to counting size, so fix
-    NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS / 2 ))
 
 }
 
@@ -1157,12 +1260,10 @@ check_lv_size() {
       
 }
 
-	# Check that there is at least one partition available for LVM
-    if [[ $NUMBER_LVM_PARTITIONS -eq 0 ]]; then
-        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_LvmPartErrBody" 0 0
-        prep_menu
-    fi
-    
+	# Find LVM appropriate partitions.
+	INCLUDE_PART='part\|crypt'
+	find_partitions
+		
     # Create a temporary file to store the partition(s) selected. This is later used for the vgcreate command. 'x' is used as a marker.
     echo "x" > /tmp/.vgcreate
     
@@ -1180,29 +1281,29 @@ check_lv_size() {
     done
     
     # Select the first or only partition for the Volume Group
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --menu "$_LvmPvSelBody" 0 0 4 ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu 
-    LVM_PARTITION=$(cat ${ANSWER})
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --menu "$_LvmPvSelBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu 
+    PARTITION=$(cat ${ANSWER})
     
     # Add the partition to the temporary file for the vgcreate command.
     # Remove selected partition from the list and deduct number of LVM viable partitions remaining.
-    sed -i "s~x~${LVM_PARTITION} x~" /tmp/.vgcreate
-    LVM_PARTITIONS=$(echo $LVM_PARTITIONS | sed "s~${LVM_PARTITION} [0-9]*[G-M]~~" | sed "s~${LVM_PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${LVM_PARTITION}$' -'~~)
-    NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
+    sed -i "s~x~${PARTITION} x~" /tmp/.vgcreate
+    PARTITIONS=$(echo $PARTITIONS | sed "s~${PARTITION} [0-9]*[G-M]~~" | sed "s~${PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${PARTITION}$' -'~~)
+    NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --infobox "\n$_Done\n\n" 0 0
     sleep 1
 
     # Where there are viable partitions still remaining, run loop
-    while [[ $NUMBER_LVM_PARTITIONS -gt 0 ]]; do
+    while [[ $NUMBER_PARTITIONS -gt 0 ]]; do
 
-           dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --menu "$_LvmPvSelBody" 0 0 4 $"Done" $"-" ${LVM_PARTITIONS} 2>${ANSWER} || prep_menu 
-           LVM_PARTITION=$(cat ${ANSWER})
+           dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --menu "$_LvmPvSelBody" 0 0 4 $"Done" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu 
+           PARTITION=$(cat ${ANSWER})
 
-           if [[ $LVM_PARTITION == "Done" ]]; then
+           if [[ $PARTITION == "Done" ]]; then
               break;
            else
-              sed -i "s~x~${LVM_PARTITION} x~" /tmp/.vgcreate
-              LVM_PARTITIONS=$(echo $LVM_PARTITIONS | sed "s~${LVM_PARTITION} [0-9]*[G-M]~~" | sed "s~${LVM_PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${LVM_PARTITION}$' -'~~)
-              NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
+              sed -i "s~x~${PARTITION} x~" /tmp/.vgcreate
+              PARTITIONS=$(echo $PARTITIONS | sed "s~${PARTITION} [0-9]*[G-M]~~" | sed "s~${PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${PARTITION}$' -'~~)
+              NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
               dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --infobox "\n$_Done\n\n" 0 0
               sleep 1
            fi
@@ -1425,7 +1526,14 @@ bios_bootloader() {
 				check_for_error
 
 				# Amend configuration file to specify root.
+				([[ $LVM -eq 1 ]] && [[ $LUKS_ROOT_PART == "" ]]) && sed -i "s~APPEND.*~APPEND root=${ROOT_PART} rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				([[ $LVM -eq 1 ]] && [[ $LUKS_ROOT_PART != "" ]]) && sed -i "s~APPEND.*~APPEND root=${ROOT_PART} cryptdevice=PARTUUID=rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				([[ $LVM -eq 0 ]] && [[ $LUKS_ROOT_PART != "" ]]) && sed -i "s~APPEND.*~APPEND root=${ROOT_PART} rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				APPEND root=/dev/mapper/lvmvolgroup-cryptroot cryptdevice=PARTUUID=<UUID>:cryptroot rw
+
+				# Amend configuration file to specify root.
 				sed -i "s~APPEND.*~APPEND root=${ROOT_PART} rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				[[ $LUKS_ROOT_PART != "" ]] && sed -i "s~rw ~cryptdevice=$(blkid $LUKS_ROOT_PART | awk '{print $2}' | sed "s/\"//g"):$LUKS_ROOT_NAME" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 
 				# Amend configuration file for kernel(s) installed
 				if [[ $KERNEL -eq 3 ]]; then
@@ -2164,7 +2272,6 @@ prep_menu() {
 			;;
         "5") detect_lvm
              deactivate_lvm
-             find_lvm_partitions
              create_lvm
              ;;
         "6") mount_partitions
