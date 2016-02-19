@@ -13,7 +13,11 @@ _AlreadyInst="Already installed:"
 _All="All"
 _Done="Done"
 _PlsWaitBody="\nPlease wait...\n\n"
+_PassReEntBody="\nRe-enter the password.\n"
 _ErrTitle="Error"
+_PassErrBody="\nThe passwords entered do not match. Please try again.\n\n"
+_Standard="Standard"
+_Encrypted="Encrypted"
 
 # btrfs
 _btrfsSVTitle="btrfs Subvolumes"
@@ -50,6 +54,15 @@ _PrepPacKey="Refresh Pacman Keys"
 
 # LUKS / DM-Crypt / Encryption
 _PrepLUKS="Block Device Encryption (optional)"
+_LuksMenuBody="\nDevices encrypted using dm_crypt cannot be accessed or even seen without being unlocked via a key or password.\n\nA seperate boot partition without encryption or logical volume management (LVM) is required.\n\nAutomatic Encryption is recommended for beginners."
+_LuksHelp="Help"
+_LuksAuto="Automatic Encryption"
+_LuksDefault="Default Encryption"
+_LuksPlain="Plain Encryption"
+_LuksLvm="LVM on LUKS"
+_LuksPartErrBody="\nA minimum of two partitions are required for encryption:\n\n1. Root (/) - standard or lvm partition types.\n\n2. Boot (/boot or /boot/efi) - standard partition types only (no encryption or lvm).\n"
+_SelLuksRootBody="\nSelect the ROOT (/) partition to encrypt. This is where Arch will be installed.\n\n"
+_LuksPassBody="\nEnter a password to encrypt the Root partition. This should not be the same as the Root or user account passwords.\n"
 
 # Logical Volume Management
 _PrepLVM="Logical Volume Management (optional)"
@@ -95,7 +108,7 @@ _ReqMetBody="\nAll checks passed!\n\n"
 
 # Installer Mirrorlist
 _MirrorlistTitle=" Mirrorlist "
-_MirrorlistBody="\nThe mirrorlist contains server addresses used by pacman to install packages. They are accessed by pacman in the order listed.\n\n"
+_MirrorlistBody="\nThe mirrorlist contains server addresses used by pacman to install packages.\n\nTo find the fastest servers, generate a mirrorlist by country before running RankMirrors, otherwise the process will take a long time.\n\nNOTE: Close text files with '[CTRL] + [x]'. If edited, then press [y] to save or [n] to discard changes.\n"
 _MirrorbyCountry="Generate list by Country"
 _MirrorEdit="Manually edit mirrorlist"
 _MirrorRankTitle="Run RankMirrors"
@@ -139,7 +152,6 @@ _HostNameBody="\nThe host name is used to identify the system on a network.\n\nI
 # Set Root Password
 _PassRtBody="\nEnter Root password\n\n"
 _PassRtBody2="\nRe-enter Root password\n\n"
-_PassRtErrBody="\nThe Root passwords entered do not match. Please try again.\n\n"
 
 # Create New User
 _NUsrTitle="Create New User"
@@ -151,9 +163,7 @@ _NUsrErrBody="\nAn incorrect user name was entered. Please try again.\n\n"
 
 # Set User
 _PassNUsrBody="\nEnter password for" 
-_PassNUsrBody2="\nRe-enter password for"
 _NUsrSetBody="\nCreating User and setting groups...\n\n"
-_PassNUsrErrBody="\nThe User passwords entered do not match. Please try again.\n\n"
 
 # Mounting (Partitions)
 _MntStatusTitle="Mount Status"
@@ -168,8 +178,8 @@ _DevSelBody="\nDevices (/dev/) are available hard-disks and USB-sticks to instal
 
 # Partitioning Tool
 _PartToolTitle="Partitioning Tool"
-_PartToolBody="\nAn Auto-Partition option is available for beginners. CFDisk is recomended for BIOS, Parted for UEFI.\n\nDO NOT select a UEFI/GPT-only partitioning tool for a BIOS/MBR system as this could cause serious problems, including an unbootable installation."
-_PartOptAuto="Auto Partition"
+_PartToolBody="\nAutomatic partition options are available for beginners. Otherwise, cfdisk is recomended for BIOS, parted for UEFI.\n\nDO NOT select a UEFI/GPT-only partitioning tool for a BIOS/MBR system as this could cause serious problems, including an unbootable installation."
+_PartOptAuto="Automatic Partition"
 _PartOptWipe="Securely Wipe Device (optional)"
 _AutoPartWipeBody1="\nWARNING: ALL data on"
 _AutoPartWipeBody2="will be destroyed using the command 'wipe -Ifre'. This process may also take a long time depending on the size of the device.\n\nDo you wish to continue?\n"
