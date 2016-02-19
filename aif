@@ -64,7 +64,6 @@ SUB_MENU=""           				# Submenu to be highlighted
 
 # Logical Volume Management
 LVM=0                   			# Logical Volume Management Detected?
-LVM_ROOT=0              			# LVM used for Root?
 LVM_SEP_BOOT=0          			# 1 = Seperate /boot, 2 = seperate /boot & LVM
 LVM_DISABLE=0           			# Option to allow user to deactive existing LVM
 LVM_VG=""               			# Name of volume group to create
@@ -743,7 +742,7 @@ auto_partition(){
 			vgcreate lvmvolgroup ${LUKS_ROOT_PART} 2>/tmp/.errlog
 			lvcreate -l +100%FREE lvmvolgroup -n $LUKS_ROOT_NAME 2>>/tmp/.errlog
 			check_for_error
-			LVM_ROOT=1
+			LVM=1
 		fi
 
         # Show created partitions
