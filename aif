@@ -1466,6 +1466,7 @@ check_lv_size() {
     lvcreate -l +100%FREE ${LVM_VG} -n ${LVM_LV_NAME} 2>/tmp/.errlog
     check_for_error
     NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
+    LVM=1
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --yesno "$_LvmCompBody" 0 0 \
     && show_devices || prep_menu
 }
