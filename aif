@@ -741,7 +741,7 @@ auto_partition(){
 			LUKS_ROOT_PART=$(lsblk -lno SIZE,NAME,TYPE ${DEVICE} | grep "part" | sort -n -r | awk '{print $2}' | head -1)
 			LUKS_ROOT_NAME="cryptroot"
 			
-        	set_luks_password
+        	luks_password
         	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_Encrypted $_PartOptAuto" --infobox "$_LuksWaitBody $LUKS_ROOT_NAME\n$_LuksWaitBody2 $LUKS_ROOT_PART\n$_PlsWaitBody" 0 0
 			echo $PASSWD | cryptsetup -q luksFormat ${LUKS_ROOT_PART} 2>/tmp/.errlog
 			check_for_error
@@ -1089,7 +1089,7 @@ mount_current_partition(){
 ######################################################################
 
 # Save repetition of code.
-set_luks_password(){
+luks_password(){
 
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --clear --insecure --passwordbox "$_LuksPassBody" 0 0 2> ${ANSWER} || config_base_menu
     PASSWD=$(cat ${ANSWER})
@@ -1109,7 +1109,7 @@ luks_open(){
 	LUKS_ROOT_DEV=""
 	LUKS_ROOT_NAME=""
 	INCLUDE_PART='crypt'
-    umount_partitions
+    #umount_partitions
 	find_partitions
 	
 	# Select encrypted partition to open 
@@ -1127,22 +1127,23 @@ luks_open(){
 		fi
 	done
 	
-	cryptsetup open --type luks ${LUKS_ROOT_DEV} ${LUKS_ROOT_NAME} > /tmp/.luks
+	luks_password
+	echo $PASSWD | cryptsetup open --type luks ${LUKS_ROOT_DEV} ${LUKS_ROOT_NAME} > /tmp/.luks
 	if [[ $(cat /tmp/.luks | grep -i "error") == "" ]]; then
 		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --textbox /tmp/.luks 0 0
 	else
 		check_for_error
 	fi
 	
-
+	luks_menu
 }
 
 luks_menu() {
 
 	# Check there are at least two viable partitions for LUKS.
-	INCLUDE_PART='part\|lvm'
-	find_partitions
-	modprobe -a dm-mod dm_crypt
+	#INCLUDE_PART='part\|lvm'
+	#find_partitions
+	#modprobe -a dm-mod dm_crypt
 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --menu "$_LuksMenuBody" 0 0 4 \
 	"$_LuksHelp" "-" \
@@ -1161,7 +1162,7 @@ luks_menu() {
 		;;
 	esac
     
-	luks_menu 	
+	#luks_menu 	
 
 }
 
