@@ -551,9 +551,9 @@ run_mkinitcpio() {
 	clear
 
 	# If $LVM is being used, add the lvm2 hook
-	([[ $LVM -eq 1 ]] && [[ $LUKS_ROOT_PART == "" ]]) && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
-    ([[ $LVM -eq 1 ]] && [[ $LUKS_ROOT_PART != "" ]]) && sed -i 's/block filesystems/block encrypt lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
-    ([[ $LVM -eq 0 ]] && [[ $LUKS_ROOT_PART != "" ]]) && sed -i 's/block filesystems/block encrypt filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
+	([[ $LVM -eq 1 ]] && [[ $LUKS_ROOT_DEV == "" ]]) && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
+    ([[ $LVM -eq 1 ]] && [[ $LUKS_ROOT_DEV != "" ]]) && sed -i 's/block filesystems/block encrypt lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
+    ([[ $LVM -eq 0 ]] && [[ $LUKS_ROOT_DEV != "" ]]) && sed -i 's/block filesystems/block encrypt filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
     
 	# Amend command depending on kernel(s) installed
 	([[ $KERNEL -eq 1 ]] || [[ $KERNEL -eq 3 ]]) && arch_chroot "mkinitcpio -p linux" 2>/tmp/.errlog
@@ -998,13 +998,20 @@ mount_current_partition(){
 				if [[ $(lsblk -lno FSTYPE ${i} | grep -i "crypto_LUKS") != "" ]]; then
 					LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
 					LUKS_ROOT_NAME=$(lsblk -lno NAME,FSTYPE,TYPE ${i} | grep -i "lvm2_member" | grep crypt$ | awk '{print $1}')
-					break
+					clear
+					echo $LUKS_ROOT_DEV
+					echo $LUKS_ROOT_NAME
+					read
 				else
 					LVM_ROOT=1
 				fi
 			fi
 		done
 	fi
+
+	echo $LUKS_ROOT_DEV
+					echo $LUKS_ROOT_NAME
+					read
 
 	# Identify and create swap, if applicable
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
