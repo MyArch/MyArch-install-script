@@ -1602,7 +1602,7 @@ bios_bootloader() {
 
 				# Amend configuration file to specify root.
 				sed -i "s~APPEND.*~APPEND root=${ROOT_PART} rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-				[[ $LUKS_ROOT_PART != "" ]] && sed -i "s~rw~cryptdevice=$(blkid $LUKS_ROOT_PART | awk '{print $2}' | sed 's~"~~g'):$LUKS_ROOT_NAME rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~rw~cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 
 				# Amend configuration file for kernel(s) installed
 				if [[ $KERNEL -eq 3 ]]; then
