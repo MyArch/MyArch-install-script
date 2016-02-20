@@ -1119,6 +1119,7 @@ luks_open(){
     LUKS_ROOT_NAME=$(cat ${ANSWER})
 	
 	luks_password
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --infobox "$_PlsWaitBody" 0 0
 	echo $PASSWD | cryptsetup open --type luks ${PARTITION} ${LUKS_ROOT_NAME}
 	check_for_error
 	lsblk ${PARTITION}
