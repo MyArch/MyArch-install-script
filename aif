@@ -633,7 +633,7 @@ find_partitions() {
 
 	PARTITIONS=""
 	NUMBER_PARTITIONS=0
-	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep $INCLUDE_PART | sed 's/part/\/dev\//g' | sed 's/lvm$\|crypt$/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
+	partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep $INCLUDE_PART | sed 's/part$/\/dev\//g' | sed 's/lvm$\|crypt$/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
 
     for i in ${partition_list}; do
         PARTITIONS="${PARTITIONS} ${i}"
@@ -1226,7 +1226,7 @@ detect_lvm() {
   
 	if [[ $LVM_LV = "" ]] && [[ $LVM_VG = "" ]] && [[ $LVM_PV = "" ]]; then
 	# LVM may not be detected if used with encryption
-	([[ $LUKS_ROOT_PART == "" ]] && [[ LVM -ne 1 ]]) && LVM=0
+	([[ $LUKS_ROOT_DEV == "" ]] && [[ LVM -ne 1 ]]) && LVM=0
 	else
 		# Flag LVM for mkinitcpio configuration and "activate" LVM
 		LVM=1
@@ -1274,8 +1274,6 @@ deactivate_lvm() {
         LVM=0
         vgscan >/dev/null 2>&1
 		vgchange -ay >/dev/null 2>&1
-    else
-		prep_menu
 	fi
 
 }
