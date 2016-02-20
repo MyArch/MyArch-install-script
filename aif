@@ -1106,29 +1106,20 @@ luks_password(){
 
 luks_open(){
 
-	LUKS_ROOT_DEV=""
 	LUKS_ROOT_NAME=""
-	INCLUDE_PART='crypt'
+	INCLUDE_PART='part'
     #umount_partitions
 	find_partitions
 	
 	# Select encrypted partition to open 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "\nsomething here" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
 	PARTITION=$(cat ${ANSWER})
-	LUKS_ROOT_NAME=$(echo $PARTITION | sed "s~/dev/mapper/~~g")
 	
-	# Identify parent of encrypted partition
-	LUKS_ROOT_DEV=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
-
-	for i in ${LUKS_ROOT_DEV}; do
-		if [[ $(lsblk -lno NAME,TYPE ${i} | grep  $LUKS_ROOT_NAME) != "" ]]; then
-			LUKS_ROOT_DEV=${i}
-			break;
-		fi
-	done
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --inputbox "Enter name of encrypted partition" 0 0 "cryptroot" 2>${ANSWER} || prep_menu
+    LUKS_ROOT_NAME=$(cat ${ANSWER})
 	
 	luks_password
-	echo $PASSWD | cryptsetup open --type luks ${LUKS_ROOT_DEV} ${LUKS_ROOT_NAME} > /tmp/.luks
+	echo $PASSWD | cryptsetup open --type luks ${PARTITION} ${LUKS_ROOT_NAME} > /tmp/.luks
 	if [[ $(cat /tmp/.luks | grep -i "error") == "" ]]; then
 		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --textbox /tmp/.luks 0 0
 	else
