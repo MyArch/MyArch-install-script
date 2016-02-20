@@ -988,7 +988,7 @@ mount_current_partition(){
 	# Make the directory and mount
 	mount_current_partition
 
-	# Identify if root is encrypted
+	# Identify if root is encrypted # NEED TO FIX THIS
 	if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm\|crypt") != "" ]]; then
 		root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
 		
@@ -997,7 +997,7 @@ mount_current_partition(){
 			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $root_name) != "" ]]; then
 				if [[ $(lsblk -lno FSTYPE ${i} | grep -i "crypto_LUKS") != "" ]]; then
 					LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
-					LUKS_ROOT_NAME=$(lsblk -lno NAME,STYPE,NAME ${i} | grep -i "lvm2_member" | grep crypt$ | awk '{print $1}')
+					LUKS_ROOT_NAME=$(lsblk -lno NAME,FSTYPE,TYPE ${i} | grep -i "lvm2_member" | grep crypt$ | awk '{print $1}')
 					break
 				else
 					LVM_ROOT=1
