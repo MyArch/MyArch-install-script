@@ -1107,8 +1107,8 @@ luks_password(){
 luks_open(){
 
 	LUKS_ROOT_NAME=""
-	INCLUDE_PART='part'
-    #umount_partitions
+	INCLUDE_PART='part\|crypt\|lvm'
+    umount_partitions
 	find_partitions
 	
 	# Select encrypted partition to open 
@@ -1119,13 +1119,11 @@ luks_open(){
     LUKS_ROOT_NAME=$(cat ${ANSWER})
 	
 	luks_password
-	echo $PASSWD | cryptsetup open --type luks ${PARTITION} ${LUKS_ROOT_NAME} > /tmp/.luks
-	if [[ $(cat /tmp/.luks | grep -i "error") == "" ]]; then
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --textbox /tmp/.luks 0 0
-	else
-		check_for_error
-	fi
-	
+	echo $PASSWD | cryptsetup open --type luks ${PARTITION} ${LUKS_ROOT_NAME}
+	check_for_error
+	lsblk ${PARTITION}
+	lsblk -o NAME,TYPE,FSTYPE,SIZE,MOUNTPOINT | grep "crypt\|NAME\|MODEL\|TYPE\|FSTYPE\|SIZE" > /tmp/.devlist
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevShowOpt" --textbox /tmp/.devlist 0 0
 	luks_menu
 }
 
