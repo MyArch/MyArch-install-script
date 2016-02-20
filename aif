@@ -677,8 +677,9 @@ secure_wipe(){
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PartOptWipe " --yesno "$_AutoPartWipeBody1 ${DEVICE} $_AutoPartWipeBody2" 0 0
 	if [[ $? -eq 0 ]]; then
 		clear
+		
 		# Install wipe where not already installed. Much faster than dd
-		if [[ ! -e /usr/bin/wipefs ]]; then
+		if [ -n "$WIPE" ]; then
 			pacman -Sy --noconfirm wipe 2>/tmp/.errlog
 			check_for_error
 		fi
