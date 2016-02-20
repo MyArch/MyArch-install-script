@@ -992,7 +992,7 @@ mount_current_partition(){
 	if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm\|crypt") != "" ]]; then
 		root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
 		
-		parent_parts=$($(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}'))
+		parent_parts=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}'))
 		for i in ${parent_parts}; do
 			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $root_name) != "" ]]; then
 				if [[ $(lsblk -lno FSTYPE ${i} | grep -i "crypto_LUKS") != "" ]]; then
