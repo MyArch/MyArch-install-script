@@ -2295,7 +2295,7 @@ prep_menu() {
              select_device
              create_partitions
              ;;
-        "4") echo "" >/dev/null # LUKS here
+        "4") luks_menu
 			;;
         "5") detect_lvm
              deactivate_lvm
