@@ -74,7 +74,7 @@ VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 
 # LUKS
 LUKS=0                  			# Luks Detected?
-LUKS_ROOT_PART=""					# If encrypted, root partition
+LUKS_ROOT_DEV=""					# If encrypted, root partition
 LUKS_ROOT_NAME=""					# Name given to encrypted root partition
 
 MOUNTPOINT="/mnt"       			# Installation: Root mount
@@ -737,7 +737,7 @@ auto_partition(){
         if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
 			modprobe -a dm-mod dm_crypt
 			
-			# Presumably the root partition will be bigger than 512MB.
+			# Presumably the root partition will be bigger than 512MB. FIX THIS PART.
 			LUKS_ROOT_PART=$(lsblk -lno SIZE,NAME,TYPE ${DEVICE} | grep "part" | sort -n -r | awk '{print $2}' | head -1)
 			LUKS_ROOT_NAME="cryptroot"
 			
@@ -1104,6 +1104,39 @@ set_luks_password(){
 
 }
 
+luks_open(){
+
+	LUKS_ROOT_DEV=""
+	LUKS_ROOT_NAME=""
+	INCLUDE_PART='crypt'
+    umount_partitions
+	find_partitions
+	
+	# Select encrypted partition to open 
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "\nsomething here" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+	PARTITION=$(cat ${ANSWER})
+	LUKS_ROOT_NAME=$(echo $PARTITION | sed "s~/dev/mapper/~~g")
+	
+	# Identify parent of encrypted partition
+	LUKS_ROOT_DEV=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
+
+	for i in ${LUKS_ROOT_DEV}; do
+		if [[ $(lsblk -lno NAME,TYPE ${i} | grep  $LUKS_ROOT_NAME) != "" ]]; then
+			LUKS_ROOT_DEV=${i}
+			break;
+		fi
+	done
+	
+	cryptsetup open --type luks ${LUKS_ROOT_DEV} ${LUKS_ROOT_NAME} > /tmp/.luks
+	if [[ $(cat /tmp/.luks | grep -i "error") == "" ]]; then
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --textbox /tmp/.luks 0 0
+	else
+		check_for_error
+	fi
+	
+
+}
+
 luks_menu() {
 
 	# Check there are at least two viable partitions for LUKS.
@@ -1111,20 +1144,18 @@ luks_menu() {
 	find_partitions
 	modprobe -a dm-mod dm_crypt
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --menu "$_LuksMenuBody" 0 0 5 \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --menu "$_LuksMenuBody" 0 0 4 \
 	"$_LuksHelp" "-" \
-	"$_LuksDefault" "$_LuksLvm" \
-	"$_LuksPlain" "LUKS" \
-	"$_Back" "-" 2>${ANSWER}	
+	"cryptsetup open --type luks" "$_LuksOpen" \
+	"cryptsetup -q luksFormat" "$_LuksEncrypt" \
+	"$_Back" "-" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
-	"1") echo "" > /dev/null # add help page
+	$_LuksHelp) echo "" > /dev/null # add help page
 		;;
-	"2") echo "" > /dev/null # add help page
+	"cryptsetup open --type luks") luks_open
 		;;
-	"3") echo "" > /dev/null # add help page
-		;;
-	"4") echo "" > /dev/null # add help page
+	"cryptsetup -q luksFormat") echo "" > /dev/null # add help page
 		;;
 	*) prep_menu
 		;;
