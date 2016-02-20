@@ -748,7 +748,7 @@ auto_partition(){
 			echo $PASSWD | cryptsetup open ${LUKS_ROOT_PART} $LUKS_ROOT_NAME 2>/tmp/.errlog
 			check_for_error
 			vgcreate lvmvolgroup ${LUKS_ROOT_PART} 2>/tmp/.errlog
-			lvcreate -l +100%FREE lvmvolgroup -n $LUKS_ROOT_NAME 2>>/tmp/.errlog
+			lvcreate -l +100%FREE lvmvolgroup -n ${LUKS_ROOT_NAME} 2>>/tmp/.errlog
 			check_for_error
 			LVM=1
 		fi
@@ -1112,11 +1112,11 @@ luks_open(){
 	find_partitions
 	
 	# Select encrypted partition to open 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "\nsomething here" 0 0 4 ${PARTITIONS} 2>${ANSWER} || luks_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "$_LuksMenuBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || luks_menu
 	PARTITION=$(cat ${ANSWER})
 	
 	# Enter name of the Luks partition and get password to open it
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --inputbox "Enter name of encrypted partition" 0 0 "cryptroot" 2>${ANSWER} || luks_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --inputbox "$_LuksOpenBody" 10 50 "cryptroot" 2>${ANSWER} || luks_menu
     LUKS_ROOT_NAME=$(cat ${ANSWER})
 	luks_password
 	
@@ -1125,21 +1125,48 @@ luks_open(){
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --infobox "$_PlsWaitBody" 0 0
 	echo $PASSWD | cryptsetup open --type luks ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
 	check_for_error
-	lsblk ${PARTITION}
-	lsblk -o NAME,TYPE,FSTYPE,SIZE,MOUNTPOINT | grep "crypt\|NAME\|MODEL\|TYPE\|FSTYPE\|SIZE" > /tmp/.devlist
+
+	lsblk -o NAME,TYPE,FSTYPE,SIZE,MOUNTPOINT ${PARTITION} | grep "crypt\|NAME\|MODEL\|TYPE\|FSTYPE\|SIZE" > /tmp/.devlist
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevShowOpt" --textbox /tmp/.devlist 0 0
 	
 	luks_menu
 }
 
+luks_create(){
+
+	modprobe -a dm-mod dm_crypt
+	INCLUDE_PART='part\|lvm'
+    umount_partitions
+	find_partitions
+	
+	# Select partition to encrypt 
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --menu "$_LuksCreateBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || luks_menu
+	PARTITION=$(cat ${ANSWER})
+
+	# Enter name of the Luks partition and get password to create it
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --inputbox "$_LuksOpenBody" 10 50 "cryptroot" 2>${ANSWER} || luks_menu
+    LUKS_ROOT_NAME=$(cat ${ANSWER})
+    luks_password
+    
+    # Encrypt selected partition with credentials given
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
+	echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog
+	check_for_error
+	echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
+	check_for_error
+	
+	echo -e ${_LuksEncruptSucc} > /tmp/.devlist
+	lsblk -o NAME,TYPE,FSTYPE,SIZE ${PARTITION} | grep "part\|crypt\|NAME\|TYPE\|FSTYPE\|SIZE" >> /tmp/.devlist
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --textbox /tmp/.devlist 0 0
+
+	luks_menu
+}
+
 luks_menu() {
 
-	# Check there are at least two viable partitions for LUKS.
-	#INCLUDE_PART='part\|lvm'
-	#find_partitions
 	#modprobe -a dm-mod dm_crypt
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --menu "$_LuksMenuBody" 0 0 4 \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --menu "$_LuksMenuBody$_LuksMenuBody2" 0 0 4 \
 	"$_LuksHelp" "-" \
 	"cryptsetup open --type luks" "$_LuksOpen" \
 	"cryptsetup -q luksFormat" "$_LuksEncrypt" \
@@ -1150,7 +1177,7 @@ luks_menu() {
 		;;
 	"cryptsetup open --type luks") luks_open
 		;;
-	"cryptsetup -q luksFormat") echo "" > /dev/null # add help page
+	"cryptsetup -q luksFormat") luks_create
 		;;
 	*) prep_menu
 		;;
