@@ -1091,10 +1091,10 @@ mount_current_partition(){
 # Save repetition of code.
 luks_password(){
 
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --clear --insecure --passwordbox "$_LuksPassBody" 0 0 2> ${ANSWER} || config_base_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --clear --insecure --passwordbox "$_LuksPassBody" 0 0 2> ${ANSWER} || prep_menu
     PASSWD=$(cat ${ANSWER})
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || prep_menu
     PASSWD2=$(cat ${ANSWER})
     
     if [[ $PASSWD != $PASSWD2 ]]; then 
@@ -1112,19 +1112,23 @@ luks_open(){
 	find_partitions
 	
 	# Select encrypted partition to open 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "\nsomething here" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "\nsomething here" 0 0 4 ${PARTITIONS} 2>${ANSWER} || luks_menu
 	PARTITION=$(cat ${ANSWER})
 	
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --inputbox "Enter name of encrypted partition" 0 0 "cryptroot" 2>${ANSWER} || prep_menu
+	# Enter name of the Luks partition and get password to open it
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --inputbox "Enter name of encrypted partition" 0 0 "cryptroot" 2>${ANSWER} || luks_menu
     LUKS_ROOT_NAME=$(cat ${ANSWER})
-	
 	luks_password
+	
+	# Try to open the luks partition with the credentials given. If successful show this, otherwise
+	# show the error
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --infobox "$_PlsWaitBody" 0 0
-	echo $PASSWD | cryptsetup open --type luks ${PARTITION} ${LUKS_ROOT_NAME}
+	echo $PASSWD | cryptsetup open --type luks ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
 	check_for_error
 	lsblk ${PARTITION}
 	lsblk -o NAME,TYPE,FSTYPE,SIZE,MOUNTPOINT | grep "crypt\|NAME\|MODEL\|TYPE\|FSTYPE\|SIZE" > /tmp/.devlist
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DevShowOpt" --textbox /tmp/.devlist 0 0
+	
 	luks_menu
 }
 
