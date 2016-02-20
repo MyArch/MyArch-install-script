@@ -998,20 +998,12 @@ mount_current_partition(){
 				if [[ $(lsblk -lno FSTYPE ${i} | grep -i "crypto_LUKS") != "" ]]; then
 					LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
 					LUKS_ROOT_NAME=$(lsblk -lno NAME,FSTYPE,TYPE ${i} | grep -i "lvm2_member" | grep crypt$ | awk '{print $1}')
-					clear
-					echo $LUKS_ROOT_DEV
-					echo $LUKS_ROOT_NAME
-					read
 				else
 					LVM_ROOT=1
 				fi
 			fi
 		done
 	fi
-
-	echo $LUKS_ROOT_DEV
-					echo $LUKS_ROOT_NAME
-					read
 
 	# Identify and create swap, if applicable
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
