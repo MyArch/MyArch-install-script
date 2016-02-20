@@ -737,7 +737,7 @@ auto_partition(){
         if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
 			modprobe -a dm-mod dm_crypt
 			
-			# Presumably the root partition will be bigger than 512MB. FIX THIS PART.
+			# Presumably the root partition will be bigger than 512MB.
 			LUKS_ROOT_PART=$(lsblk -lno SIZE,NAME,TYPE ${DEVICE} | grep "part" | sort -n -r | awk '{print $2}' | head -1)
 			LUKS_ROOT_NAME="cryptroot"
 			
@@ -750,6 +750,8 @@ auto_partition(){
 			vgcreate lvmvolgroup ${LUKS_ROOT_PART} 2>/tmp/.errlog
 			lvcreate -l +100%FREE lvmvolgroup -n ${LUKS_ROOT_NAME} 2>>/tmp/.errlog
 			check_for_error
+			
+			# Add LVM flag for mkinitcpio
 			LVM=1
 		fi
 
@@ -957,8 +959,10 @@ mount_current_partition(){
 	#### MOUNTING FUNCTION BEGINS HERE  ####
 	####								####
 
-	# prep variable
+	# prep variables
 	MOUNT=""
+	LUKS_ROOT_NAME=""
+	LUKS_ROOT_DEV=""
 	
 	# Warn users that they CAN mount partitions without formatting them!
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --msgbox "$_WarnMount1 '$_FSSkip' $_WarnMount2" 0 0
@@ -975,16 +979,30 @@ mount_current_partition(){
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelRootBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
 	PARTITION=$(cat ${ANSWER})
     ROOT_PART=${PARTITION}
-
-    # Identify if root is LVM
-    [[ $(lsblk -lno TYPE | grep "lvm") != "" ]] && LVM_ROOT=0 || LVM_ROOT=1
-    	
+   	
 	select_filesystem
 	[[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${PARTITION} >/dev/null 2>/tmp/.errlog
 	check_for_error
 	
 	# Make the directory and mount
 	mount_current_partition
+
+	# Identify if root is encrypted
+	if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]]; then
+		LUKS_ROOT_NAME=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
+		
+		# Identify "parent" partition and get UUID for it (for bootloaders)
+		LUKS_ROOT_DEV=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
+		for i in ${LUKS_ROOT_DEV}; do
+			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
+				LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
+				break;
+			fi
+		done
+	
+	elif [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm") != "" ]]; then
+		 LVM_ROOT=1
+	fi
 	
 	# Identify and create swap, if applicable
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
@@ -1074,9 +1092,11 @@ mount_current_partition(){
                 # Create directory and mount.
                 mount_current_partition
                 
-                # Determine if a seperate /boot is used. Necessary LVM-realted bootloader configuration
-                LVM_SEP_BOOT=0
-                [[ $MOUNT == "/boot" ]] && LVM_SEP_BOOT=1 || LVM_SEP_BOOT=2
+                # Determine if a seperate /boot is used. 0 = no seperate boot, 1 = seperate 
+                # non-lvm boot, 2 = seperate lvm boot. For Grub configuration
+                if  [[ $MOUNT == "/boot" ]]; then
+					[[ $(lsblk -lno TYPE ${PARTITION} | grep "lvm") != "" ]] && LVM_SEP_BOOT=2 || LVM_SEP_BOOT=1
+				fi
                 
              fi
        done
@@ -1561,13 +1581,14 @@ bios_bootloader() {
 			if [[ $DEVICE != "" ]]; then
 				clear
 				arch_chroot "grub-install --target=i386-pc --debug --recheck $DEVICE" 2>/tmp/.errlog
+				
+				# if /boot is LVM (whether using a seperate /boot mount or not), amend grub
+				if ( [[ $LVM_ROOT -eq 1 ]] && [[ $LVM_SEP_BOOT -eq 0 ]] ) || [[ $LVM_SEP_BOOT -eq 2 ]]; then
+					sed -i "s/GRUB_PRELOAD_MODULES=\"\"/GRUB_PRELOAD_MODULES=\"lvm\"/g" ${MOUNTPOINT}/etc/default/grub
+				fi
+				
 				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
 				check_for_error
-				
-				# if /boot is LVM then amend /boot/grub/grub.cfg accordingly
-				if ( [[ $LVM_ROOT -eq 1 ]] && [[ $LVM_SEP_BOOT -eq 0 ]] ) || [[ $LVM_SEP_BOOT -eq 2 ]]; then
-					sed -i '/### BEGIN \/etc\/grub.d\/00_header ###/a insmod lvm' ${MOUNTPOINT}/boot/grub/grub.cfg
-				fi
 			fi
 		else
 			# Syslinux
