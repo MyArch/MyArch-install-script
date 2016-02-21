@@ -1530,7 +1530,7 @@ lvm_menu(){
 	"$_Back" "-" 2>${ANSWER}
 	
 	case $(cat ${ANSWER}) in
-	"vgcreate -f") lvm_create
+	"vgcreate -f, lvcreate -L -n") lvm_create
 	;;
 	"vgremove -f") lvm_del_vg
 	;;
