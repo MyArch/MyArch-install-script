@@ -1422,7 +1422,7 @@ check_lv_size() {
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateLV " --radiolist "$_LvmLvNumBody1 ${LVM_VG}. $_LvmLvNumBody2" 0 0 9 \
 	"1" "-" off "2" "-" off "3" "-" off "4" "-" off "5" "-" off "6" "-" off "7" "-" off "8" "-" off "9 " "-" off 2>${ANSWER}
     
-	[[ $(cat ${ANSWER}) == "" ]] && lvm_menu
+	[[ $(cat ${ANSWER}) == "" ]] && lvm_menu || NUMBER_LOGICAL_VOLUMES=$(cat ${ANSWER})
 
 	# Loop while the number of LVs is greater than 1. This is because the size of the last LV is automatic.
 	while [[ $NUMBER_LOGICAL_VOLUMES -gt 1 ]]; do
