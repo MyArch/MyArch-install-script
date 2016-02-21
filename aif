@@ -1499,7 +1499,7 @@ check_lv_size() {
 	NUMBER_LOGICAL_VOLUMES=$(( NUMBER_LOGICAL_VOLUMES - 1 ))
 	LVM=1
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateLV " --yesno "$_LvmCompBody" 0 0 \
-	&& show_devices || prep_menu
+	&& show_devices || lvm_menu
 
 }
 
@@ -1579,7 +1579,7 @@ lvm_menu(){
 	case $(cat ${ANSWER}) in
 	"vgcreate -f") lvm_create_vg
 	;;
-	"lvcreate -L -n") lvm_create_vg
+	"lvcreate -L -n") lvm_create_lv
 	;;
 	"vgremove -f") lvm_del_vg
 	;;
