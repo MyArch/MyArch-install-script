@@ -73,7 +73,7 @@ _LuksWaitBody2="Block Device used:"
 
 # Logical Volume Management
 _PrepLVM="Logical Volume Management"
-_PrepLVM2"(optional)"
+_PrepLVM2="(optional)"
 _LvmMenu="\nLogical Volume Management (LVM) allows 'virtual' hard drives (Volume Groups) and partitions (Logical Volumes) to be created from existing drives and partitions. A Volume Group must be created first, then one or more Logical Volumes in it.\n\nLVM can also be used with an encrypted partition to create multiple logical volumes (e.g. root and home) in it."
 _LvmCreateVG="Create Volume Group"
 _LvmCreateLV="Create Logical Volumes"
