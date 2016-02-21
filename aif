@@ -1290,12 +1290,9 @@ check_lv_size() {
 	LV_SIZE_INVALID=0
 	chars=0
 
-	clear
-	echo "check 1"
 	# Check to see if anything was actually entered and if first character is '0'
 	([[ ${#LVM_LV_SIZE} -eq 0 ]] || [[ ${LVM_LV_SIZE:0:1} -eq "0" ]]) && LV_SIZE_INVALID=1
 
-	echo "check 2"
 	# If not invalid so far, check for non numberic characters other than the last character
 	if [[ $LV_SIZE_INVALID -eq 0 ]]; then
 		while [[ $chars -lt $(( ${#LVM_LV_SIZE} - 1 )) ]]; do
@@ -1304,7 +1301,6 @@ check_lv_size() {
 		done
 	fi
 	
-	echo "check 3"
 	# If not invalid so far, check that last character is a M/m or G/g
 	if [[ $LV_SIZE_INVALID -eq 0 ]]; then
 		LV_SIZE_TYPE=$(echo ${LVM_LV_SIZE:$(( ${#LVM_LV_SIZE} - 1 )):1})
@@ -1316,7 +1312,6 @@ check_lv_size() {
 		
 	fi
 
-	echo "check 4"
 	# If not invalid so far, check whether the value is greater than or equal to the LV remaining Size.
 	# If not, convert into MB for VG space remaining.      
 	if [[ ${LV_SIZE_INVALID} -eq 0 ]]; then
@@ -1339,9 +1334,7 @@ check_lv_size() {
 		esac
 
 	fi  
-	
-	echo "done"
-	read
+
 }
 
 	#							#
