@@ -1008,7 +1008,7 @@ mount_current_partition(){
 					LUKS_ROOT_NAME=$(lsblk -lno NAME,FSTYPE,TYPE ${i} | grep -i "lvm2_member" | grep crypt$ | awk '{print $1}')
 					break;
 				else
-					LVM_ROOT=1
+					LVM=1
 				fi
 			fi
 		done
@@ -1025,7 +1025,6 @@ mount_current_partition(){
 			fi
 		done
 	fi
-	
 
 	# Identify and create swap, if applicable
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
@@ -1605,7 +1604,7 @@ bios_bootloader() {
 				arch_chroot "grub-install --target=i386-pc --debug --recheck $DEVICE" 2>/tmp/.errlog
 				
 				# if /boot is LVM (whether using a seperate /boot mount or not), amend grub
-				if ( [[ $LVM_ROOT -eq 1 ]] && [[ $LVM_SEP_BOOT -eq 0 ]] ) || [[ $LVM_SEP_BOOT -eq 2 ]]; then
+				if ( [[ $LVM -eq 1 ]] && [[ $LVM_SEP_BOOT -eq 0 ]] ) || [[ $LVM_SEP_BOOT -eq 2 ]]; then
 					sed -i "s/GRUB_PRELOAD_MODULES=\"\"/GRUB_PRELOAD_MODULES=\"lvm\"/g" ${MOUNTPOINT}/etc/default/grub
 				fi
 				
