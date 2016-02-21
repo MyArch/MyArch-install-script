@@ -974,6 +974,9 @@ mount_current_partition(){
 	MOUNT=""
 	LUKS_ROOT_NAME=""
 	LUKS_ROOT_DEV=""
+	LUKS=0
+	LVM=0
+	
 	
 	# Warn users that they CAN mount partitions without formatting them!
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --msgbox "$_WarnMount1 '$_FSSkip' $_WarnMount2" 0 0
