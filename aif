@@ -1597,6 +1597,7 @@ bios_bootloader() {
 				
 				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
 				check_for_error
+				BOOTLOADER="Grub"
 			fi
 		else
 			# Syslinux
@@ -1623,6 +1624,7 @@ bios_bootloader() {
 				
 				# If BTRFS Subvolume mount	
 				[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				BOOTLOADER="Syslinux"
 			fi
 		fi
 	fi
@@ -1658,6 +1660,7 @@ uefi_bootloader() {
 					dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstUefiBtTitle" --infobox "\nGrub $_SetDefDoneBody" 0 0
 					sleep 2
 				fi
+				BOOTLOADER="Grub"
 				;;
 		"systemd-boot")
 				arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>/tmp/.errlog
@@ -1676,6 +1679,8 @@ uefi_bootloader() {
 				[[ $KERNEL -eq 3 ]] && echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${bl_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf 2>>/tmp/.errlog
 				[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/loader/entries/arch.conf 2>>/tmp/.errlog
 				check_for_error
+				
+				BOOTLOADER="systemd-boot"
 				;;
 		*) install_base_menu
 				;;
@@ -2103,6 +2108,7 @@ install_dm() {
 enable_dm() {
 	arch_chroot "systemctl enable $(cat ${PACKAGES})" 2>/tmp/.errlog
 	check_for_error
+	DM=$(cat ${PACKAGES})
 	DM_ENABLED=1
 }
 
@@ -2128,7 +2134,10 @@ enable_dm() {
 		
 			# check if selected dm already installed. If so, enable and break loop.
 			for i in ${DM_INST}; do
-				[[ $(cat ${PACKAGES}) == ${i} ]] && enable_dm && break;
+				if [[ $(cat ${PACKAGES}) == ${i} ]]; then
+					enable_dm
+					break;
+				fi
 			done
 		
 			# If no match found, install and enable DM	
@@ -2137,7 +2146,7 @@ enable_dm() {
 				# Where lightdm selected, add gtk greeter package
 				sed -i 's/lightdm/lightdm lightdm-gtk-greeter/' ${PACKAGES}
 				pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
-			
+				
 				# Where lightdm selected, now remove the greeter package
 				sed -i 's/lightdm-gtk-greeter//' ${PACKAGES}
 				enable_dm
@@ -2585,29 +2594,22 @@ edit_configs() {
              ;;
         "7") FILE="${MOUNTPOINT}/etc/fstab"
              ;;
-        "8") FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
-        #case $BOOTLOADER in
-         #          "Grub") FILE="${MOUNTPOINT}/etc/default/grub"
-         #                  ;;
-         #      "Syslinux") FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
-         #                  ;;
-         #  "systemd-boot") FILE="${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf" 
-         #                  FILE2="${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf"
-         #                  ;;
-         #        "rEFInd") [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf ]] \
-         #                  && FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/refind/refind.conf" || FILE="${MOUNTPOINT}${UEFI_MOUNT}/EFI/BOOT/refind.conf"
-         #                  FILE2="${MOUNTPOINT}/boot/refind_linux.conf"
-         #                  ;;
-         #     esac
+        "8") case $BOOTLOADER in
+                   "Grub") FILE="${MOUNTPOINT}/etc/default/grub"
+                           ;;
+               "Syslinux") FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
+                           ;;
+           "systemd-boot") FILE="${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf" 
+                           FILE2="${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf"
+                           ;;
+			 esac
             ;;
         "9") case $DM in
-                   "LXDM") FILE="${MOUNTPOINT}/etc/lxdm/lxdm.conf" 
+                   "lxdm") FILE="${MOUNTPOINT}/etc/lxdm/lxdm.conf" 
                            ;;
-                "LightDM") FILE="${MOUNTPOINT}/etc/lightdm/lightdm.conf" 
+                "lightdm") FILE="${MOUNTPOINT}/etc/lightdm/lightdm.conf" 
                            ;;
-                   "SDDM") FILE="${MOUNTPOINT}/etc/sddm.conf"
-                           ;;
-                   "SLiM") FILE="${MOUNTPOINT}/etc/slim.conf"
+                   "sddm") FILE="${MOUNTPOINT}/etc/sddm.conf"
                            ;;
               esac
             ;;       
