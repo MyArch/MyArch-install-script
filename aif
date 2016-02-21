@@ -550,7 +550,7 @@ create_new_user() {
 
 run_mkinitcpio() {
 	
-	clear $LUKS
+	clear
 
 	# If LVM and/or LUKS used, add the relevant hook(s)
 	([[ $LVM -eq 1 ]] && [[ $LUKS -eq 0 ]]) && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf
