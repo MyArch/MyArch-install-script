@@ -1288,7 +1288,7 @@ lvm_show_lv(){
 	lv_list=$(lsblk -lno NAME,TYPE,SIZE  | grep "lvm" | awk '{print $1 " " $3}' | sed 's~-~/~g')
 
 	for i in ${lv_list}; do
-		LV_LIST="${VG_LIST} ${i}"
+		LV_LIST="${LV_LIST} ${i}"
 	done
     
 	# If no VGs, no point in continuing
