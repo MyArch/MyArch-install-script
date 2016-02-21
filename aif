@@ -1693,17 +1693,22 @@ uefi_bootloader() {
  					
 				# Create default config files
 				echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${bl_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>/tmp/.errlog
-				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~options~options cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME~g" ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog
-				echo -e "default  arch\ntimeout  5" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf 2>>/tmp/.errlog	
+				[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog
+				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~options~options cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME~g" ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog	
 				check_for_error
 
 				# Amend for kernel(s) installed and btrfs mount options
-				[[ $KERNEL -eq 2 ]] && sed - i "s/linux/linux-lts//g" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog
-				[[ $KERNEL -eq 3 ]] && echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${bl_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf 2>/tmp/.errlog
-				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~options~options cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME~g" ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog
-				[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/loader/entries/arch.conf 2>>/tmp/.errlog
+				if [[ $KERNEL -eq 2 ]]; then
+					sed - i "s/linux/linux-lts//g" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog
+				elif [[ $KERNEL -eq 3 ]]; then
+					echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${bl_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf 2>/tmp/.errlog
+					[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf 2>>/tmp/.errlog
+					[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~options~options cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME~g" ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf 2>>/tmp/.errlog
+				fi
 				check_for_error
 				
+				echo -e "default  arch\ntimeout  5" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf 2>/tmp/.errlog
+				check_for_error
 				BOOTLOADER="systemd-boot"
 				;;
 		*) install_base_menu
