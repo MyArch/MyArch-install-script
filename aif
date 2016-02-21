@@ -473,7 +473,7 @@ set_hostname() {
 
    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseHost" --inputbox "$_HostNameBody" 0 0 "arch" 2>${ANSWER} || config_base_menu
 
-   echo $(cat ${ANSWER}) > ${MOUNTPOINT}/etc/hostname 2>/tmp/.errlog
+   echo "$(cat ${ANSWER})" > ${MOUNTPOINT}/etc/hostname 2>/tmp/.errlog
    echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t$(cat ${ANSWER})\n::1\tlocalhost.localdomain\tlocalhost\t$(cat {ANSWER})" > ${MOUNTPOINT}/etc/hosts 2>>/tmp/.errlog
    check_for_error
 }
@@ -702,7 +702,13 @@ auto_partition(){
 
 	LUKS_ROOT_PART=""
 	
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2" 0 0
+	# Different info depending on standard or encrypted auto-partitioning
+	if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
+		# stuff here
+	else
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2" 0 0
+	fi
+	
 	if [[ $? -eq 0 ]]; then
 		
 		# Deal with LVM and delete existing partitions
