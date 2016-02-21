@@ -1261,6 +1261,25 @@ lvm_detect() {
 	fi
 }
 
+lvm_show_vg(){
+
+	VG_LIST=""
+	vg_list=$(lvs --noheadings | awk '{print $2}' | uniq)
+
+	for i in ${vg_list}; do
+		VG_LIST="${VG_LIST} ${i} $(vgdisplay ${i} | grep -i "vg size" | awk '{print $3$4}')"
+	done
+
+	# If no VGs, no point in continuing
+	if [[ $VG_LIST == "" ]]; then
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ErrTitle " --msgbox "$_LvmVGErr" 0 0
+		lvm_menu
+ 	fi
+
+	# Select VG
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLVM " --menu "$_LvmSelVGBody" 0 0 5 \
+	${VG_LIST} 2>${ANSWER} || lvm_menu
+}
 
 # Create Volume Group and Logical Volumes
 lvm_create() {
