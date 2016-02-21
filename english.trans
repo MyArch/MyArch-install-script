@@ -99,6 +99,7 @@ _LvmLvSizeErrBody="\nInvalid value Entered. A numeric value must be entered with
 _LvmCompBody="\nDone! All Logical Volumes have been created for the Volume Group.\n\nDo you wish to view the new LVM scheme?\n\n"
 _LvmDelQ="\nConfirm deletion of Volume Group(s) and Logical Volume(s).\n\nIf deleting a Volume Group, all Logical Volumes within will be deleted as well.\n\n"
 _LvmSelVGBody="\nSelect Volume Group to delete. All Logical Volumes within will also be deleted.\n"
+_LvmVGErr="\nNo Volume Groups found.\n\n"
 
 # Show devices and partitions
 _DevShowOpt="List Devices (optional)"
