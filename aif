@@ -1288,11 +1288,11 @@ lvm_show_lv(){
 	lv_list=$(lsblk -lno NAME,TYPE,SIZE  | grep "lvm" | awk '{print $1 " " $3}' | sed 's~-~/~g')
 
 	for i in ${lv_list}; do
-		VG_LIST="${VG_LIST} ${i}"
+		LV_LIST="${VG_LIST} ${i}"
 	done
     
 	# If no VGs, no point in continuing
-	if [[ $VG_LIST == "" ]]; then
+	if [[ $LV_LIST == "" ]]; then
 		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateLV " --msgbox "$_LvmVGErr" 0 0
 		lvm_menu
 	fi
