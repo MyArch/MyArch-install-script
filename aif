@@ -384,9 +384,11 @@ set_keymap() {
         XKBMAP_LIST="${XKBMAP_LIST} ${i}"
     done
 	
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepKBLayout" --menu "$_XkbmapBody" 0 0 16 ${XKBMAP_LIST} 2>${ANSWER} || config_base_menu
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepKBLayout" --menu "$_XkbmapBody" 0 0 16 ${XKBMAP_LIST} 2>${ANSWER} || install_graphics_menu
     XKBMAP=$(cat ${ANSWER} |sed 's/_.*//')
     echo -e "Section "\"InputClass"\"\nIdentifier "\"system-keyboard"\"\nMatchIsKeyboard "\"on"\"\nOption "\"XkbLayout"\" "\"${XKBMAP}"\"\nEndSection" > /tmp/00-keyboard.conf
+ 
+	install_graphics_menu
  
 }
 
@@ -1789,6 +1791,8 @@ install_cups(){
 	*) main_menu_online
         ;;
     esac
+    
+    install_wireless_packages
 }
 
 # Install xorg and input drivers. Also copy the xkbmap configuration file created earlier to the installed system
@@ -1825,6 +1829,7 @@ install_xorg_input() {
 		arch_chroot "chown -R ${i}:users /home/${i}"
 	done
     
+    install_graphics_menu
 }
 
 setup_graphics_card() {
@@ -2004,6 +2009,8 @@ install_ati(){
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_NvidiaConfTitle" --msgbox "$_NvidiaConfBody" 0 0
     nano ${MOUNTPOINT}/etc/X11/xorg.conf.d/20-nvidia.conf
  fi
+ 
+ install_graphics_menu
 
 }
 
@@ -2082,6 +2089,8 @@ install_de_wm() {
 		fi
 
 	fi
+	
+	install_graphics_menu
 
 }
 
@@ -2136,6 +2145,8 @@ enable_dm() {
 
 	# Show after successfully installing or where attempting to repeat when already completed.
 	[[ $DM_ENABLED -eq 1 ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --msgbox "$_DmDoneBody" 0 0       
+
+	install_graphics_menu
 }
 
 # Network Manager
@@ -2197,6 +2208,8 @@ enable_nm() {
 	
 	# Show after successfully installing or where attempting to repeat when already completed.
 	[[ $NM_ENABLED -eq 1 ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstNMTitle" --msgbox "$_InstNMErrBody" 0 0
+
+	install_network_menu
 
 }
 
