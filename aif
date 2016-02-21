@@ -1566,7 +1566,7 @@ lvm_del_all(){
 
 lvm_menu(){
 
-	modprobe dm-mod
+	lvm_detect
 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLVM $_PrepLVM2 " --menu "$_LvmMenu" 0 0 6 \
 	"vgcreate -f" "$_LvmCreateVG" \
