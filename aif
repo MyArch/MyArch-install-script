@@ -2484,7 +2484,7 @@ install_graphics_menu() {
 			;;
     esac
     
-    install_desktop_menu
+    install_graphics_menu
 	
 }
 
