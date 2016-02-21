@@ -1583,7 +1583,7 @@ lvm_menu(){
 	;;
 	"vgremove -f") lvm_del_vg
 	;;
-	"lvremove -f ") lvm_del_lv
+	"lvremove -f") lvm_del_lv
 	;;
 	"lv,vg,pvremove -f") lvm_del_all
 	;;
