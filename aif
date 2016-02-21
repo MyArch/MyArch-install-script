@@ -1728,6 +1728,7 @@ install_wireless_packages(){
 		check_for_error
 	fi
 
+	install_network_menu
 }
 
 install_cups(){
@@ -1754,6 +1755,8 @@ install_cups(){
 			fi
 		fi
 	fi
+	
+	install_network_menu
 
 }
 
@@ -1791,8 +1794,7 @@ install_cups(){
 	*) main_menu_online
         ;;
     esac
-    
-    install_wireless_packages
+   
 }
 
 # Install xorg and input drivers. Also copy the xkbmap configuration file created earlier to the installed system
@@ -2247,6 +2249,8 @@ install_alsa_pulse(){
 		check_for_error
 	fi
 
+	install_multimedia_menu
+
 }
 
 install_codecs(){
@@ -2267,7 +2271,9 @@ install_codecs(){
 	if [[ $(cat ${PACKAGES}) != "" ]]; then
 		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
 		check_for_error
-	fi	
+	fi
+	
+	install_multimedia_menu
 }
  
 install_cust_pkgs(){
@@ -2278,7 +2284,9 @@ install_cust_pkgs(){
 	if [[ $(cat ${PACKAGES}) != "" ]]; then
 		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
 		check_for_error
-	fi	
+	fi
+	
+	install_multimedia_menu
 }
 
 	if [[ $SUB_MENU != "install_multimedia_menu" ]]; then
@@ -2496,9 +2504,7 @@ install_graphics_menu() {
           *) main_menu_online
 			;;
     esac
-    
-    install_graphics_menu
-	
+   
 }
 
 # Install Accessibility Applications
@@ -2529,6 +2535,8 @@ install_acc_menu() {
 		pacstrap ${MOUNTPOINT} ${PACKAGES} 2>/tmp/.errlog
 		check_for_error
 	fi
+	
+	install_multimedia_menu
 
 }
 
