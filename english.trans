@@ -361,7 +361,5 @@ _InstMulCustBody="\nEnter the names of packages to install from the Arch reposit
 _MMTitle="Main Menu"
 _MMBody="\nEach step must be followed IN ORDER. Once complete, select 'Done' to properly finalise the installation.\n"
 
-_Done="Done"
-
 # Close Installer
 _CloseInstBody="Close installer?"
