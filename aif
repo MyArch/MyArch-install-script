@@ -996,8 +996,8 @@ mount_current_partition(){
 	# Make the directory and mount
 	mount_current_partition
 
-	# Identify if root is encrypted # NEED TO FIX THIS
-	if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm\|crypt") != "" ]]; then
+	# Identify if root is encrypted. First if lvm type.
+	if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm") != "" ]]; then
 		root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
 		
 		parent_parts=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
@@ -1006,12 +1006,26 @@ mount_current_partition(){
 				if [[ $(lsblk -lno FSTYPE ${i} | grep -i "crypto_LUKS") != "" ]]; then
 					LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
 					LUKS_ROOT_NAME=$(lsblk -lno NAME,FSTYPE,TYPE ${i} | grep -i "lvm2_member" | grep crypt$ | awk '{print $1}')
+					break;
 				else
 					LVM_ROOT=1
 				fi
 			fi
 		done
+	# crypt fs type specific.	
+	elif [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]]; then
+		LUKS_ROOT_NAME=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
+		
+		# Identify "parent" partition and get UUID for it (for bootloaders)
+		LUKS_ROOT_DEV=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
+		for i in ${LUKS_ROOT_DEV}; do
+			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
+				LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
+				break;
+			fi
+		done
 	fi
+	
 
 	# Identify and create swap, if applicable
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
