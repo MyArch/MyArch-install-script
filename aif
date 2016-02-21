@@ -2657,7 +2657,7 @@ edit_configs() {
    "5" "/etc/sudoers" \
    "6" "/etc/mkinitcpio.conf" \
    "7" "/etc/fstab" \
-   "8" "sys" \
+   "8" "$BOOTLOADER" \
    "9" "$DM" \
    "10" "$_Back" 2>${ANSWER}
 	
