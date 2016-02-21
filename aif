@@ -706,9 +706,9 @@ auto_partition(){
 	
 	# Different info depending on standard or encrypted auto-partitioning
 	if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
-		# stuff here
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoLuksBody\n\n$_AutoPartBody3" 0 0
 	else
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2" 0 0
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoPartBody3" 0 0
 	fi
 	
 	if [[ $? -eq 0 ]]; then
