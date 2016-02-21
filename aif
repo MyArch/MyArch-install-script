@@ -1261,62 +1261,76 @@ lvm_detect() {
 	fi
 }
 
-# Show Volume Groups
-lvm_show_vg(){
+
+# Create Volume Group and Logical Volumes
+lvm_create() {
+
+# subroutine to save a lot of repetition.
+check_lv_size() {
+
+	LV_SIZE_INVALID=0
+	chars=0
+
+	# Check to see if anything was actually entered and if first character is '0'
+	([[ ${#LVM_LV_SIZE} -eq 0 ]] || [[ ${LVM_LV_SIZE:0:1} -eq "0" ]]) && LV_SIZE_INVALID=1
+
+	# If not invalid so far, check for non numberic characters other than the last character
+	if [[ $LV_SIZE_INVALID == 0 ]]; then
+		while [[ $chars -lt $(( ${#LVM_LV_SIZE} - 1 )) ]]; do
+			[[ ${LVM_LV_SIZE:chars:1} != [0-9] ]] && LV_SIZE_INVALID=1 && break;
+			chars=$(( chars + 1 ))
+		done
+	fi
 	
-	VG_LIST=""
-	vg_list=$(lvs --noheadings | awk '{print $2}' | uniq)
-
-	for i in ${vg_list}; do
-		VG_LIST="${VG_LIST} ${i} $(vgdisplay ${i} | grep -i "vg size" | awk '{print $3$4}')"
-	done
-    
-	# If no VGs, no point in continuing
-	if [[ $VG_LIST == "" ]]; then
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateLV " --msgbox "$_LvmVGErr" 0 0
-		lvm_menu
+	# If not invalid so far, check that last character is a M/m or G/g
+	if [[ $LV_SIZE_INVALID == 0 ]]; then
+		LV_SIZE_TYPE=$(echo ${LVM_LV_SIZE:$(( ${#LVM_LV_SIZE} - 1 )):1})
+		
+		case $LV_SIZE_TYPE in
+		"m"|"M"|"g"|"G") LV_SIZE_INVALID=0 ;;
+		*) LV_SIZE_INVALID=1 ;;
+		esac
+		
 	fi
-    
-	# Select VG to create LVs in
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLVM " --menu "$_LvmSelVGBody" 0 0 5 \
-	${VG_LIST} 2>${ANSWER} || lvm_menu
+
+	# If not invalid so far, check whether the value is greater than or equal to the LV remaining Size.
+	# If not, convert into MB for VG space remaining.      
+	if [[ ${LV_SIZE_INVALID} -eq 0 ]]; then
+  
+		case ${LV_SIZE_TYPE} in
+		"G"|"g") if [[ $(( $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) * 1000 )) -ge ${LVM_VG_MB} ]]; then
+					LV_SIZE_INVALID=1
+				 else
+					LVM_VG_MB=$(( LVM_VG_MB - $(( $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) * 1000 )) ))
+				 fi
+				 ;;
+		"M"|"m") if [[ $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) -ge ${LVM_VG_MB} ]]; then
+					LV_SIZE_INVALID=1
+				 else
+					LVM_VG_MB=$(( LVM_VG_MB - $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) ))
+				 fi
+				 ;;
+		*) LV_SIZE_INVALID=1
+				 ;;
+		esac
+
+	fi  
 }
 
-lvm_show_lv(){
+	#							#
+	# LVM Create Starts Here	#
+	#							#
 
-	LV_LIST=""
-	lv_list=$(lsblk -lno NAME,TYPE,SIZE  | grep "lvm" | awk '{print $1 " " $3}' | sed 's~-~/~g')
-
-	for i in ${lv_list}; do
-		LV_LIST="${LV_LIST} ${i}"
-	done
-    
-	# If no VGs, no point in continuing
-	if [[ $LV_LIST == "" ]]; then
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateLV " --msgbox "$_LvmVGErr" 0 0
-		lvm_menu
-	fi
-    
-	# Select VG to create LVs in
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLVM " --menu "$_LvmSelVGBody" 0 0 5 \
-	${LV_LIST} 2>${ANSWER} || lvm_menu
-
-
-}
-
-
-# Create Volume Groups
-lvm_create_vg() {
+	# Prep Variables
+	LVM_VG=""
+	LVM_VG_MB=0
+	echo "x" > /tmp/.vgcreate
 
 	# Find LVM appropriate partitions.
 	INCLUDE_PART='part\|crypt'
 	find_partitions
-		
-    # Create a temporary file to store the partition(s) selected. This is later used for the vgcreate command. 'x' is used as a marker.
-    echo "x" > /tmp/.vgcreate
     
     # Name the Volume Group
-    LVM_VG=""
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateVG " --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
     LVM_VG=$(cat ${ANSWER})
 
@@ -1373,72 +1387,10 @@ lvm_create_vg() {
        lvm_menu
     fi
 
-}
-
-# Create Logical Volumes
-lvm_create_lv() {
-
-# subroutine to save a lot of repetition.
-check_lv_size() {
-
-	LV_SIZE_INVALID=0
-	chars=0
-
-	# Check to see if anything was actually entered and if first character is '0'
-	([[ ${#LVM_LV_SIZE} -eq 0 ]] || [[ ${LVM_LV_SIZE:0:1} -eq "0" ]]) && LV_SIZE_INVALID=1
-
-	# If not invalid so far, check for non numberic characters other than the last character
-	if [[ $LV_SIZE_INVALID == 0 ]]; then
-		while [[ $chars -lt $(( ${#LVM_LV_SIZE} - 1 )) ]]; do
-			[[ ${LVM_LV_SIZE:chars:1} != [0-9] ]] && LV_SIZE_INVALID=1 && break;
-			chars=$(( chars + 1 ))
-		done
-	fi
+	#
+	# Once VG created, find size and then create Logical Volumes
+	#
 	
-	# If not invalid so far, check that last character is a M/m or G/g
-	if [[ $LV_SIZE_INVALID == 0 ]]; then
-		LV_SIZE_TYPE=$(echo ${LVM_LV_SIZE:$(( ${#LVM_LV_SIZE} - 1 )):1})
-		
-		case $LV_SIZE_TYPE in
-		"m"|"M"|"g"|"G") LV_SIZE_INVALID=0 ;;
-		*) LV_SIZE_INVALID=1 ;;
-		esac
-		
-	fi
-
-	# If not invalid so far, check whether the value is greater than or equal to the LV remaining Size.
-	# If not, convert into MB for VG space remaining.      
-	if [[ ${LV_SIZE_INVALID} -eq 0 ]]; then
-  
-		case ${LV_SIZE_TYPE} in
-		"G"|"g") if [[ $(( $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) * 1000 )) -ge ${LVM_VG_MB} ]]; then
-					LV_SIZE_INVALID=1
-				 else
-					LVM_VG_MB=$(( LVM_VG_MB - $(( $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) * 1000 )) ))
-				 fi
-				 ;;
-		"M"|"m") if [[ $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) -ge ${LVM_VG_MB} ]]; then
-					LV_SIZE_INVALID=1
-				 else
-					LVM_VG_MB=$(( LVM_VG_MB - $(echo ${LVM_LV_SIZE:0:$(( ${#LVM_LV_SIZE} - 1 ))}) ))
-				 fi
-				 ;;
-		*) LV_SIZE_INVALID=1
-				 ;;
-		esac
-
-	fi  
-}
-
-	# Prep Variables
-	LVM_VG=""
-	LVM_VG_MB=0
-	
-	# Generate list of VGs for selection
-	lvm_show_vg
-    
-	# Get VG Name and size information (decimal points are ignored)
-	LVM_VG=$(cat ${ANSWER})
 	VG_SIZE=$(vgdisplay $LVM_VG | grep 'VG Size' | awk '{print $3}' | sed 's/\..*//')
 	VG_SIZE_TYPE=$(vgdisplay $LVM_VG | grep 'VG Size' | awk '{print $4}' | sed 's/\..*//')
 
@@ -1519,22 +1471,6 @@ lvm_del_vg(){
 	lvm_del_vg
 }
 
-lvm_del_lv(){
-
-	# Generate list of VGs for selection
-	lvm_show_lv
-	
-	# Ask for confirmation
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmDelLV " --yesno "$_LvmDelQ" 0 0
-	
-	# if confirmation given, delete
-	if [[ $? -eq 0 ]]; then
-		lvremove -f $(cat ${ANSWER}) >/dev/null 2>&1
-	fi
-	
-	lvm_del_lv
-}
-
 lvm_del_all(){
 
 	LVM_PV=$(pvs -o pv_name --noheading 2>/dev/null)
@@ -1568,24 +1504,18 @@ lvm_menu(){
 
 	lvm_detect
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLVM $_PrepLVM2 " --menu "$_LvmMenu" 0 0 6 \
-	"vgcreate -f" "$_LvmCreateVG" \
-	"lvcreate -L -n" "$_LvmCreateLV" \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLVM $_PrepLVM2 " --menu "$_LvmMenu" 0 0 4 \
+	"vgcreate -f, lvcreate -L -n" "$_LvmCreateVG" \
 	"vgremove -f" "$_LvmDelVG" \
-	"lvremove -f" "$_LvmDelLV" \
-	"lv,vg,pvremove -f" "$_LvMDelAll" \
+	"lv, vg, pvremove -f" "$_LvMDelAll" \
 	"$_Back" "-" 2>${ANSWER}
 	
 	case $(cat ${ANSWER}) in
-	"vgcreate -f") lvm_create_vg
-	;;
-	"lvcreate -L -n") lvm_create_lv
+	"vgcreate -f") lvm_create
 	;;
 	"vgremove -f") lvm_del_vg
 	;;
-	"lvremove -f") lvm_del_lv
-	;;
-	"lv,vg,pvremove -f") lvm_del_all
+	"lv, vg, pvremove -f") lvm_del_all
 	;;
 	*) prep_menu
 	;;
