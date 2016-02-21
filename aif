@@ -1524,6 +1524,8 @@ lvm_del_all(){
 
 lvm_menu(){
 
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLVM $_PrepLVM2 " --infobox "$_PlsWaitBody" 0 0
+	sleep 1
 	lvm_detect
 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLVM $_PrepLVM2 " --menu "$_LvmMenu" 0 0 4 \
