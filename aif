@@ -1485,7 +1485,7 @@ check_lv_size() {
     # Create the final LV
     lvcreate -l +100%FREE ${LVM_VG} -n ${LVM_LV_NAME} 2>/tmp/.errlog
     check_for_error
-    NUMBER_LVM_PARTITIONS=$(( NUMBER_LVM_PARTITIONS - 1 ))
+    NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
     LVM=1
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLVM" --yesno "$_LvmCompBody" 0 0 \
     && show_devices || prep_menu
@@ -1608,6 +1608,9 @@ bios_bootloader() {
 					sed -i "s/GRUB_PRELOAD_MODULES=\"\"/GRUB_PRELOAD_MODULES=\"lvm\"/g" ${MOUNTPOINT}/etc/default/grub
 				fi
 				
+				# If encryption used amend grub
+				sed -i "s~GRUB_CMDLINE_LINUX=\"\"~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
+				
 				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
 				check_for_error
 				BOOTLOADER="Grub"
@@ -1660,6 +1663,11 @@ uefi_bootloader() {
 		case $(cat ${PACKAGES}) in
 		"grub") 
 				arch_chroot "grub-install --target=x86_64-efi --efi-directory=${UEFI_MOUNT} --bootloader-id=arch_grub --recheck --debug" 2>/tmp/.errlog
+				
+				# If encryption used amend grub
+				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=\"\"~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
+				
+				# Generate config file
 				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
 				check_for_error
 
@@ -1684,12 +1692,15 @@ uefi_bootloader() {
 				|| bl_root=$"PARTUUID="$(blkid -s PARTUUID ${ROOT_PART} | sed 's/.*=//g' | sed 's/"//g')
  					
 				# Create default config files
-				echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${bl_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
-				echo -e "default  arch\ntimeout  5" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf 2>/tmp/.errlog				
+				echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${bl_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>/tmp/.errlog
+				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~options~options cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME~g" ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog
+				echo -e "default  arch\ntimeout  5" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf 2>>/tmp/.errlog	
+				check_for_error
 
 				# Amend for kernel(s) installed and btrfs mount options
 				[[ $KERNEL -eq 2 ]] && sed - i "s/linux/linux-lts//g" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog
-				[[ $KERNEL -eq 3 ]] && echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${bl_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf 2>>/tmp/.errlog
+				[[ $KERNEL -eq 3 ]] && echo -e "title\tArch Linux\nlinux\t/vmlinuz-linux-lts\ninitrd\t/initramfs-linux-lts.img\noptions\troot=${bl_root} rw" > ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf 2>/tmp/.errlog
+				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~options~options cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME~g" ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf 2>>/tmp/.errlog
 				[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/loader/entries/arch.conf 2>>/tmp/.errlog
 				check_for_error
 				
