@@ -19,6 +19,12 @@ _PassErrBody="\nThe passwords entered do not match. Please try again.\n\n"
 _Standard="Standard"
 _Encrypted="Encrypted"
 
+# Security and Tweaks
+_SecMenuTitle="Security and Tweaks"
+_SecPkgTitle="Install Security Packages"
+_SecCoreTitle="Disable Coredump logging"
+_SecJournTitle="Amend journald logging"
+
 # btrfs
 _btrfsSVTitle="btrfs Subvolumes"
 _btrfsSVBody="Create btrfs subvolumes?\n\nAn initial subvolume will be created and then mounted. Other subvolumes branching from this may then be created.\n\nOtherwise you can skip directly to the mounting options.\n"
