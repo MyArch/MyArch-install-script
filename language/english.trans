@@ -16,6 +16,14 @@ _ErrTitle="Error"
 _PassErrBody="\nThe passwords entered do not match. Please try again.\n\n"
 _Standard="Standard"
 _Encrypted="Encrypted"
+_SelLang=" Select Language "
+_Language="\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua"
+
+# Security and Tweaks
+_SecMenuTitle="Security and Tweaks"
+_SecPkgTitle="Install Security Packages"
+_SecCoreTitle="Disable Coredump logging"
+_SecJournTitle="Amend journald logging"
 
 # btrfs
 _btrfsSVTitle="btrfs Subvolumes"
