@@ -26,13 +26,12 @@ DM_INST=""						# Which DMs have been installed?
 DM_ENABLED=0					# Has a display manager been enabled?
 NM_INST=""						# Which NMs have been installed?
 NM_ENABLED=0					# Has a network connection manager been enabled?
-BOOTLOADER="n/a"      # Which bootloader has been installed?
 KEYMAP="us"          	# Virtual console keymap. Default is "us"
 XKBMAP="us"      	    # X11 keyboard layout. Default is "us"
 ZONE=""               # For time
 SUBZONE=""            # For time
 LOCALE="en_US.UTF-8"  # System locale. Default is "en_US.UTF-8"
-KERNEL="n"            # Kernel installed ?
+KERNEL="n"            # Kernel(s) installed (base install); kernels for mkinitcpio
 GRAPHIC_CARD=""				# graphics card
 INTEGRATED_GC=""			# Integrated graphics card for NVIDIA
 NVIDIA_INST=0         # Indicates if NVIDIA proprietary driver has been installed
@@ -52,7 +51,6 @@ SUB_MENU=""       # Submenu to be highlighted
 # Logical Volume Management
 LVM=0                   			# Logical Volume Management Detected?
 LVM_SEP_BOOT=0          			# 1 = Seperate /boot, 2 = seperate /boot & LVM
-LVM_DISABLE=0           			# Option to allow user to deactive existing LVM
 LVM_VG=""               			# Name of volume group to create
 LVM_VG_MB=0             			# MB remaining of VG
 LVM_LV_NAME=""          			# Name of LV to create
@@ -73,8 +71,7 @@ INCLUDE_PART='part\|lvm\|crypt'		# Partition types to include for display and se
 CURR_LOCALE="en_US.UTF-8"   		# Default Locale
 FONT=""                     		# Set new font if necessary
 # Edit Files
-FILE=""               # Which file is to be opened?
-FILE2=""							# Which second file is to be opened?
+FILE=""               # File(s) to be reviewed
 
 ################################################################################
 ##
@@ -282,7 +279,7 @@ configure_mirrorlist() {
       DIALOG --title "$_MirrorlistTitle" --infobox "$_MirrorGenDone" 0 0
       sleep 2
     else
-      install_base_menu
+      configure_mirrorlist
     fi
   }
 
@@ -490,16 +487,18 @@ create_new_user() {
 
 run_mkinitcpio() {
   clear
+  echo "" > /tmp/.errlog
+  KERNEL=""
   # If LVM and/or LUKS used, add the relevant hook(s)
   ([[ $LVM -eq 1 ]] && [[ $LUKS -eq 0 ]]) && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf 2>/tmp/.errlog
   ([[ $LVM -eq 1 ]] && [[ $LUKS -eq 1 ]]) && sed -i 's/block filesystems/block encrypt lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf 2>/tmp/.errlog
   ([[ $LVM -eq 0 ]] && [[ $LUKS -eq 1 ]]) && sed -i 's/block filesystems/block encrypt filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf 2>/tmp/.errlog
   check_for_error
   # Run Mkinitcpio command depending on kernel(s) installed
-  [[ -e ${MOUNTPOINT}/boot/initramfs-linux.img ]] && arch_chroot "mkinitcpio -p linux-lts" 2>>/tmp/.errlog
-  [[ -e ${MOUNTPOINT}/boot/initramfs-linux-lts.img ]] && arch_chroot "mkinitcpio -p linux-lts" 2>>/tmp/.errlog
-  [[ -e ${MOUNTPOINT}/boot/initramfs-linux-grsec.img ]] && arch_chroot "mkinitcpio -p linux-grsec" 2>>/tmp/.errlog
-  [[ -e ${MOUNTPOINT}/boot/initramfs-linux-zen.img ]] && arch_chroot "mkinitcpio -p linux-zen" 2>>/tmp/.errlog
+  KERNEL=$(ls /boot/*.img | grep -v fallback | sed s~/boot/initramfs-~~g | sed s~\.img~~g | uniq)
+  for i in ${KERNEL}; do
+    mkinitcpio -p ${i} 2>>/tmp/.errlog
+  done
   check_for_error
 }
 
@@ -1151,11 +1150,13 @@ lvm_create() {
 
   # Prep Variables
   LVM_VG=""
+  VG_PARTS=""
   LVM_VG_MB=0
-  echo "x" > /tmp/.vgcreate
   # Find LVM appropriate partitions.
   INCLUDE_PART='part\|crypt'
   find_partitions
+  # Amend partition(s) found for use in check list
+  PARTITIONS=$(echo $PARTITIONS | sed 's/M\|G\|T/& off/g')
   # Name the Volume Group
   DIALOG --title " $_LvmCreateVG " --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
   LVM_VG=$(cat ${ANSWER})
@@ -1165,37 +1166,15 @@ lvm_create() {
     DIALOG --title " $_LvmCreateVG " --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
     LVM_VG=$(cat ${ANSWER})
   done
-  # Select the first or only partition for the Volume Group
-  DIALOG --title " $_LvmCreateVG " --menu "$_LvmPvSelBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
-  PARTITION=$(cat ${ANSWER})
-  # Add the partition to the temporary file for the vgcreate command.
-  # Remove selected partition from the list and deduct number of LVM viable partitions remaining.
-  sed -i "s~x~${PARTITION} x~" /tmp/.vgcreate
-  PARTITIONS=$(echo $PARTITIONS | sed "s~${PARTITION} [0-9]*[G-M]~~" | sed "s~${PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${PARTITION}$' -'~~)
-  NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
-  DIALOG --title " $_LvmCreateVG " --infobox "\n$_Done\n\n" 0 0
-  sleep 1
-  # Where there are viable partitions still remaining, run loop
-  while [[ $NUMBER_PARTITIONS -gt 0 ]]; do
-    DIALOG --title " $_LvmCreateVG " --menu "$_LvmPvSelBody" 0 0 4 $"Done" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu
-    PARTITION=$(cat ${ANSWER})
-    if [[ $PARTITION == "Done" ]]; then
-      break;
-    else
-      sed -i "s~x~${PARTITION} x~" /tmp/.vgcreate
-      PARTITIONS=$(echo $PARTITIONS | sed "s~${PARTITION} [0-9]*[G-M]~~" | sed "s~${PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${PARTITION}$' -'~~)
-      NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
-      DIALOG --title " $_LvmCreateVG " --infobox "\n$_Done\n\n" 0 0
-      sleep 1
-    fi
-  done
-  # Once all the partitions have been selected, remove 'x' from the .vgcreate file, then use it in 'vgcreate' command.
+  # Select the partition(s) for the Volume Group
+  DIALOG --title " $_LvmCreateVG " --menu "$_LvmPvSelBody $_UseSpaceBar" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+  [[ $(cat ${ANSWER}) != "" ]] && VG_PARTS=$(cat ${ANSWER}) || prep_menu
+  # Once all the partitions have been selected, show user. On confirmation, use it/them in 'vgcreate' command.
   # Also determine the size of the VG, to use for creating LVs for it.
-  VG_PARTS=$(cat /tmp/.vgcreate | sed 's/x//')
   DIALOG --title " $_LvmCreateVG " --yesno "$_LvmPvConfBody1${LVM_VG} $_LvmPvConfBody2${VG_PARTS}" 0 0
   if [[ $? -eq 0 ]]; then
     DIALOG --title " $_LvmCreateVG " --infobox "$_LvmPvActBody1${LVM_VG}.$_PlsWaitBody" 0 0
-    sleep 2
+    sleep 1
     vgcreate -f ${LVM_VG} ${VG_PARTS} >/dev/null 2>/tmp/.errlog
     check_for_error
     # Once created, get size and size type for display and later number-crunching for lv creation
@@ -1224,37 +1203,37 @@ lvm_create() {
   [[ $(cat ${ANSWER}) == "" ]] && lvm_menu || NUMBER_LOGICAL_VOLUMES=$(cat ${ANSWER})
   # Loop while the number of LVs is greater than 1. This is because the size of the last LV is automatic.
   while [[ $NUMBER_LOGICAL_VOLUMES -gt 1 ]]; do
-    DIALOG --title " $_LvmCreateLV " --inputbox "$_LvmLvNameBody1" 0 0 "lvol" 2>${ANSWER} || prep_menu
+    DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --inputbox "$_LvmLvNameBody1" 0 0 "lvol" 2>${ANSWER} || prep_menu
     LVM_LV_NAME=$(cat ${ANSWER})
     # Loop if preceeded with a "/", if nothing is entered, if there is a space, or if that name already exists.
     while [[ ${LVM_LV_NAME:0:1} == "/" ]] || [[ ${#LVM_LV_NAME} -eq 0 ]] || [[ ${LVM_LV_NAME} =~ \ |\' ]] || [[ $(lsblk | grep ${LVM_LV_NAME}) != "" ]]; do
       DIALOG --title "$_ErrTitle" --msgbox "$_LvmLvNameErrBody" 0 0
-      DIALOG --title " $_LvmCreateLV " --inputbox "$_LvmLvNameBody1" 0 0 "lvol" 2>${ANSWER} || prep_menu
+      DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --inputbox "$_LvmLvNameBody1" 0 0 "lvol" 2>${ANSWER} || prep_menu
       LVM_LV_NAME=$(cat ${ANSWER})
     done
-    DIALOG --title " $_LvmCreateLV " --inputbox "\n${LVM_VG}: ${VG_SIZE}${VG_SIZE_TYPE} (${LVM_VG_MB}MB $_LvmLvSizeBody1).$_LvmLvSizeBody2" 0 0 "" 2>${ANSWER} || prep_menu
+    DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --inputbox "\n${LVM_VG}: ${VG_SIZE}${VG_SIZE_TYPE} (${LVM_VG_MB}MB $_LvmLvSizeBody1).$_LvmLvSizeBody2" 0 0 "" 2>${ANSWER} || prep_menu
     LVM_LV_SIZE=$(cat ${ANSWER})
     check_lv_size
     # Loop while an invalid value is entered.
     while [[ $LV_SIZE_INVALID -eq 1 ]]; do
       DIALOG --title "$_ErrTitle" --msgbox "$_LvmLvSizeErrBody" 0 0
-      DIALOG --title " $_LvmCreateLV " --inputbox "\n${LVM_VG}: ${VG_SIZE}${VG_SIZE_TYPE} (${LVM_VG_MB}MB $_LvmLvSizeBody1).$_LvmLvSizeBody2" 0 0 "" 2>${ANSWER} || prep_menu
+      DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --inputbox "\n${LVM_VG}: ${VG_SIZE}${VG_SIZE_TYPE} (${LVM_VG_MB}MB $_LvmLvSizeBody1).$_LvmLvSizeBody2" 0 0 "" 2>${ANSWER} || prep_menu
       LVM_LV_SIZE=$(cat ${ANSWER})
       check_lv_size
     done
     # Create the LV
     lvcreate -L ${LVM_LV_SIZE} ${LVM_VG} -n ${LVM_LV_NAME} 2>/tmp/.errlog
     check_for_error
-    DIALOG --title " $_LvmCreateLV " --msgbox "\n$_Done\n\nLV ${LVM_LV_NAME} (${LVM_LV_SIZE}) $_LvmPvDoneBody2.\n\n" 0 0
+    DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --msgbox "\n$_Done\n\nLV ${LVM_LV_NAME} (${LVM_LV_SIZE}) $_LvmPvDoneBody2.\n\n" 0 0
     NUMBER_LOGICAL_VOLUMES=$(( NUMBER_LOGICAL_VOLUMES - 1 ))
   done
   # Now the final LV. Size is automatic.
-  DIALOG --title " $_LvmCreateLV " --inputbox "$_LvmLvNameBody1 $_LvmLvNameBody2 (${LVM_VG_MB}MB)." 0 0 "lvol" 2>${ANSWER} || prep_menu
+  DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --inputbox "$_LvmLvNameBody1 $_LvmLvNameBody2 (${LVM_VG_MB}MB)." 0 0 "lvol" 2>${ANSWER} || prep_menu
   LVM_LV_NAME=$(cat ${ANSWER})
   # Loop if preceeded with a "/", if nothing is entered, if there is a space, or if that name already exists.
   while [[ ${LVM_LV_NAME:0:1} == "/" ]] || [[ ${#LVM_LV_NAME} -eq 0 ]] || [[ ${LVM_LV_NAME} =~ \ |\' ]] || [[ $(lsblk | grep ${LVM_LV_NAME}) != "" ]]; do
     DIALOG --title "$_ErrTitle" --msgbox "$_LvmLvNameErrBody" 0 0
-    DIALOG --title " $_LvmCreateLV " --inputbox "$_LvmLvNameBody1 $_LvmLvNameBody2 (${LVM_VG_MB}MB)." 0 0 "lvol" 2>${ANSWER} || prep_menu
+    DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --inputbox "$_LvmLvNameBody1 $_LvmLvNameBody2 (${LVM_VG_MB}MB)." 0 0 "lvol" 2>${ANSWER} || prep_menu
     LVM_LV_NAME=$(cat ${ANSWER})
   done
   # Create the final LV
@@ -1374,9 +1353,14 @@ install_base() {
   fi
   # If a selection made, act
   if [[ $(cat ${PACKAGES}) != "" ]]; then
-    # Find out if kernel(s) selected
-    if [[ $(cat ${PACKAGES} | awk '{print $1}') == "linux" ]]; then
+    # Check to see if a kernel is already installed
+    ls ${MOUNTPOINT}/boot/*.img >/dev/null 2>&1
+    if [[ $? == 0 ]]; then
       KERNEL="y"
+      # If not, check to see if a linux kernel has been selected
+    elif [[ $(cat ${PACKAGES} | awk '{print $1}') == "linux" ]]; then
+      KERNEL="y"
+      # If no linux kernel, check to see if any of the others have been selected
     else
       for i in ${kernels}; do
         [[ $(cat ${PACKAGES} | grep ${i}) != "" ]] && KERNEL="y" && break;
@@ -1428,7 +1412,6 @@ install_bootloader() {
           [[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=\"\"~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
           arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
           check_for_error
-          BOOTLOADER="Grub"
         fi
       else
         # Syslinux
@@ -1460,7 +1443,6 @@ install_bootloader() {
           echo -e "\n\nLABEL reboot\n\tMENU LABEL Reboot\n\tCOM32 reboot.c32" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
           echo -e "\n\n#LABEL windows\n\t#MENU LABEL Windows\n\t#COM32 chain.c32\n\t#APPEND root=/dev/sda2 rw" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
           echo -e "\n\nLABEL poweroff\n\tMENU LABEL Poweroff\n\tCOM32 poweroff.c32" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          BOOTLOADER="Syslinux"
         fi
       fi
     fi
@@ -1494,7 +1476,6 @@ install_bootloader() {
           DIALOG --title "$_InstUefiBtTitle" --infobox "\nGrub $_SetDefDoneBody" 0 0
           sleep 2
         fi
-        BOOTLOADER="Grub"
         ;;
         "systemd-boot")
         arch_chroot "bootctl --path=${UEFI_MOUNT} install" 2>/tmp/.errlog
@@ -1515,7 +1496,6 @@ install_bootloader() {
           [[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~options~options cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME~g" ${i}
           [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${i}
         done
-        BOOTLOADER="systemd-boot"
         ;;
         *)
         install_base_menu
@@ -1547,8 +1527,10 @@ install_network_menu() {
     done
     # If no wireless, uncheck wireless pkgs
     [[ $(lspci | grep -i "Network Controller") == "" ]] && WIRELESS_PACKAGES=$(echo $WIRELESS_PACKAGES | sed "s/ on/ off/g")
-    DIALOG --title " $_InstNMMenuPkg " --checklist "$_InstNMMenuPkgBody\n\n$_UseSpaceBar" 0 0 11 \
+    DIALOG --title " $_InstNMMenuPkg " --checklist "$_InstNMMenuPkgBody\n\n$_UseSpaceBar" 0 0 13 \
     $WIRELESS_PACKAGES \
+    "ufw" $(pacman -Si ufw | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
+    "gufw" $(pacman -Si gufw | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
     "ntp" $(pacman -Si ntp | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
     "b43-fwcutter" "Broadcom 802.11b/g/n" off \
     "bluez-firmware" "Broadcom BCM203x / STLC2300 Bluetooth" off \
@@ -2102,33 +2084,51 @@ security_menu(){
     SUB_MENU="security_menu"
     HIGHLIGHT_SUB=1
   else
-    if [[ $HIGHLIGHT_SUB != 6 ]]; then
+    if [[ $HIGHLIGHT_SUB != 4 ]]; then
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstGrMenuTitle " --menu "$_InstGrMenuBody" 0 0 6 \
-  "1" "$_SecPkgTitle" \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_InstGrMenuTitle " \
+  --menu "$_InstGrMenuBody" 0 0 4 \
+  "1" "$_SecJournTitle" \
   "2" "$_SecCoreTitle" \
-  "3" "$_SecJournTitle" \
-  "4" "$_InstGrMenuDM" \
-  "5"	"$_PrepKBLayout" \
-  "6" "$_Back" 2>${ANSWER}
+  "3" "" \
+  "4" "$_Back" 2>${ANSWER}
   HIGHLIGHT_SUB=$(cat ${ANSWER})
   case $(cat ${ANSWER}) in
     "1")
-    install_xorg_input
+    # systemd-journald
+    DIALOG --title " $_SecJournTitle " --radiolist "$_SecJournBody$_UseSpaceBar" 0 0 7 \
+    "$_Edit" "/etc/systemd/journald.conf" off \
+    "SystemMaxUse=10M" "10M" off \
+    "SystemMaxUse=20M" "20M" off \
+    "SystemMaxUse=50M" "50M" off \
+    "SystemMaxUse=100M" "100M" off \
+    "SystemMaxUse=200M" "200M" off \
+    "Storage=none" "$_Disable" off 2>${ANSWER}
+    if [[ $(cat ${ANSWER}) != "" ]]; then
+      case $(cat ${ANSWER}) in
+        "$_Edit")
+        nano ${MOUNTPOINT}/etc/systemd/journald.conf
+        ;;
+        "Storage=none")
+        sed -i "s/#Storage.*\|Storage.*/Storage=none/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+        sed -i "s/SystemMaxUse.*/#&/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+        ;;
+        *)
+        sed -i "s/#SystemMaxUse.*\|SystemMaxUse.*/$(cat ${ANSWER})/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+        sed -i "s/Storage.*/#&/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+        ;;
+      esac
+    fi
     ;;
     "2")
-    setup_graphics_card
     ;;
     "3")
-    install_de_wm
     ;;
     "4")
-    install_dm
     ;;
     "5")
-    set_xkbmap
     ;;
     *)
     main_menu_online
@@ -2357,7 +2357,6 @@ install_acc_menu() {
 edit_configs() {
   # Clear the file variables
   FILE=""
-  FILE2=""
   user_list=""
   if [[ $SUB_MENU != "edit configs" ]]; then
     SUB_MENU="edit configs"
@@ -2375,8 +2374,8 @@ edit_configs() {
   "5" "/etc/sudoers" \
   "6" "/etc/mkinitcpio.conf" \
   "7" "/etc/fstab" \
-  "8" "$BOOTLOADER" \
-  "9" "$DM" \
+  "8" "grub/syslinux/systemd-boot" \
+  "9" "lxdm/lightdm/sddm" \
   "10" "$_Back" 2>${ANSWER}
   HIGHLIGHT_SUB=$(cat ${ANSWER})
   case $(cat ${ANSWER}) in
@@ -2402,44 +2401,25 @@ edit_configs() {
     FILE="${MOUNTPOINT}/etc/fstab"
     ;;
     "8")
-    case $BOOTLOADER in
-      "Grub")
-      FILE="${MOUNTPOINT}/etc/default/grub"
-      ;;
-      "Syslinux")
-      FILE="${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
-      ;;
-      "systemd-boot")
-      FILE="${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf"
-      FILE2="${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf"
-      ;;
-    esac
+    [[ -e ${MOUNTPOINT}/etc/default/grub ]] && FILE="${MOUNTPOINT}/etc/default/grub"
+    [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]] && FILE="$FILE ${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
+    if [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf ]]; then
+      files=$(ls ${MOUNTPOINT}${UEFI_MOUNT}/loader/*.conf)
+      for i in ${files}; do
+        FILE="$FILE ${i}"
+      done
+    fi
     ;;
     "9")
-    case $DM in
-      "lxdm")
-      FILE="${MOUNTPOINT}/etc/lxdm/lxdm.conf"
-      ;;
-      "lightdm")
-      FILE="${MOUNTPOINT}/etc/lightdm/lightdm.conf"
-      ;;
-      "sddm")
-      FILE="${MOUNTPOINT}/etc/sddm.conf"
-      ;;
-    esac
+    [[ -e ${MOUNTPOINT}/etc/lxdm/lxdm.conf ]] && FILE="${MOUNTPOINT}/etc/lxdm/lxdm.conf"
+    [[ -e ${MOUNTPOINT}/etc/lightdm/lightdm.conf ]] && FILE="${MOUNTPOINT}/etc/lightdm/lightdm.conf"
+    [[ -e ${MOUNTPOINT}/etc/sddm.conf ]] && FILE="${MOUNTPOINT}/etc/sddm.conf"
     ;;
     *)
     main_menu_online
     ;;
   esac
-  # open file(s) with nano
-  if [[ -e $FILE ]] && [[ $FILE2 != "" ]]; then
-    nano $FILE $FILE2
-  elif [[ -e $FILE ]]; then
-    nano $FILE
-  else
-    DIALOG --title "$_ErrTitle" --msgbox "$_SeeConfErrBody" 0 0
-  fi
+  nano $FILE
   edit_configs
 }
 
