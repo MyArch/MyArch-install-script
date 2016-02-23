@@ -21,9 +21,12 @@ _Encrypted="Encrypted"
 
 # Security and Tweaks
 _SecMenuTitle="Security and systemd Tweaks"
-_SecPkgTitle="Install Security Packages"
-_SecCoreTitle="Disable Coredump logging"
 _SecJournTitle="Amend journald logging"
+_SecCoreTitle="Disable Coredump logging"
+_SecKernTitle="Restrict Access to Kernel Logs"
+_Edit="Edit configuration file"
+_Disable="Disable"
+_SecJournBody="\nsystemd-journald collects and stores kernel logs, system logs, audit records, and standard outputs and error messages from services.\n\nBy default, a persistent (non-volatile) journal size limit is 10% of the root partition size: a 500G root means a 50G limit to data stored in /var/log/journal. 50M should be sufficent. Logging can also be disabled, although solving system problems may be more difficult.\n\n"
 
 # btrfs
 _btrfsSVTitle="btrfs Subvolumes"

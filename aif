@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 2.0 beta - 15-Feb-2016)
+# Architect Installation Framework (version 2.0 beta - 24-Feb-2016)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -30,7 +30,6 @@ DM_INST=""							# Which DMs have been installed?
 DM_ENABLED=0						# Has a display manager been enabled?
 NM_INST=""							# Which NMs have been installed?
 NM_ENABLED=0						# Has a network connection manager been enabled?
-BOOTLOADER="n/a"      				# Which bootloader has been installed?
 KEYMAP="us"          				# Virtual console keymap. Default is "us"
 XKBMAP="us"      	    			# X11 keyboard layout. Default is "us"
 ZONE=""               				# For time
@@ -65,7 +64,6 @@ SUB_MENU=""           				# Submenu to be highlighted
 # Logical Volume Management
 LVM=0                   			# Logical Volume Management Detected?
 LVM_SEP_BOOT=0          			# 1 = Seperate /boot, 2 = seperate /boot & LVM
-LVM_DISABLE=0           			# Option to allow user to deactive existing LVM
 LVM_VG=""               			# Name of volume group to create or use
 LVM_VG_MB=0             			# MB remaining of VG
 LVM_LV_NAME=""          			# Name of LV to create or use
@@ -88,8 +86,7 @@ CURR_LOCALE="en_US.UTF-8"   		# Default Locale
 FONT=""                     		# Set new font if necessary
 
 # Edit Files
-FILE=""                     		# Which file is to be opened?
-FILE2=""							# Which second file is to be opened?
+FILE=""                     		# File(s) to be reviewed
 
 ######################################################################
 ##																	##
@@ -1795,8 +1792,10 @@ install_wireless_packages(){
 	# If no wireless, uncheck wireless pkgs
 	[[ $(lspci | grep -i "Network Controller") == "" ]] && WIRELESS_PACKAGES=$(echo $WIRELESS_PACKAGES | sed "s/ on/ off/g")
 	
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstNMMenuPkg " --checklist "$_InstNMMenuPkgBody\n\n$_UseSpaceBar" 0 0 11 \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstNMMenuPkg " --checklist "$_InstNMMenuPkgBody\n\n$_UseSpaceBar" 0 0 13 \
 	$WIRELESS_PACKAGES \
+	"ufw" $(pacman -Si ufw | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
+	"gufw" $(pacman -Si gufw | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
 	"ntp" $(pacman -Si ntp | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
 	"b43-fwcutter" "Broadcom 802.11b/g/n" off \
 	"bluez-firmware" "Broadcom BCM203x / STLC2300 Bluetooth" off \
@@ -2408,30 +2407,49 @@ security_menu(){
 	   SUB_MENU="security_menu"
 	   HIGHLIGHT_SUB=1
 	else
-	   if [[ $HIGHLIGHT_SUB != 6 ]]; then
+	   if [[ $HIGHLIGHT_SUB != 4 ]]; then
 	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
 	   fi
 	fi
 
-    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstGrMenuTitle " --menu "$_InstGrMenuBody" 0 0 6 \
- 	"1" "$_SecPkgTitle" \
+    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstGrMenuTitle " --menu "$_InstGrMenuBody" 0 0 4 \
+ 	"1" "$_SecJournTitle" \
 	"2" "$_SecCoreTitle" \
-	"3" "$_SecJournTitle" \
-	"4" "$_InstGrMenuDM" \
-	"5"	"$_PrepKBLayout" \
-	"6" "$_Back" 2>${ANSWER}
+	"3" "" \
+	"4" "$_Back" 2>${ANSWER}
 
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
-        "1") install_xorg_input
+        "1") # systemd-journald
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_SecJournTitle " --radiolist "$_SecJournBody$_UseSpaceBar" 0 0 7 \
+			"$_Edit" "/etc/systemd/journald.conf" off \
+			"SystemMaxUse=10M" "10M" off \
+			"SystemMaxUse=20M" "20M" off \
+			"SystemMaxUse=50M" "50M" off \
+			"SystemMaxUse=100M" "100M" off \
+			"SystemMaxUse=200M" "200M" off \
+			"Storage=none" "$_Disable" off 2>${ANSWER}
+
+			if [[ $(cat ${ANSWER}) != "" ]]; then
+				case $(cat ${ANSWER}) in
+				"$_Edit") nano ${MOUNTPOINT}/etc/systemd/journald.conf
+				;;
+				"Storage=none") sed -i "s/#Storage.*\|Storage.*/Storage=none/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+								sed -i "s/SystemMaxUse.*/#&/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+				;;
+				*) sed -i "s/#SystemMaxUse.*\|SystemMaxUse.*/$(cat ${ANSWER})/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+				   sed -i "s/Storage.*/#&/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+				;;
+				esac
+			fi
 			;;
-		"2") setup_graphics_card 
+		"2") echo "" > /dev/null
              ;;
-        "3") install_de_wm
+        "3") 
              ;;
-        "4") install_dm
+        "4") echo "" > /dev/null
              ;;
-		"5") set_xkbmap
+		"5") echo "" > /dev/null
 			;;
           *) main_menu_online
 			;;
