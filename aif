@@ -1201,17 +1201,17 @@ luks_menu() {
 	LUKS_OPT=""
 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --menu "$_LuksMenuBody$_LuksMenuBody2$_LuksMenuBody3" 0 0 4 \
-	"cryptsetup open --type luks" "$_LuksOpen" \
 	"cryptsetup -q luksFormat" "$_LuksEncrypt" \
 	"cryptsetup -q -s -c" "$_LuksEncryptAdv" \
+	"cryptsetup open --type luks" "$_LuksOpen" \
 	"$_Back" "-" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
-	"cryptsetup open --type luks") luks_open
-		;;
 	"cryptsetup -q luksFormat"|"cryptsetup -q -c -s") 
 		LUKS_OPT=$(cat ${ANSWER})
 		luks_create
+		;;
+	"cryptsetup open --type luks") luks_open
 		;;
 	*) prep_menu
 		;;
