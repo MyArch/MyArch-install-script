@@ -685,6 +685,7 @@ secure_wipe(){
 		clear
 		
 		# Install wipe where not already installed. Much faster than dd
+		WIPE=$(pacman -Qs wipe)
 		if [ -n "$WIPE" ]; then
 			pacman -Sy --noconfirm wipe 2>/tmp/.errlog
 			check_for_error
