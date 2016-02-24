@@ -1231,7 +1231,7 @@ luks_menu() {
 	"$_Back" "-" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
-	"cryptsetup open --type luks") 
+	"$_LuksOpen") 
 		luks_open
 	;;
 	"$_LuksEncrypt")
