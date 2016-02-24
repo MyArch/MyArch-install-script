@@ -2726,7 +2726,7 @@ edit_configs() {
              ;;
         "3") [[ -e ${MOUNTPOINT}/etc/hostname ]] && FILE="${MOUNTPOINT}/etc/hostname"
              ;;
-        "4") [[ -e ${MOUNTPOINT}/etc/hosts]] && FILE="${MOUNTPOINT}/etc/hosts"
+        "4") [[ -e ${MOUNTPOINT}/etc/hosts ]] && FILE="${MOUNTPOINT}/etc/hosts"
              ;;
         "5") [[ -e ${MOUNTPOINT}/etc/sudoers ]] && FILE="${MOUNTPOINT}/etc/sudoers"
              ;;
