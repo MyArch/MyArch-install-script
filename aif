@@ -2452,18 +2452,17 @@ security_menu(){
 			 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_SecCoreTitle " --menu "$_SecCoreBody" 0 0 2 \
 			"$_Disable" "Storage=none" "$_Edit" "/etc/systemd/coredump.conf.d/custom.conf" 2>${ANSWER}
 			
-			case $(cat ${ANSWER}) in
-			"$_Disable") echo -e "[Coredump]\nStorage=none" > ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf
-						 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_SecCoreTitle " --infobox "\n$_Done!\n\n" 0 0
-						 sleep 2
-			;;
-			"$_Edit") if [[ -e ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf ]]; then
+			if [[ $(cat ${ANSWER}) == "$_Disable" ]]; then
+				echo -e "[Coredump]\nStorage=none" > ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf
+				dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_SecCoreTitle " --infobox "\n$_Done!\n\n" 0 0
+				sleep 2
+			elif [[ $(cat ${ANSWER}) == "$_Edit" ]]; then
+					if [[ -e ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf ]]; then
 						nano ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf
-					  else
+					else
 						dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_SeeConfErrTitle" --msgbox "$_SeeConfErrBody1" 0 0
-					  fi
-			;;
-			esac
+					fi
+			fi
           ;;
         "3") # Kernel log access 
 			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_SecKernTitle " --menu "\nKernel logs may contain information an attacker can use to identify and exploit kernel vulnerabilities, including sensitive memory addresses.\n\nIf systemd-journald logging has not been disabled, it is possible to create a rule in /etc/sysctl.d/ to disable access to these logs unless using root privilages (e.g. via sudo).\n" 0 0 2 \
