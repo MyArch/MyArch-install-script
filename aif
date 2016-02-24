@@ -74,6 +74,7 @@ VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 LUKS=0                  			# Luks Detected?
 LUKS_ROOT_DEV=""					# If encrypted, root partition
 LUKS_ROOT_NAME=""					# Name given to encrypted root partition
+LUKS_OPT=""							# Default or user-defined?
 
 MOUNTPOINT="/mnt"       			# Installation: Root mount
 MOUNT=""							# Installation: All other mounts branching from Root
@@ -454,16 +455,17 @@ generate_fstab() {
 	"genfstab -t PARTUUID -p" "$_FstabDevPtUUID" 2>${ANSWER}
 	
 	if [[ $(cat ${ANSWER}) != "" ]]; then
-		if ([[ $SYSTEM == "BIOS" ]] && [[ $(cat ${ANSWER}) == "genfstab -t PARTUUID -p" ]]) \
-		|| ([[ $SYSTEM == "UEFI" ]] && [[ $(cat ${ANSWER}) == "genfstab -U -p" ]] ); then
-			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ErrTitle " --msgbox "$_FstabErr ($SYSTEM)\n\n" 0 0
+		if [[ $SYSTEM == "BIOS" ]] && [[ $(cat ${ANSWER}) == "genfstab -t PARTUUID -p" ]]; then
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ErrTitle " --msgbox "$_FstabErr" 0 0
 			generate_fstab
+		else
+			$(cat ${ANSWER}) ${MOUNTPOINT} > ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
+			check_for_error
+			[[ -f ${MOUNTPOINT}/swapfile ]] && sed -i "s/\\${MOUNTPOINT}//" ${MOUNTPOINT}/etc/fstab
 		fi
-		
-		$(cat ${ANSWER}) ${MOUNTPOINT} > ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
-		check_for_error
-		[[ -f ${MOUNTPOINT}/swapfile ]] && sed -i "s/\\${MOUNTPOINT}//" ${MOUNTPOINT}/etc/fstab
 	fi
+	
+	config_base_menu
 
 }
 
@@ -703,19 +705,13 @@ secure_wipe(){
 
 # BIOS and UEFI
 auto_partition(){
-
-	LUKS_ROOT_PART=""
 	
-	# Different info depending on standard or encrypted auto-partitioning
-	if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoLuksBody\n\n$_AutoPartBody3" 0 0
-	else
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoPartBody3" 0 0
-	fi
+	# Provide warning to user
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoPartBody3" 0 0
 	
 	if [[ $? -eq 0 ]]; then
 		
-		# Deal with LVM HERE?
+		# Find existing partitions (if any) to remove
 		parted -s ${DEVICE} print | awk '/^ / {print $1}' > /tmp/.del_parts
 	
 		for del_part in $(tac /tmp/.del_parts); do
@@ -741,28 +737,6 @@ auto_partition(){
 		parted -s ${DEVICE} set 1 boot on 2>>/tmp/.errlog
 		parted -s ${DEVICE} mkpart primary ext3 513MiB 100% 2>>/tmp/.errlog
 		check_for_error
-        
-        # Extra steps for Encrypted Root
-        if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
-			modprobe -a dm-mod dm_crypt
-			
-			# Presumably the root partition will be bigger than 512MB.
-			LUKS_ROOT_PART=$(lsblk -lno SIZE,NAME,TYPE ${DEVICE} | grep "part" | sort -n -r | awk '{print $2}' | head -1)
-			
-        	luks_password
-        	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_Encrypted $_PartOptAuto" --infobox "$_LuksWaitBody $LUKS_ROOT_NAME\n$_LuksWaitBody2 $LUKS_ROOT_PART\n$_PlsWaitBody" 0 0
-
-			# Encrypt partition
-			echo $PASSWD | cryptsetup -q luksFormat ${LUKS_ROOT_PART} 2>/tmp/.errlog
-			check_for_error
-			echo $PASSWD | cryptsetup open ${LUKS_ROOT_PART} root 2>/tmp/.errlog
-			check_for_error
-			
-			# Add LVM to partition
-			vgcreate vg01 /dev/mapper/root 2>/tmp/.errlog
-			lvcreate -l +100%FREE vg01 -n cryptroot 2>>/tmp/.errlog
-			check_for_error
-		fi
 
         # Show created partitions
         lsblk ${DEVICE} -o NAME,TYPE,FSTYPE,SIZE > /tmp/.devlist
@@ -774,27 +748,27 @@ auto_partition(){
 }
 
 	# Partitioning Menu
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --menu "$_PartToolBody" 0 0 8 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepPartDisk" --menu "$_PartToolBody" 0 0 7 \
     "$_PartOptWipe" "BIOS & UEFI" \
-    "$_Standard $_PartOptAuto" "BIOS & UEFI" \
-    "$_Encrypted $_PartOptAuto" "BIOS & UEFI" \
- 	"parted" "BIOS & UEFI" \
-	"cfdisk" "BIOS/MBR" \
-	"cgdisk" "UEFI/GPT" \
+    "$_PartOptAuto" "BIOS & UEFI" \
+	"cfdisk" "BIOS" \
+	"cgdisk" "UEFI" \
 	"fdisk"  "BIOS & UEFI" \
-	"gdisk"  "UEFI/GPT" 2>${ANSWER}
+	"gdisk"  "UEFI" \
+	"parted" "BIOS & UEFI" 2>${ANSWER}
 
 	clear
 	# If something selected
 	if [[ $(cat ${ANSWER}) != "" ]]; then
-		if ([[ $(cat ${ANSWER}) != $_PartOptWipe ]] &&  [[ $(cat ${ANSWER}) != "$_Standard $_PartOptAuto" ]] &&  [[ $(cat ${ANSWER}) != "$_Encrypted $_PartOptAuto" ]]); then
+		if ([[ $(cat ${ANSWER}) != "$_PartOptWipe" ]] &&  [[ $(cat ${ANSWER}) != "$_PartOptAuto" ]]); then
 			$(cat ${ANSWER}) ${DEVICE}
-			prep_menu
 		else
 			[[ $(cat ${ANSWER}) == $_PartOptWipe ]] && secure_wipe && create_partitions
-			([[ $(cat ${ANSWER}) == "$_Standard $_PartOptAuto" ]] || [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]) && auto_partition
+			[[ $(cat ${ANSWER}) == "$_PartOptAuto" ]] && auto_partition
 		fi
-	fi	
+	fi
+	
+	prep_menu
 }	
 
 # Set static list of filesystems rather than on-the-fly. Partially as most require additional flags, and 
@@ -1198,9 +1172,12 @@ luks_create(){
     LUKS_ROOT_NAME=$(cat ${ANSWER})
     luks_password
     
+    [[ $LUKS_OPT == "cryptsetup -q -c -s" ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
+		
     # Encrypt selected partition with credentials given
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
-	echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog
+	[[ $LUKS_OPT == "cryptsetup -q luksFormat" ]] && echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog
+	[[ $LUKS_OPT == "cryptsetup -q -c -s" ]] && echo $PASSWD | cryptsetup -q $(cat ${ANSWER}) luksFormat ${PARTITION} 2>/tmp/.errlog
 	check_for_error
 	echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
 	check_for_error
@@ -1214,26 +1191,26 @@ luks_create(){
 
 luks_menu() {
 
-	#modprobe -a dm-mod dm_crypt
+	LUKS_OPT=""
 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepLUKS" --menu "$_LuksMenuBody$_LuksMenuBody2" 0 0 4 \
-	"$_LuksHelp" "-" \
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --menu "$_LuksMenuBody$_LuksMenuBody2$_LuksMenuBody3" 0 0 4 \
 	"cryptsetup open --type luks" "$_LuksOpen" \
 	"cryptsetup -q luksFormat" "$_LuksEncrypt" \
+	"cryptsetup -q -s -c" "$_LuksEncryptAdv" \
 	"$_Back" "-" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
-	$_LuksHelp) echo "" > /dev/null # add help page
-		;;
 	"cryptsetup open --type luks") luks_open
 		;;
-	"cryptsetup -q luksFormat") luks_create
+	"cryptsetup -q luksFormat"|"cryptsetup -q -c -s") 
+		LUKS_OPT=$(cat ${ANSWER})
+		luks_create
 		;;
 	*) prep_menu
 		;;
 	esac
     
-	#luks_menu 	
+	luks_menu 	
 
 }
 
@@ -1551,7 +1528,9 @@ install_base() {
 	if [[ $(cat ${ANSWER}) -eq 1 ]]; then
 		
 		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --checklist "$_InstStandBseBody$_UseSpaceBar" 0 0 3 \
-		"linux" "-" on "linux-lts" "-" off "base-devel" "-" on 2>${PACKAGES}
+		"linux" $(pacman -Si linux | grep -i version | sed s/.*://g | sed "s/^ //") on \
+		"linux-lts" $(pacman -Si linux-lts | grep -i version | sed s/.*://g | sed "s/^ //") off \
+		"base-devel" "-" on 2>${PACKAGES}
 	
 	# "Advanced" installation method
 	elif [[ $(cat ${ANSWER}) -eq 2 ]]; then
@@ -1575,10 +1554,10 @@ install_base() {
 		done
 		
 		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstBseTitle" --checklist "$_InstAdvBseBody $_UseSpaceBar" 0 0 20 \
-		"linux" $(pacman -Si linux | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") on \
-		"linux-lts" $(pacman -Si linux-lts | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
-		"linux-grsec" $(pacman -Si linux-grsec | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
-		"linux-zen" $(pacman -Si linux-zen | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
+		"linux" $(pacman -Si linux | grep -i version | sed s/.*://g | sed "s/^ //") on \
+		"linux-lts" $(pacman -Si linux-lts | grep -i version | sed s/.*://g | sed "s/^ //") off \
+		"linux-grsec" $(pacman -Si linux-grsec | grep -i version | sed s/.*://g | sed "s/^ //") off \
+		"linux-zen" $(pacman -Si linux-zen | grep -i version | sed s/.*://g | sed "s/^ //") off \
 		$PKG_LIST $BTRF_CHECK $F2FS_CHECK 2>${PACKAGES}
     fi
     
@@ -2363,8 +2342,12 @@ install_cust_pkgs(){
 
 	# If at least one package, install.
 	if [[ $(cat ${PACKAGES}) != "" ]]; then
-		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
-		check_for_error
+		if [[ $(cat ${PACKAGES}) == "hen poem" ]]; then
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " \"My Sweet Buckies\" by Atiya & Carl " --msgbox "\nMy Sweet Buckies,\nYou are the sweetest Buckies that ever did \"buck\",\nLily, Rosie, Trumpet, and Flute,\nMy love for you all is absolute!\n\nThey buck: \"We love our treats, we are the Booyakka sisters,\"\n\"Sometimes we squabble and give each other comb-twisters,\"\n\"And in our garden we love to sunbathe, forage, hop and jump,\"\n\"We love our freedom far, far away from that factory farm dump,\"\n\n\"For so long we were trapped in cramped prisons full of disease,\"\n\"No sunlight, no fresh air, no one who cared for even our basic needs,\"\n\"We suffered in fear, pain, and misery for such a long time,\"\n\"But now we are so happy, we wanted to tell you in this rhyme!\"\n\n" 0 0
+		else
+			pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
+			check_for_error
+		fi
 	fi
 	
 	install_multimedia_menu
