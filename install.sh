@@ -60,6 +60,7 @@ VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 LUKS=0                  			# Luks Detected?
 LUKS_ROOT_DEV=""				    	# If encrypted, root partition
 LUKS_ROOT_NAME=""					    # Name given to encrypted root partition
+LUKS_OPT=""                   # Default or user-defined ?
 # Installation
 MOUNTPOINT="/mnt"                 # Installation: Root mount
 MOUNT=""							            # Installation: All other mounts branching from Root
@@ -411,15 +412,19 @@ generate_fstab() {
   "genfstab -U -p" "$_FstabDevUUID" \
   "genfstab -t PARTUUID -p" "$_FstabDevPtUUID" 2>${ANSWER}
   if [[ $(cat ${ANSWER}) != "" ]]; then
-    if ([[ $SYSTEM == "BIOS" ]] && [[ $(cat ${ANSWER}) == "genfstab -t PARTUUID -p" ]]) \
-    || ([[ $SYSTEM == "UEFI" ]] && [[ $(cat ${ANSWER}) == "genfstab -U -p" ]] ); then
-      DIALOG --title " $_ErrTitle " --msgbox "$_FstabErr ($SYSTEM)\n\n" 0 0
+    if [[ $SYSTEM == "BIOS" ]] && [[ $(cat ${ANSWER}) == "genfstab -t PARTUUID -p" ]]; then
+      DIALOG --title " $_ErrTitle " --msgbox "$_FstabErr" 0 0
       generate_fstab
     fi
     $(cat ${ANSWER}) ${MOUNTPOINT} > ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
     check_for_error
     [[ -f ${MOUNTPOINT}/swapfile ]] && sed -i "s/\\${MOUNTPOINT}//" ${MOUNTPOINT}/etc/fstab
+  else
+    $(cat ${ANSWER}) ${MOUNTPOINT} > ${MOUNTPOINT}/etc/fstab 2>/tmp/.errlog
+    check_for_error
+    [[ -f ${MOUNTPOINT}/swapfile ]] && sed -i "s/\\${MOUNTPOINT}//" ${MOUNTPOINT}/etc/fstab
   fi
+  config_base_menu
 }
 
 set_hostname() {
@@ -487,7 +492,6 @@ create_new_user() {
 
 run_mkinitcpio() {
   clear
-  echo "" > /tmp/.errlog
   KERNEL=""
   # If LVM and/or LUKS used, add the relevant hook(s)
   ([[ $LVM -eq 1 ]] && [[ $LUKS -eq 0 ]]) && sed -i 's/block filesystems/block lvm2 filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf 2>/tmp/.errlog
@@ -495,9 +499,9 @@ run_mkinitcpio() {
   ([[ $LVM -eq 0 ]] && [[ $LUKS -eq 1 ]]) && sed -i 's/block filesystems/block encrypt filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf 2>/tmp/.errlog
   check_for_error
   # Run Mkinitcpio command depending on kernel(s) installed
-  KERNEL=$(ls /boot/*.img | grep -v fallback | sed s~/boot/initramfs-~~g | sed s~\.img~~g | uniq)
+  KERNEL=$(ls ${MOUNTPOINT}/boot/*.img | sed s~/mnt/boot/initramfs-~~g | sed "s~-fallback.img\|.img~~g" | uniq)
   for i in ${KERNEL}; do
-    mkinitcpio -p ${i} 2>>/tmp/.errlog
+    arch_chroot "mkinitcpio -p ${i}" 2>>/tmp/.errlog
   done
   check_for_error
 }
@@ -601,12 +605,10 @@ create_partitions(){
     if [[ $? -eq 0 ]]; then
       clear
       # Install wipe where not already installed. Much faster than dd
-      if [ -n "$WIPE" ]; then
+      if [[ ! -e /usr/bin/wipe ]]; then
         pacman -Sy --noconfirm wipe 2>/tmp/.errlog
         check_for_error
       fi
-      detect_lvm
-      deactivate_lvm
       clear
       wipe -Ifre ${DEVICE}
       # Alternate dd command - requires pv to be installed
@@ -619,15 +621,10 @@ create_partitions(){
 
   # BIOS and UEFI
   auto_partition(){
-    LUKS_ROOT_PART=""
-    # Different info depending on standard or encrypted auto-partitioning
-    if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
-      DIALOG --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoLuksBody\n\n$_AutoPartBody3" 0 0
-    else
-      DIALOG --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoPartBody3" 0 0
-    fi
+    # Provide warning to user
+    DIALOG --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoPartBody3" 0 0
     if [[ $? -eq 0 ]]; then
-      # Deal with LVM HERE?
+      # Find existing partitions (if any) to remove
       parted -s ${DEVICE} print | awk '/^ / {print $1}' > /tmp/.del_parts
       for del_part in $(tac /tmp/.del_parts); do
         parted -s ${DEVICE} rm ${del_part} 2>/tmp/.errlog
@@ -648,23 +645,6 @@ create_partitions(){
       parted -s ${DEVICE} set 1 boot on 2>>/tmp/.errlog
       parted -s ${DEVICE} mkpart primary ext3 513MiB 100% 2>>/tmp/.errlog
       check_for_error
-      # Extra steps for Encrypted Root
-      if [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]; then
-        modprobe -a dm-mod dm_crypt
-        # Presumably the root partition will be bigger than 512MB.
-        LUKS_ROOT_PART=$(lsblk -lno SIZE,NAME,TYPE ${DEVICE} | grep "part" | sort -n -r | awk '{print $2}' | head -1)
-        luks_password
-        DIALOG --title "$_Encrypted $_PartOptAuto" --infobox "$_LuksWaitBody $LUKS_ROOT_NAME\n$_LuksWaitBody2 $LUKS_ROOT_PART\n$_PlsWaitBody" 0 0
-        # Encrypt partition
-        echo $PASSWD | cryptsetup -q luksFormat ${LUKS_ROOT_PART} 2>/tmp/.errlog
-        check_for_error
-        echo $PASSWD | cryptsetup open ${LUKS_ROOT_PART} root 2>/tmp/.errlog
-        check_for_error
-        # Add LVM to partition
-        vgcreate vg01 /dev/mapper/root 2>/tmp/.errlog
-        lvcreate -l +100%FREE vg01 -n cryptroot 2>>/tmp/.errlog
-        check_for_error
-      fi
       # Show created partitions
       lsblk ${DEVICE} -o NAME,TYPE,FSTYPE,SIZE > /tmp/.devlist
       DIALOG --title "" --textbox /tmp/.devlist 0 0
@@ -674,26 +654,25 @@ create_partitions(){
   }
 
   # Partitioning Menu
-  DIALOG --title "$_PrepPartDisk" --menu "$_PartToolBody" 0 0 8 \
+  DIALOG --title "$_PrepPartDisk" --menu "$_PartToolBody" 0 0 7 \
   "$_PartOptWipe" "BIOS & UEFI" \
-  "$_Standard $_PartOptAuto" "BIOS & UEFI" \
-  "$_Encrypted $_PartOptAuto" "BIOS & UEFI" \
-  "parted" "BIOS & UEFI" \
-  "cfdisk" "BIOS/MBR" \
-  "cgdisk" "UEFI/GPT" \
+  "$_PartOptAuto" "BIOS & UEFI" \
+  "cfdisk" "BIOS" \
+  "cgdisk" "UEFI" \
   "fdisk"  "BIOS & UEFI" \
-  "gdisk"  "UEFI/GPT" 2>${ANSWER}
+  "gdisk"  "UEFI" \
+  "parted" "BIOS & UEFI" 2>${ANSWER}
   clear
   # If something selected
   if [[ $(cat ${ANSWER}) != "" ]]; then
-    if ([[ $(cat ${ANSWER}) != $_PartOptWipe ]] &&  [[ $(cat ${ANSWER}) != "$_Standard $_PartOptAuto" ]] &&  [[ $(cat ${ANSWER}) != "$_Encrypted $_PartOptAuto" ]]); then
+    if ([[ $(cat ${ANSWER}) != "$_PartOptWipe" ]] && [[ $(cat ${ANSWER}) != "$_PartOptAuto" ]]); then
       $(cat ${ANSWER}) ${DEVICE}
-      prep_menu
     else
       [[ $(cat ${ANSWER}) == $_PartOptWipe ]] && secure_wipe && create_partitions
-      ([[ $(cat ${ANSWER}) == "$_Standard $_PartOptAuto" ]] || [[ $(cat ${ANSWER}) == "$_Encrypted $_PartOptAuto" ]]) && auto_partition
+      [[ $(cat ${ANSWER}) == "$_PartOptAuto" ]] && auto_partition
     fi
   fi
+  prep_menu
 }
 
 # Set static list of filesystems rather than on-the-fly. Partially as most require additional flags, and
@@ -889,6 +868,15 @@ mount_partitions() {
         break;
       fi
     done
+    # Identify if LUKS on LVM for mkinitcpio
+    root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
+    parent_parts=$(lsblk -lno NAME,TYPE | grep "lvm" | awk '{print "/dev/mapper/" $1}')
+    for i in ${parent_parts}; do
+      if [[ $(lsblk -lno NAME,TYPE ${i} | grep $root_name) != "" ]]; then
+        LVM=1
+        break;
+      fi
+    done
   fi
   # Identify and create swap, if applicable
   DIALOG --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 \
@@ -985,7 +973,7 @@ luks_password(){
   PASSWD2=$(cat ${ANSWER})
   if [[ $PASSWD != $PASSWD2 ]]; then
     DIALOG --title "$_ErrTitle" --msgbox "$_PassErrBody" 0 0
-    set_luks_password
+    luks_password
   fi
 }
 
@@ -1011,7 +999,7 @@ luks_open(){
   luks_menu
 }
 
-luks_create(){
+luks_setup(){
   modprobe -a dm-mod dm_crypt
   INCLUDE_PART='part\|lvm'
   umount_partitions
@@ -1023,12 +1011,31 @@ luks_create(){
   DIALOG --title " $_LuksEncrypt " --inputbox "$_LuksOpenBody" 10 50 "cryptroot" 2>${ANSWER} || luks_menu
   LUKS_ROOT_NAME=$(cat ${ANSWER})
   luks_password
-  # Encrypt selected partition with credentials given
+}
+
+luks_default() {
+  # Encrypt selected partition or LV with credentials given
   DIALOG --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
+  sleep 2
   echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog
-  check_for_error
+  # Now open the encrypted partition or LV
   echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
   check_for_error
+}
+
+luks_key_define() {
+  DIALOG --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
+  # Encrypt selected partition or LV with credentials given
+  DIALOG --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
+  sleep 2
+  echo $PASSWD | cryptsetup -q $(cat ${ANSWER}) luksFormat ${PARTITION} 2>/tmp/.errlog
+  check_for_error
+  # Now open the encrypted partition or LV
+  echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
+  check_for_error
+}
+
+luks_show(){
   echo -e ${_LuksEncruptSucc} > /tmp/.devlist
   lsblk -o NAME,TYPE,FSTYPE,SIZE ${PARTITION} | grep "part\|crypt\|NAME\|TYPE\|FSTYPE\|SIZE" >> /tmp/.devlist
   DIALOG --title " $_LuksEncrypt " --textbox /tmp/.devlist 0 0
@@ -1036,27 +1043,32 @@ luks_create(){
 }
 
 luks_menu() {
-  #modprobe -a dm-mod dm_crypt
-  DIALOG --title "$_PrepLUKS" --menu "$_LuksMenuBody$_LuksMenuBody2" 0 0 4 \
-  "$_LuksHelp" "-" \
-  "cryptsetup open --type luks" "$_LuksOpen" \
-  "cryptsetup -q luksFormat" "$_LuksEncrypt" \
+  LUKS_OPT=""
+  DIALOG --title " $_PrepLUKS " \
+  --menu "$_LuksMenuBody$_LuksMenuBody2$_LuksMenuBody3" 0 0 4 \
+  "$_LuksOpen" "cryptsetup open --type luks" \
+  "$_LuksEncrypt" "cryptsetup -q luksFormat" \
+  "$_LuksEncryptAdv" "cryptsetup -q -s -c" \
   "$_Back" "-" 2>${ANSWER}
   case $(cat ${ANSWER}) in
-    $_LuksHelp)
-    echo "" > /dev/null # add help page
-    ;;
-    "cryptsetup open --type luks")
+    "$_LuksOpen")
     luks_open
     ;;
-    "cryptsetup -q luksFormat")
-    luks_create
+    "$_LuksEncrypt")
+    luks_setup
+    luks_default
+    luks_show
+    ;;
+    "$_LuksEncryptAdv")
+    luks_setup
+    luks_key_define
+    luks_show
     ;;
     *)
     prep_menu
     ;;
   esac
-  #luks_menu
+  luks_menu
 }
 
 ################################################################################
@@ -1167,7 +1179,7 @@ lvm_create() {
     LVM_VG=$(cat ${ANSWER})
   done
   # Select the partition(s) for the Volume Group
-  DIALOG --title " $_LvmCreateVG " --menu "$_LvmPvSelBody $_UseSpaceBar" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+  DIALOG --title " $_LvmCreateVG " --checklist "$_LvmPvSelBody $_UseSpaceBar" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
   [[ $(cat ${ANSWER}) != "" ]] && VG_PARTS=$(cat ${ANSWER}) || prep_menu
   # Once all the partitions have been selected, show user. On confirmation, use it/them in 'vgcreate' command.
   # Also determine the size of the VG, to use for creating LVs for it.
@@ -1327,7 +1339,9 @@ install_base() {
   # "Standard" installation method
   if [[ $(cat ${ANSWER}) -eq 1 ]]; then
     DIALOG --title "$_InstBseTitle" --checklist "$_InstStandBseBody$_UseSpaceBar" 0 0 3 \
-    "linux" "-" on "linux-lts" "-" off "base-devel" "-" on 2>${PACKAGES}
+    "linux" $(pacman -Si linux | grep -i version | sed s/.*://g | sed "s/^ //") on \
+    "linux-lts" $(pacman -Si linux-lts | grep -i version | sed s/.*://g | sed "s/^ //") off \
+    "base-devel" "-" on 2>${PACKAGES}
     # "Advanced" installation method
   elif [[ $(cat ${ANSWER}) -eq 2 ]]; then
     # Ask user to wait while package descriptions are gathered (because it takes ages)
@@ -1345,10 +1359,10 @@ install_base() {
       PKG_LIST="${PKG_LIST} ${i} $(pacman -Si ${i} | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") on"
     done
     DIALOG --title "$_InstBseTitle" --checklist "$_InstAdvBseBody $_UseSpaceBar" 0 0 20 \
-    "linux" $(pacman -Si linux | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") on \
-    "linux-lts" $(pacman -Si linux-lts | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
-    "linux-grsec" $(pacman -Si linux-grsec | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
-    "linux-zen" $(pacman -Si linux-zen | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off \
+    "linux" $(pacman -Si linux | grep -i version | sed s/.*://g | sed "s/^ //") on \
+    "linux-lts" $(pacman -Si linux-lts | grep -i version | sed s/.*://g | sed "s/^ //") off \
+    "linux-grsec" $(pacman -Si linux-grsec | grep -i version | sed s/.*://g | sed "s/^ //") off \
+    "linux-zen" $(pacman -Si linux-zen | grep -i version | sed s/.*://g | sed "s/^ //") off \
     $PKG_LIST $BTRF_CHECK $F2FS_CHECK 2>${PACKAGES}
   fi
   # If a selection made, act
@@ -2039,8 +2053,12 @@ install_multimedia_menu(){
     DIALOG --title " $_InstMulCust " --inputbox "$_InstMulCustBody" 0 0 "" 2>${PACKAGES} || install_multimedia_menu
     # If at least one package, install.
     if [[ $(cat ${PACKAGES}) != "" ]]; then
-      PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
-      check_for_error
+      if [[ $(cat ${PACKAGES}) == "hen poem" ]]; then
+        DIALOG --title " \"My Sweet Buckies\" by Atiya & Carl " --msgbox "\nMy Sweet Buckies,\nYou are the sweetest Buckies that ever did \"buck\",\nLily, Rosie, Trumpet, and Flute,\nMy love for you all is absolute!\n\nThey buck: \"We love our treats, we are the Booyakka sisters,\"\n\"Sometimes we squabble and give each other comb-twisters,\"\n\"And in our garden we love to sunbathe, forage, hop and jump,\"\n\"We love our freedom far, far away from that factory farm dump,\"\n\n\"For so long we were trapped in cramped prisons full of disease,\"\n\"No sunlight, no fresh air, no one who cared for even our basic needs,\"\n\"We suffered in fear, pain, and misery for such a long time,\"\n\"But now we are so happy, we wanted to tell you in this rhyme!\"\n\n" 0 0
+      else
+        PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
+        check_for_error
+      fi
     fi
     install_multimedia_menu
   }
