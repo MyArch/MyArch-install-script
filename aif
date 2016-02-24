@@ -562,7 +562,7 @@ run_mkinitcpio() {
 	# Run Mkinitcpio command depending on kernel(s) installed
 	KERNEL=$(ls ${MOUNTPOINT}/boot/*.img | sed s~/mnt/boot/initramfs-~~g | sed "s~-fallback.img\|.img~~g" | uniq)
 	for i in ${KERNEL}; do
-		mkinitcpio -p ${i} 2>>/tmp/.errlog
+		arch_chroot "mkinitcpio -p ${i}" 2>>/tmp/.errlog
 	done
 	check_for_error
  
