@@ -1121,7 +1121,7 @@ luks_password(){
     
     if [[ $PASSWD != $PASSWD2 ]]; then 
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ErrTitle" --msgbox "$_PassErrBody" 0 0
-       set_luks_password
+       luks_password
     fi
 
 }
