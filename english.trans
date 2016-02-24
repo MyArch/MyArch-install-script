@@ -26,7 +26,9 @@ _SecCoreTitle="Disable Coredump logging"
 _SecKernTitle="Restrict Access to Kernel Logs"
 _Edit="Edit configuration file"
 _Disable="Disable"
+_SecMenuBody="\nA few useful and beginner-friendly tweaks are available to improve system security and performance.\n\nSelecting an option will provide details about it."
 _SecJournBody="\nsystemd-journald collects and stores kernel logs, system logs, audit records, and standard outputs and error messages from services.\n\nBy default, a persistent (non-volatile) journal size limit is 10% of the root partition size: a 500G root means a 50G limit to data stored in /var/log/journal. 50M should be sufficent. Logging can also be disabled, although solving system problems may be more difficult.\n\n"
+_SecCoreBody="\nA core dump is a record of computer memory when a process crashes.\n\nUseful for developers but not the average user, core dumps waste system resources and can also contain sensitive data such as passwords and encryption keys.\n\nThe default systemd behavior is to generate core dumps for all processes in /var/lib/systemd/coredump. This behavior can be overridden by creating a configuration file in the /etc/systemd/coredump.conf.d/ directory.\n\n"
 
 # btrfs
 _btrfsSVTitle="btrfs Subvolumes"
@@ -239,11 +241,11 @@ _ExtErrBody="\nPartition cannot be mounted due to a problem with the mountpoint 
 
 # Install Base
 _InstBseTitle=" Install Base "
-_InstBseBody="\nSelect installation method.\n\nStandard: Select kernel(s) and optionally the base-devel package group, necessary for the Arch User Repository (AUR). Recommended for beginners.\n\nAdvanced: Select kernel(s) and individual packages from the base and base-devel package groups.\n\n"
-_InstStandBseBody="\nAt least one kernel (linux or linux-lts) must be selected. The base package group will be installed automatically. The base-devel package group is required to use the Arch User Repository (AUR).\n\n"
+_InstBseBody="\nTwo installation methods are available:\n\nStandard: Recommended for beginners. Choose up to two kernels (latest and Long Term Support) and optionally the base-devel package group. The sudo, btrfs-progs, and f2fs-tools packages will also be installed.\n\nAdvanced: Choose up to four kernels (latest, lts, grsec, and zen) and control individual packages from the base and base-devel package groups. Additional configuration for the grsec and zen kernels may be required for Virtualbox and NVIDIA.\n\nNOTE: It will be necessary to select at least one kernel for installation, unless a kernel has already been installed."
+_InstStandBseBody="\nThe base package group will be installed automatically. The base-devel package group is required to use the Arch User Repository (AUR).\n\n"
 _InstStandBase="Standard Installation"
 _InstAdvBase="Advanced Installation"
-_InstAdvBseBody="WARNING: This is for experienced users only. Newer users should use the 'standard' installation option."
+_InstAdvBseBody="\nWARNING: This is for experienced users only. Newer users should use the 'standard' installation option."
 _InstAdvWait="\nGathering package descriptions."
 
 # Install BIOS Bootloader
