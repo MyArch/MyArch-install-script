@@ -973,47 +973,35 @@ mount_current_partition(){
 	# Make the directory and mount
 	mount_current_partition
 
-	# Identify if root is encrypted. First if lvm type.
-	if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm") != "" ]]; then
-		root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")	
-		parent_parts=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
-		
-		for i in ${parent_parts}; do
-			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $root_name) != "" ]]; then
-				if [[ $(lsblk -lno FSTYPE ${i} | grep -i "crypto_LUKS") != "" ]]; then
-					LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
-					LUKS_ROOT_NAME=$(lsblk -lno NAME,FSTYPE,TYPE ${i} | grep -i "lvm2_member" | grep crypt$ | awk '{print $1}')
-					break;
-				else
-					LVM=1
-				fi
-			fi
-		done
-	# crypt fs type specific.	
-	elif [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]]; then
+	# Identify if root is LUKS, or LVM on LUKS (parent = partition)
+	if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt\|lvm") != "" ]]; then
 		LUKS_ROOT_NAME=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
-		LUKS=1
-		
-		# Identify "parent" partition and get UUID for it (for bootloaders)
-		LUKS_ROOT_DEV=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
-		for i in ${LUKS_ROOT_DEV}; do
-			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
-				LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
+	    [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]] && LUKS=1
+	    [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm") != "" ]] && LVM=1
+
+		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print $"/dev/"$1}')
+		for i in ${cryptparts}; do
+			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
+				LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE $"/dev/"${i} | grep "part" | awk '{print $1}')
 				break;
 			fi
 		done
+	fi
+	
+	# Identify if LUKS on LVM (parent = logical volume)
+	if ([[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]] && [[ $LUKS_ROOT_DEV == "" ]]); then
+		LUKS_ROOT_NAME=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
 		
-		# Identify if LUKS on LVM for mkinitcpio
-		root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
-		parent_parts=$(lsblk -lno NAME,TYPE | grep "lvm" | awk '{print "/dev/mapper/" $1}')
-		
-		for i in ${parent_parts}; do
-			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $root_name) != "" ]]; then
+		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print $"/dev/mapper/"$1}')
+		for i in ${cryptparts}; do
+			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
+				LUKS_ROOT_DEV=${i}
 				LVM=1
 				break;
 			fi
 		done
 	fi
+	
 
 	# Identify and create swap, if applicable
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
@@ -1666,7 +1654,7 @@ bios_bootloader() {
 				fi
 				
 				# If encryption used amend grub
-				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=\"\"~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
+				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=.*~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
 				
 				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
 				check_for_error
