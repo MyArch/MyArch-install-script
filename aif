@@ -1342,7 +1342,7 @@ check_lv_size() {
     done
     
     # Select the partition(s) for the Volume Group
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateVG " --menu "$_LvmPvSelBody $_UseSpaceBar" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu 
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateVG " --checklist "$_LvmPvSelBody $_UseSpaceBar" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu 
     [[ $(cat ${ANSWER}) != "" ]] && VG_PARTS=$(cat ${ANSWER}) || prep_menu
     
     # Once all the partitions have been selected, show user. On confirmation, use it/them in 'vgcreate' command.
