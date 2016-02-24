@@ -1172,13 +1172,22 @@ luks_create(){
     LUKS_ROOT_NAME=$(cat ${ANSWER})
     luks_password
     
-    [[ $LUKS_OPT == "cryptsetup -q -c -s" ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
+    [[ $LUKS_OPT == "cryptsetup -q -s -c" ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
 		
     # Encrypt selected partition with credentials given
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
-	[[ $LUKS_OPT == "cryptsetup -q luksFormat" ]] && echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog
-	[[ $LUKS_OPT == "cryptsetup -q -c -s" ]] && echo $PASSWD | cryptsetup -q $(cat ${ANSWER}) luksFormat ${PARTITION} 2>/tmp/.errlog
+	if [[ $LUKS_OPT == "cryptsetup -q luksFormat" ]]; then
+	clear
+	echo "echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog"
+	read
+		echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog
+	elif [[ $LUKS_OPT == "cryptsetup -q -s -c" ]]; then
+		echo $PASSWD | cryptsetup -q $(cat ${ANSWER}) luksFormat ${PARTITION} 2>/tmp/.errlog
+	fi
 	check_for_error
+		clear
+	echo "echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog"
+	read
 	echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
 	check_for_error
 	
