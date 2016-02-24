@@ -975,9 +975,9 @@ mount_current_partition(){
 
 	# Identify if root is encrypted. First if lvm type.
 	if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm") != "" ]]; then
-		root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
-		
+		root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")	
 		parent_parts=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
+		
 		for i in ${parent_parts}; do
 			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $root_name) != "" ]]; then
 				if [[ $(lsblk -lno FSTYPE ${i} | grep -i "crypto_LUKS") != "" ]]; then
@@ -999,6 +999,17 @@ mount_current_partition(){
 		for i in ${LUKS_ROOT_DEV}; do
 			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
 				LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
+				break;
+			fi
+		done
+		
+		# Identify if LUKS on LVM for mkinitcpio
+		root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
+		parent_parts=$(lsblk -lno NAME,TYPE | grep "lvm" | awk '{print "/dev/mapper/" $1}')
+		
+		for i in ${parent_parts}; do
+			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $root_name) != "" ]]; then
+				LVM=1
 				break;
 			fi
 		done
