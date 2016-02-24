@@ -2752,9 +2752,9 @@ edit_configs() {
    "6" "/etc/mkinitcpio.conf" \
    "7" "/etc/fstab" \
    "8" "/etc/crypttab" \
-   "8" "grub/syslinux/systemd-boot" \
-   "9" "lxdm/lightdm/sddm" \
-   "10" "$_Back" 2>${ANSWER}
+   "9" "grub/syslinux/systemd-boot" \
+   "10" "lxdm/lightdm/sddm" \
+   "11" "$_Back" 2>${ANSWER}
 	
 	HIGHLIGHT_SUB=$(cat ${ANSWER})
 	case $(cat ${ANSWER}) in
