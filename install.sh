@@ -482,7 +482,7 @@ create_new_user() {
   # Set up basic configuration files and permissions for user
   arch_chroot "cp /etc/skel/.bashrc /home/${USER}"
   arch_chroot "chown -R ${USER}:users /home/${USER}"
-  sed -i '/%wheel ALL=(ALL) ALL/s/^#//' ${MOUNTPOINT}/etc/sudoers
+  [[ -e ${MOUNTPOINT}/etc/sudoers ]] && sed -i '/%wheel ALL=(ALL) ALL/s/^#//' ${MOUNTPOINT}/etc/sudoers
 }
 
 run_mkinitcpio() {
@@ -1357,7 +1357,7 @@ install_base() {
     ls ${MOUNTPOINT}/boot/*.img >/dev/null 2>&1
     if [[ $? == 0 ]]; then
       KERNEL="y"
-      # If not, check to see if a linux kernel has been selected
+      # If not, check to see if the linux kernel has been selected
     elif [[ $(cat ${PACKAGES} | awk '{print $1}') == "linux" ]]; then
       KERNEL="y"
       # If no linux kernel, check to see if any of the others have been selected
@@ -2088,11 +2088,11 @@ security_menu(){
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_InstGrMenuTitle " \
-  --menu "$_InstGrMenuBody" 0 0 4 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_SecMenuTitle " \
+  --menu "$_SecMenuBody" 0 0 4 \
   "1" "$_SecJournTitle" \
   "2" "$_SecCoreTitle" \
-  "3" "" \
+  "3" "$_SecKernTitle" \
   "4" "$_Back" 2>${ANSWER}
   HIGHLIGHT_SUB=$(cat ${ANSWER})
   case $(cat ${ANSWER}) in
@@ -2114,26 +2114,61 @@ security_menu(){
         "Storage=none")
         sed -i "s/#Storage.*\|Storage.*/Storage=none/g" ${MOUNTPOINT}/etc/systemd/journald.conf
         sed -i "s/SystemMaxUse.*/#&/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+        DIALOG --title " $_SecCoreTitle " --infobox "\n$_Done!\n\n" 0 0
+        sleep 2
         ;;
         *)
         sed -i "s/#SystemMaxUse.*\|SystemMaxUse.*/$(cat ${ANSWER})/g" ${MOUNTPOINT}/etc/systemd/journald.conf
         sed -i "s/Storage.*/#&/g" ${MOUNTPOINT}/etc/systemd/journald.conf
+        DIALOG --title " $_SecJournTitle " --infobox "\n$_Done!\n\n" 0 0
+        sleep 2
         ;;
       esac
+      DIALOG --title " $_SecJournTitle " --infobox "\n$_Done!\n\n" 0 0
     fi
     ;;
     "2")
+    # core dump
+    DIALOG --title " $_SecCoreTitle " --menu "$_SecCoreBody" 0 0 2 \
+    "$_Disable" "Storage=none" \
+    "$_Edit" "/etc/systemd/coredump.conf.d/custom.conf" 2>${ANSWER}
+    if [[ $(cat ${ANSWER}) == "$_Disable" ]]; then
+      echo -e "[Coredump]\nStorage=none" > ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf
+      DIALOG --title " $_SecCoreTitle " --infobox "\n$_Done!\n\n" 0 0
+      sleep 2
+    elif [[ $(cat ${ANSWER}) == "$_Edit" ]]; then
+      if [[ -e ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf ]]; then
+        nano ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf
+      else
+        DIALOG --title "$_SeeConfErrTitle" --msgbox "$_SeeConfErrBody1" 0 0
+      fi
+    fi
     ;;
     "3")
-    ;;
-    "4")
-    ;;
-    "5")
+    # Kernel log access
+    DIALOG --title " $_SecKernTitle " --menu "\nKernel logs may contain information an attacker can use to identify and exploit kernel vulnerabilities, including sensitive memory addresses.\n\nIf systemd-journald logging has not been disabled, it is possible to create a rule in /etc/sysctl.d/ to disable access to these logs unless using root privilages (e.g. via sudo).\n" 0 0 2 \
+    "$_Disable" "kernel.dmesg_restrict = 1" \
+    "$_Edit" "/etc/systemd/coredump.conf.d/custom.conf" 2>${ANSWER}
+    case $(cat ${ANSWER}) in
+      "$_Disable")
+      echo "kernel.dmesg_restrict = 1" > ${MOUNTPOINT}/etc/sysctl.d/50-dmesg-restrict.conf
+      DIALOG --title " $_SecKernTitle " --infobox "\n$_Done!\n\n" 0 0
+      sleep 2
+      ;;
+      "$_Edit")
+      if [[ -e ${MOUNTPOINT}/etc/sysctl.d/50-dmesg-restrict.conf ]]; then
+        nano ${MOUNTPOINT}/etc/sysctl.d/50-dmesg-restrict.conf
+      else
+        DIALOG --title "$_SeeConfErrTitle" --msgbox "$_SeeConfErrBody1" 0 0
+      fi
+      ;;
+    esac
     ;;
     *)
     main_menu_online
     ;;
   esac
+  security_menu
 }
 
 ################################################################################
@@ -2366,7 +2401,8 @@ edit_configs() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_SeeConfOptTitle" --menu "$_SeeConfOptBody" 0 0 10 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_SeeConfOptTitle" \
+  --menu "$_SeeConfOptBody" 0 0 11 \
   "1" "/etc/vconsole.conf" \
   "2" "/etc/locale.conf" \
   "3" "/etc/hostname" \
@@ -2374,33 +2410,37 @@ edit_configs() {
   "5" "/etc/sudoers" \
   "6" "/etc/mkinitcpio.conf" \
   "7" "/etc/fstab" \
-  "8" "grub/syslinux/systemd-boot" \
-  "9" "lxdm/lightdm/sddm" \
-  "10" "$_Back" 2>${ANSWER}
+  "8" "/etc/crypttab" \
+  "9" "grub/syslinux/systemd-boot" \
+  "10" "lxdm/lightdm/sddm" \
+  "11" "$_Back" 2>${ANSWER}
   HIGHLIGHT_SUB=$(cat ${ANSWER})
   case $(cat ${ANSWER}) in
     "1")
-    FILE="${MOUNTPOINT}/etc/vconsole.conf"
+    [[ -e ${MOUNTPOINT}/etc/vconsole.conf ]] && FILE="${MOUNTPOINT}/etc/vconsole.conf"
     ;;
     "2")
-    FILE="${MOUNTPOINT}/etc/locale.conf"
+    [[ -e ${MOUNTPOINT}/etc/locale.conf ]] && FILE="${MOUNTPOINT}/etc/locale.conf"
     ;;
     "3")
-    FILE="${MOUNTPOINT}/etc/hostname"
+    [[ -e ${MOUNTPOINT}/etc/hostname ]] && FILE="${MOUNTPOINT}/etc/hostname"
     ;;
     "4")
-    FILE="${MOUNTPOINT}/etc/hosts"
+    [[ -e ${MOUNTPOINT}/etc/hosts ]] && FILE="${MOUNTPOINT}/etc/hosts"
     ;;
     "5")
-    FILE="${MOUNTPOINT}/etc/sudoers"
+    [[ -e ${MOUNTPOINT}/etc/sudoers ]] && FILE="${MOUNTPOINT}/etc/sudoers"
     ;;
     "6")
-    FILE="${MOUNTPOINT}/etc/mkinitcpio.conf"
+    [[ -e ${MOUNTPOINT}/etc/mkinitcpio.conf ]] && FILE="${MOUNTPOINT}/etc/mkinitcpio.conf"
     ;;
     "7")
-    FILE="${MOUNTPOINT}/etc/fstab"
+    [[ -e ${MOUNTPOINT}/etc/fstab ]] && FILE="${MOUNTPOINT}/etc/fstab"
     ;;
     "8")
+    [[ -e ${MOUNTPOINT}/etc/crypttab ]] && FILE="${MOUNTPOINT}/etc/crypttab"
+    ;;
+    "9")
     [[ -e ${MOUNTPOINT}/etc/default/grub ]] && FILE="${MOUNTPOINT}/etc/default/grub"
     [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]] && FILE="$FILE ${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
     if [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf ]]; then
@@ -2410,7 +2450,7 @@ edit_configs() {
       done
     fi
     ;;
-    "9")
+    "10")
     [[ -e ${MOUNTPOINT}/etc/lxdm/lxdm.conf ]] && FILE="${MOUNTPOINT}/etc/lxdm/lxdm.conf"
     [[ -e ${MOUNTPOINT}/etc/lightdm/lightdm.conf ]] && FILE="${MOUNTPOINT}/etc/lightdm/lightdm.conf"
     [[ -e ${MOUNTPOINT}/etc/sddm.conf ]] && FILE="${MOUNTPOINT}/etc/sddm.conf"
@@ -2419,12 +2459,13 @@ edit_configs() {
     main_menu_online
     ;;
   esac
-  nano $FILE
+  [[ $FILE != "" ]] && nano $FILE \
+  || DIALOG --title "$_SeeConfErrTitle" --msgbox "$_SeeConfErrBody1" 0 0
   edit_configs
 }
 
 main_menu_online() {
-  if [[ $HIGHLIGHT != 8 ]]; then
+  if [[ $HIGHLIGHT != 9 ]]; then
     HIGHLIGHT=$(( HIGHLIGHT + 1 ))
   fi
   DIALOG --default-item ${HIGHLIGHT} --title "$_MMTitle" \
@@ -2443,7 +2484,7 @@ main_menu_online() {
   if [[ $(cat ${ANSWER}) -eq 2 ]]; then
     check_mount
   fi
-  if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 7 ]]; then
+  if [[ $(cat ${ANSWER}) -ge 3 ]] && [[ $(cat ${ANSWER}) -le 8 ]]; then
     check_mount
     check_base
   fi
