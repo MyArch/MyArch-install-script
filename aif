@@ -1165,7 +1165,7 @@ luks_open(){
 	luks_menu
 }
 
-luks_create(){
+luks_setup(){
 
 	modprobe -a dm-mod dm_crypt
 	INCLUDE_PART='part\|lvm'
@@ -1180,23 +1180,38 @@ luks_create(){
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --inputbox "$_LuksOpenBody" 10 50 "cryptroot" 2>${ANSWER} || luks_menu
     LUKS_ROOT_NAME=$(cat ${ANSWER})
     luks_password
-    
-    [[ $LUKS_OPT == "$_LuksEncryptAdv" ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
-		
+}
+
+luks_default() {
+	
     # Encrypt selected partition or LV with credentials given
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
 	sleep 2
+	echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog
+	
+	# Now open the encrypted partition or LV
+	echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
+	check_for_error
+	
+}
 
-	if [[ $LUKS_OPT == "$_LuksEncrypt" ]]; then
-		echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog
-	elif [[ $LUKS_OPT == "$_LuksEncryptAdv" ]]; then
-		echo $PASSWD | cryptsetup -q $(cat ${ANSWER}) luksFormat ${PARTITION} 2>/tmp/.errlog
-	fi
+luks_key_define() {
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
+
+	# Encrypt selected partition or LV with credentials given
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
+	sleep 2
+
+	echo $PASSWD | cryptsetup -q $(cat ${ANSWER}) luksFormat ${PARTITION} 2>/tmp/.errlog
 	check_for_error
 
 	# Now open the encrypted partition or LV
 	echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
 	check_for_error
+
+}
+
+luks_show(){
 	
 	echo -e ${_LuksEncruptSucc} > /tmp/.devlist
 	lsblk -o NAME,TYPE,FSTYPE,SIZE ${PARTITION} | grep "part\|crypt\|NAME\|TYPE\|FSTYPE\|SIZE" >> /tmp/.devlist
@@ -1219,9 +1234,15 @@ luks_menu() {
 	"cryptsetup open --type luks") 
 		luks_open
 	;;
-	"$_LuksEncrypt"|"$_LuksEncryptAdv")
-		LUKS_OPT=$(cat ${ANSWER})
-		luks_create
+	"$_LuksEncrypt")
+		luks_setup
+		luks_default
+		luks_show
+	;;
+	"$_LuksEncryptAdv")
+		luks_setup
+		luks_key_define
+		luks_show
 	;;
 	*) prep_menu
 	;;
