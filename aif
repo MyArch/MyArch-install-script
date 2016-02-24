@@ -550,7 +550,7 @@ create_new_user() {
 run_mkinitcpio() {
 	
 	clear
-	echo "" > /tmp/.errlog
+
 	KERNEL=""
 
 	# If LVM and/or LUKS used, add the relevant hook(s)
@@ -560,7 +560,7 @@ run_mkinitcpio() {
     check_for_error
     
 	# Run Mkinitcpio command depending on kernel(s) installed
-	KERNEL=$(ls /boot/*.img | grep -v fallback | sed s~/boot/initramfs-~~g | sed s~\.img~~g | uniq)
+	KERNEL=$(ls ${MOUNTPOINT}/boot/*.img | grep -v fallback | sed s~/boot/initramfs-~~g | sed s~\.img~~g | uniq)
 	for i in ${KERNEL}; do
 		mkinitcpio -p ${i} 2>>/tmp/.errlog
 	done
