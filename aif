@@ -1170,22 +1170,20 @@ luks_create(){
     LUKS_ROOT_NAME=$(cat ${ANSWER})
     luks_password
     
-    [[ $LUKS_OPT == "cryptsetup -q -s -c" ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
+    [[ $LUKS_OPT == "$_LuksEncryptAdv" ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
 		
-    # Encrypt selected partition with credentials given
+    # Encrypt selected partition or LV with credentials given
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
-	if [[ $LUKS_OPT == "cryptsetup -q luksFormat" ]]; then
-	clear
-	echo "echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog"
-	read
+	sleep 2
+
+	if [[ $LUKS_OPT == "$_LuksEncrypt" ]]; then
 		echo $PASSWD | cryptsetup -q luksFormat ${PARTITION} 2>/tmp/.errlog
-	elif [[ $LUKS_OPT == "cryptsetup -q -s -c" ]]; then
+	elif [[ $LUKS_OPT == "$_LuksEncryptAdv" ]]; then
 		echo $PASSWD | cryptsetup -q $(cat ${ANSWER}) luksFormat ${PARTITION} 2>/tmp/.errlog
 	fi
 	check_for_error
-		clear
-	echo "echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog"
-	read
+
+	# Now open the encrypted partition or LV
 	echo $PASSWD | cryptsetup open ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
 	check_for_error
 	
@@ -1201,22 +1199,23 @@ luks_menu() {
 	LUKS_OPT=""
 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --menu "$_LuksMenuBody$_LuksMenuBody2$_LuksMenuBody3" 0 0 4 \
-	"cryptsetup -q luksFormat" "$_LuksEncrypt" \
-	"cryptsetup -q -s -c" "$_LuksEncryptAdv" \
-	"cryptsetup open --type luks" "$_LuksOpen" \
+	"$_LuksOpen" "cryptsetup open --type luks" \
+	"$_LuksEncrypt" "cryptsetup -q luksFormat" \
+	"$_LuksEncryptAdv" "cryptsetup -q -s -c" \
 	"$_Back" "-" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
-	"cryptsetup -q luksFormat"|"cryptsetup -q -c -s") 
+	"cryptsetup open --type luks") 
+		luks_open
+	;;
+	"$_LuksEncrypt"|"$_LuksEncryptAdv")
 		LUKS_OPT=$(cat ${ANSWER})
 		luks_create
-		;;
-	"cryptsetup open --type luks") luks_open
-		;;
+	;;
 	*) prep_menu
-		;;
+	;;
 	esac
-    
+
 	luks_menu 	
 
 }
