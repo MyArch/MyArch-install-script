@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 2.0 beta - 24-Feb-2016)
+# Architect Installation Framework (version 2.0 - 25-Feb-2016)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -23,7 +23,7 @@ PACKAGES="/tmp/.pkgs"			# Packages to install
 BTRFS_OPTS="/tmp/.btrfs_opts"	# BTRFS mount options
 
 # Save retyping
-VERSION="Architect Installation Framework 2.0 (beta)"
+VERSION="Architect Installation Framework 2.0"
 
 # Installation
 DM_INST=""							# Which DMs have been installed?
@@ -2857,7 +2857,6 @@ main_menu_online() {
 ##																	##
 ######################################################################
 id_system
-dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Development Installer Warning " --msgbox "\nWARNING: This Development branch of the Architect installer is currently being re-coded. During this process functions may not work properly or even at all.\n\nPlease use the STABLE branch by closing the installer and rebooting, or by selecting the 'Virtual Console' option, and then entering /initialise at the command prompt to start again.\n\nOtherwise, proceed at your own risk.\n" 0 0
 select_language
 check_requirements
 greeting
