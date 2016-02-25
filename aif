@@ -962,7 +962,7 @@ mount_current_partition(){
 	find_partitions
 	
 	# Identify and mount root
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelRootBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelRootBody" 0 0 7 ${PARTITIONS} 2>${ANSWER} || prep_menu
 	PARTITION=$(cat ${ANSWER})
     ROOT_PART=${PARTITION}
    	
@@ -1004,7 +1004,7 @@ mount_current_partition(){
 	
 
 	# Identify and create swap, if applicable
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 7 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
     
     if [[ $(cat ${ANSWER}) != "$_SelSwpNone" ]]; then    
        PARTITION=$(cat ${ANSWER})
@@ -1030,7 +1030,7 @@ mount_current_partition(){
     # Extra Step for VFAT UEFI Partition. This cannot be in an LVM container.
     if [[ $SYSTEM == "UEFI" ]]; then
     
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu  
+       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_SelUefiBody" 0 0 7 ${PARTITIONS} 2>${ANSWER} || prep_menu  
        PARTITION=$(cat ${ANSWER})
        UEFI_PART=${PARTITION}
        
@@ -1058,7 +1058,7 @@ mount_current_partition(){
     
     # All other partitions
        while [[ $NUMBER_PARTITIONS > 0 ]]; do 
-             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_ExtPartBody" 0 0 4 \
+             dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_PrepMntPart" --menu "$_ExtPartBody" 0 0 7 \
              "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu 
              
              PARTITION=$(cat ${ANSWER})
@@ -1137,7 +1137,7 @@ luks_open(){
 	find_partitions
 	
 	# Select encrypted partition to open 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "$_LuksMenuBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || luks_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "$_LuksMenuBody" 0 0 7 ${PARTITIONS} 2>${ANSWER} || luks_menu
 	PARTITION=$(cat ${ANSWER})
 	
 	# Enter name of the Luks partition and get password to open it
@@ -1165,7 +1165,7 @@ luks_setup(){
 	find_partitions
 	
 	# Select partition to encrypt 
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --menu "$_LuksCreateBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || luks_menu
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --menu "$_LuksCreateBody" 0 0 7 ${PARTITIONS} 2>${ANSWER} || luks_menu
 	PARTITION=$(cat ${ANSWER})
 
 	# Enter name of the Luks partition and get password to create it
@@ -1372,7 +1372,7 @@ check_lv_size() {
     done
     
     # Select the partition(s) for the Volume Group
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateVG " --checklist "$_LvmPvSelBody $_UseSpaceBar" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu 
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LvmCreateVG " --checklist "$_LvmPvSelBody $_UseSpaceBar" 0 0 7 ${PARTITIONS} 2>${ANSWER} || prep_menu 
     [[ $(cat ${ANSWER}) != "" ]] && VG_PARTS=$(cat ${ANSWER}) || prep_menu
     
     # Once all the partitions have been selected, show user. On confirmation, use it/them in 'vgcreate' command.
