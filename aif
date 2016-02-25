@@ -560,7 +560,7 @@ run_mkinitcpio() {
     check_for_error
     
 	# Run Mkinitcpio command depending on kernel(s) installed
-	KERNEL=$(ls ${MOUNTPOINT}/boot/*.img | sed s~/mnt/boot/initramfs-~~g | sed "s~-fallback.img\|.img~~g" | uniq)
+	KERNEL=$(s ${MOUNTPOINT}/boot/*.img | grep -v "fallback" | sed "s~${MOUNTPOINT}/boot/initramfs-~~g" | sed s/\.img//g | uniq)
 	for i in ${KERNEL}; do
 		arch_chroot "mkinitcpio -p ${i}" 2>>/tmp/.errlog
 	done
@@ -2204,7 +2204,7 @@ enable_dm() {
 			DM_LIST="${DM_LIST} ${i} -"
 		done
 
-		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --menu "$_AlreadyInst$DM_INST\n\n$_DmChBody" 0 0 5 \
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --menu "$_AlreadyInst$DM_INST\n\n$_DmChBody" 0 0 4 \
 		${DM_LIST} 2>${PACKAGES}
 		clear
 		
