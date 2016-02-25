@@ -63,8 +63,8 @@ _SeeConfErrBody="\nFile does not exist.\n\n"
 _PrepPacKey="Refresh Pacman Keys"
 
 # LUKS / DM-Crypt / Encryption
-_PrepLUKS="Block Device Encryption (optional)"
-_LuksMenuBody="\nBlock devices encrypted using dm_crypt cannot be accessed or even seen without being unlocked via a key or password."
+_PrepLUKS="LUKS Encryption (optional)"
+_LuksMenuBody="\nDevices and volumes encrypted using dm_crypt cannot be accessed or even seen without being unlocked via a key or password."
 _LuksMenuBody2="\n\nA seperate boot partition without encryption or logical volume management (LVM - unless using BIOS Grub) is required."
 _LuksMenuBody3="\n\nThe Automatic option uses default encryption settings, and is recommended for beginners. Otherwise, it is possible to specify cipher and key size parameters manually."
 _LuksOpen="Open Encrypted Partition"
