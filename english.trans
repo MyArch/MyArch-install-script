@@ -352,7 +352,7 @@ _InstCupsQ="\nEnable org.cups.cupsd.service on installed system?\n\n"
 
 # Install Multimedia Support Menu
 _InstMultMenuTitle="Install Multimedia Support"
-_InstMultMenuBody="\nAccessibility packages provide aids to those with sight and/or hearing impairments. The Custom Packages option allows for user-defined packages to be installed.\n"
+_InstMultMenuBody="\nAccessibility packages aid those with sight and/or hearing impairments. The Custom Packages option allows for user-defined packages to be installed.\n"
 _InstMulSnd="Install Sound Driver(s)"
 _InstMulSndBody="\nALSA provides kernel driven sound card drivers. PulseAudio serves as a proxy to ALSA."
 _InstMulCodec="Install Codecs"
