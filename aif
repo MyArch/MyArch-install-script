@@ -1109,6 +1109,10 @@ mount_current_partition(){
 ##																	##
 ######################################################################
 
+# Had to write it in this way due to (bash?) bug(?), as if/then statements in a single
+# "create LUKS" function for default and "advanced" modes were interpreted as commands,
+# not mere string statements. Not happy with it, but it works...
+
 # Save repetition of code.
 luks_password(){
 
@@ -1213,21 +1217,21 @@ luks_menu() {
 	LUKS_OPT=""
 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --menu "$_LuksMenuBody$_LuksMenuBody2$_LuksMenuBody3" 0 0 4 \
-	"$_LuksOpen" "cryptsetup open --type luks" \
-	"$_LuksEncrypt" "cryptsetup -q luksFormat" \
-	"$_LuksEncryptAdv" "cryptsetup -q -s -c" \
+	"cryptsetup open --type luks" "$_LuksOpen" \
+	"cryptsetup -q luksFormat" "$_LuksEncrypt" \
+	"cryptsetup -q -s -c luksFormat" "$_LuksEncryptAdv" \
 	"$_Back" "-" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
-	"$_LuksOpen") 
+	"cryptsetup open --type luks") 
 		luks_open
 	;;
-	"$_LuksEncrypt")
+	"cryptsetup -q luksFormat")
 		luks_setup
 		luks_default
 		luks_show
 	;;
-	"$_LuksEncryptAdv")
+	"cryptsetup -q -s -c luksFormat")
 		luks_setup
 		luks_key_define
 		luks_show
