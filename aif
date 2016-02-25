@@ -475,7 +475,7 @@ set_hostname() {
    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_ConfBseHost" --inputbox "$_HostNameBody" 0 0 "arch" 2>${ANSWER} || config_base_menu
 
    echo "$(cat ${ANSWER})" > ${MOUNTPOINT}/etc/hostname 2>/tmp/.errlog
-   echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t$(cat ${ANSWER})\n::1\tlocalhost.localdomain\tlocalhost\t$(cat {ANSWER})" > ${MOUNTPOINT}/etc/hosts 2>>/tmp/.errlog
+   echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t$(cat ${ANSWER})\n::1\tlocalhost.localdomain\tlocalhost\t$(cat ${ANSWER})" > ${MOUNTPOINT}/etc/hosts 2>>/tmp/.errlog
    check_for_error
 }
 
