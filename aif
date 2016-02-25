@@ -1191,7 +1191,7 @@ luks_key_define() {
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
 
 	# Encrypt selected partition or LV with credentials given
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksEncryptAdv " --infobox "$_PlsWaitBody" 0 0
 	sleep 2
 
 	echo $PASSWD | cryptsetup -q $(cat ${ANSWER}) luksFormat ${PARTITION} 2>/tmp/.errlog
@@ -1724,7 +1724,7 @@ uefi_bootloader() {
 				arch_chroot "grub-install --target=x86_64-efi --efi-directory=${UEFI_MOUNT} --bootloader-id=arch_grub --recheck" 2>/tmp/.errlog
 				
 				# If encryption used amend grub
-				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=\"\"~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
+				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=.*~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
 				
 				# Generate config file
 				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
@@ -1818,7 +1818,6 @@ install_wireless_packages(){
 		check_for_error
 	fi
 
-	install_network_menu
 }
 
 install_cups(){
@@ -1846,8 +1845,6 @@ install_cups(){
 		fi
 	fi
 	
-	install_network_menu
-
 }
 
 	if [[ $SUB_MENU != "install_network_packages" ]]; then
@@ -1884,6 +1881,8 @@ install_cups(){
 	*) main_menu_online
         ;;
     esac
+    
+    install_network_menu
    
 }
 
@@ -1905,6 +1904,7 @@ install_xorg_input() {
 	"xf86-input-mouse" "-" on \
 	"xf86-input-synaptics" "-" on 2>${PACKAGES}
 
+	clear
 	# If at least one package, install.
 	if [[ $(cat ${PACKAGES}) != "" ]]; then
 		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
@@ -1920,8 +1920,8 @@ install_xorg_input() {
 		cp -f ${MOUNTPOINT}/etc/X11/xinit/xinitrc ${MOUNTPOINT}/home/$i
 		arch_chroot "chown -R ${i}:users /home/${i}"
 	done
-    
-    install_graphics_menu
+
+	install_graphics_menu
 }
 
 setup_graphics_card() {
@@ -2177,8 +2177,6 @@ install_de_wm() {
 		fi
 
 	fi
-	
-	install_graphics_menu
 
 }
 
@@ -2238,7 +2236,6 @@ enable_dm() {
 	# Show after successfully installing or where attempting to repeat when already completed.
 	[[ $DM_ENABLED -eq 1 ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_DmChTitle" --msgbox "$_DmDoneBody" 0 0       
 
-	install_graphics_menu
 }
 
 # Network Manager
@@ -2301,7 +2298,6 @@ enable_nm() {
 	# Show after successfully installing or where attempting to repeat when already completed.
 	[[ $NM_ENABLED -eq 1 ]] && dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title "$_InstNMTitle" --msgbox "$_InstNMErrBody" 0 0
 
-	install_network_menu
 
 }
 
@@ -2333,13 +2329,12 @@ install_alsa_pulse(){
 	"volumeicon" "ALSA GUI" off \
 	"volwheel" "ASLA GUI" off 2>${PACKAGES}
 
+	clear
 	# If at least one package, install.
 	if [[ $(cat ${PACKAGES}) != "" ]]; then
 		pacstrap ${MOUNTPOINT} $(cat ${PACKAGES}) 2>/tmp/.errlog
 		check_for_error
 	fi
-
-	install_multimedia_menu
 
 }
 
@@ -2363,13 +2358,13 @@ install_codecs(){
 		check_for_error
 	fi
 	
-	install_multimedia_menu
 }
  
 install_cust_pkgs(){
 	echo "" > ${PACKAGES}
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_InstMulCust " --inputbox "$_InstMulCustBody" 0 0 "" 2>${PACKAGES} || install_multimedia_menu
 
+	clear
 	# If at least one package, install.
 	if [[ $(cat ${PACKAGES}) != "" ]]; then
 		if [[ $(cat ${PACKAGES}) == "hen poem" ]]; then
@@ -2380,7 +2375,6 @@ install_cust_pkgs(){
 		fi
 	fi
 	
-	install_multimedia_menu
 }
 
 	if [[ $SUB_MENU != "install_multimedia_menu" ]]; then
@@ -2412,6 +2406,8 @@ install_cust_pkgs(){
 		  *) main_menu_online
              ;;
 	esac
+	
+	install_multimedia_menu
 }
 
 security_menu(){
@@ -2683,6 +2679,8 @@ install_graphics_menu() {
           *) main_menu_online
 			;;
     esac
+    
+    install_graphics_menu
    
 }
 
