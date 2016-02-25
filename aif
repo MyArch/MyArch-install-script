@@ -983,9 +983,6 @@ mount_current_partition(){
 		for i in ${cryptparts}; do
 			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
 				LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
-				clear
-				echo $LUKS_ROOT_DEV
-				read
 				break;
 			fi
 		done
@@ -1000,9 +997,6 @@ mount_current_partition(){
 			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
 				LUKS_ROOT_DEV=${i}
 				LVM=1
-				clear
-				echo $LUKS_ROOT_DEV
-				read
 				break;
 			fi
 		done
