@@ -979,10 +979,13 @@ mount_current_partition(){
 	    [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]] && LUKS=1
 	    [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm") != "" ]] && LVM=1
 
-		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print $"/dev/"$1}')
+		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print "/dev/"$1}')
 		for i in ${cryptparts}; do
 			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
-				LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE $"/dev/"${i} | grep "part" | awk '{print $1}')
+				LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
+				clear
+				echo $LUKS_ROOT_DEV
+				read
 				break;
 			fi
 		done
@@ -992,11 +995,14 @@ mount_current_partition(){
 	if ([[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]] && [[ $LUKS_ROOT_DEV == "" ]]); then
 		LUKS_ROOT_NAME=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
 		
-		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print $"/dev/mapper/"$1}')
+		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print "/dev/mapper/"$1}')
 		for i in ${cryptparts}; do
-			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
+			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
 				LUKS_ROOT_DEV=${i}
 				LVM=1
+				clear
+				echo $LUKS_ROOT_DEV
+				read
 				break;
 			fi
 		done
