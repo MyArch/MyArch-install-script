@@ -239,7 +239,7 @@ _ExtErrBody="\nPartition cannot be mounted due to a problem with the mountpoint 
 
 # Install Base
 _InstBseTitle=" Install Base "
-_InstBseBody="\nTwo installation methods are available:\n\nStandard: Recommended for beginners. Choose up to two kernels (latest and Long Term Support) and optionally the base-devel package group. The sudo, btrfs-progs, and f2fs-tools packages will also be installed.\n\nAdvanced: Choose up to four kernels (latest, lts, grsec, and zen) and control individual packages from the base and base-devel package groups. Additional configuration for the grsec and zen kernels may be required for Virtualbox and NVIDIA.\n\nNOTE: It will be necessary to select at least one kernel for installation, unless a kernel has already been installed."
+_InstBseBody="\nStandard: Recommended for beginners. Choose up to two kernels (linux and linux-lts) and optionally the base-devel package group. sudo, btrfs-progs, f2fs-tools will also be installed.\n\nAdvanced: Choose up to four kernels (linux, lts, grsec, zen) and control individual base and base-devel packages. Additional configuration for grsec and zen may be required for Virtualbox and NVIDIA.\n\nNOTE: Unless already installed, at least one kernel must be selected."
 _InstStandBseBody="\nThe base package group will be installed automatically. The base-devel package group is required to use the Arch User Repository (AUR).\n\n"
 _InstStandBase="Standard Installation"
 _InstAdvBase="Advanced Installation"
