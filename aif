@@ -72,8 +72,8 @@ VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 
 # LUKS
 LUKS=0                  			# Luks Detected?
-LUKS_ROOT_DEV=""					# If encrypted, root partition
-LUKS_ROOT_NAME=""					# Name given to encrypted root partition
+LUKS_DEV=""							# If encrypted, partition
+LUKS_NAME=""						# Name given to encrypted partition
 LUKS_OPT=""							# Default or user-defined?
 
 MOUNTPOINT="/mnt"       			# Installation: Root mount
@@ -953,7 +953,7 @@ mount_current_partition(){
 		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print "/dev/mapper/"$1}')
 		for i in ${cryptparts}; do
 			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_NAME) != "" ]]; then
-				LUKS_DEV="$LUKS_DEV cryptdevice=${i}"
+				LUKS_DEV="$LUKS_DEV cryptdevice=${i}:$LUKS_NAME"
 				LVM=1
 				break;
 			fi
@@ -970,8 +970,8 @@ mount_current_partition(){
 
 	# prep variables
 	MOUNT=""
-	LUKS_ROOT_NAME=""
-	LUKS_ROOT_DEV=""
+	LUKS_NAME=""
+	LUKS_DEV=""
 	LUKS=0
 	LVM=0
 	
@@ -1654,7 +1654,7 @@ bios_bootloader() {
 				fi
 				
 				# If encryption used amend grub
-				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=.*~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
+				[[ $LUKS_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=.*~GRUB_CMDLINE_LINUX=\"$LUKS_DEV\"~g" ${MOUNTPOINT}/etc/default/grub
 				
 				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
 				check_for_error
@@ -1686,7 +1686,7 @@ bios_bootloader() {
 				[[ -e ${MOUNTPOINT}/boot/initramfs-linux-zen.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Fallbacl Zen\n\tLINUX ../vmlinuz-linux-zen\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-zen-fallback.img" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				
 				# Third, amend for LUKS and BTRFS
-				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~rw~cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				[[ $LUKS_DEV != "" ]] && sed -i "s~rw~$LUKS_DEV rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				
 				# Finally, re-add the "default" entries
@@ -1720,7 +1720,7 @@ uefi_bootloader() {
 				arch_chroot "grub-install --target=x86_64-efi --efi-directory=${UEFI_MOUNT} --bootloader-id=arch_grub --recheck" 2>/tmp/.errlog
 				
 				# If encryption used amend grub
-				[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=.*~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
+				[[ $LUKS_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=.*~GRUB_CMDLINE_LINUX=\"$LUKS_DEV\"~g" ${MOUNTPOINT}/etc/default/grub
 				
 				# Generate config file
 				arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
@@ -1757,7 +1757,7 @@ uefi_bootloader() {
 				# Finally, amend kernel conf files for LUKS and BTRFS
 				sysdconf=$(ls ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch*.conf)
 				for i in ${sysdconf}; do
-					[[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~options~options cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME~g" ${i}
+					[[ $LUKS_DEV != "" ]] && sed -i "s~rw~$LUKS_DEV rw~g" ${i}
 					[[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${i}
 				done
 				;;
