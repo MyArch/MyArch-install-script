@@ -1672,8 +1672,8 @@ bios_bootloader() {
 				check_for_error
 
 				# Amend configuration file. First remove all existing entries, then input new ones.	
-				sed -i '/LABEL/q' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-				echo -e "\n" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				sed -i '/#-*/q' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				echo -e "\n" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				
 				# First the "main" entries
 				[[ -e ${MOUNTPOINT}/boot/initramfs-linux.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux\n\tLINUX ../vmlinuz-linux\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
