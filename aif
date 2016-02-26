@@ -932,6 +932,7 @@ mount_current_partition(){
 		for i in ${cryptparts}; do
 			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_NAME) != "" ]]; then
 				LUKS_DEV="$LUKS_DEV cryptdevice=UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')":$LUKS_NAME"
+				LUKS=1
 				break;
 			fi
 		done
