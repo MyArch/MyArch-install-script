@@ -931,9 +931,37 @@ mount_current_partition(){
 	check_for_error
 	confirm_mount ${MOUNTPOINT}${MOUNT}
 	
-	# Deal with lvm, luks, and btrfs
-	[[ $(lsblk -lno TYPE ${PARTITION} | grep "lvm") != "" ]] && LVM=1
-	[[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]] && LUKS=1
+	# Deal with lvm and luks
+	# Identify if partition is LUKS, or LVM on LUKS (parent = partition = use UUID)
+	if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt\|lvm") != "" ]]; then
+		LUKS_NAME=$(echo ${PARTITION} | sed "s~/dev/mapper/~~g")
+	    [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]] && LUKS=1
+	    [[ $(lsblk -lno TYPE ${PARTITION} | grep "lvm") != "" ]] && LVM=1
+
+		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print "/dev/"$1}')
+		for i in ${cryptparts}; do
+			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_NAME) != "" ]]; then
+				LUKS_DEV="$LUKS_DEV cryptdevice=UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')":$LUKS_NAME"
+				break;
+			fi
+		done
+	fi
+	
+	# Identify if LUKS on LVM (parent = logical volume = use /dev/mapper/)
+	if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]]; then
+		
+		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print "/dev/mapper/"$1}')
+		for i in ${cryptparts}; do
+			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_NAME) != "" ]]; then
+				LUKS_DEV="$LUKS_DEV cryptdevice=${i}"
+				LVM=1
+				break;
+			fi
+		done
+	fi
+
+
+	# Deal with btrfs
 	[[ $BTRFS -eq 2 ]] && btrfs_subvols
 }
 	####								####
@@ -968,38 +996,8 @@ mount_current_partition(){
 	[[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${PARTITION} >/dev/null 2>/tmp/.errlog
 	check_for_error
 	
-	# Make the directory and mount
+	# Make the directory and mount. Also identify LUKS and/or LVM
 	mount_current_partition
-
-	# Identify if root is LUKS, or LVM on LUKS (parent = partition)
-	if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt\|lvm") != "" ]]; then
-		LUKS_ROOT_NAME=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
-	    [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]] && LUKS=1
-	    [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm") != "" ]] && LVM=1
-
-		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print "/dev/"$1}')
-		for i in ${cryptparts}; do
-			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
-				LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
-				break;
-			fi
-		done
-	fi
-	
-	# Identify if LUKS on LVM (parent = logical volume)
-	if ([[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]] && [[ $LUKS_ROOT_DEV == "" ]]); then
-		LUKS_ROOT_NAME=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
-		
-		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print "/dev/mapper/"$1}')
-		for i in ${cryptparts}; do
-			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
-				LUKS_ROOT_DEV=${i}
-				LVM=1
-				break;
-			fi
-		done
-	fi
-	
 
 	# Identify and create swap, if applicable
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepMntPart " --menu "$_SelSwpBody" 0 0 7 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
@@ -1695,7 +1693,7 @@ bios_bootloader() {
 				echo -e "\n\nLABEL hdt\n\tMENU LABEL HDT (Hardware Detection Tool)\n\tCOM32 hdt.c32" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				echo -e "\n\nLABEL reboot\n\tMENU LABEL Reboot\n\tCOM32 reboot.c32" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				echo -e "\n\n#LABEL windows\n\t#MENU LABEL Windows\n\t#COM32 chain.c32\n\t#APPEND root=/dev/sda2 rw" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-				echo -e "\n\nLABEL poweroff\n\tMENU LABEL Poweroff\n\tCOM32 poweroff.c32" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				echo -e "\n\nLABEL poweroff\n\tMENU LABEL Poweroff\n\tCOM32 poweroff.c32" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				
 			fi
 		fi
@@ -2855,6 +2853,7 @@ main_menu_online() {
 ##																	##
 ######################################################################
 id_system
+dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Development Installer Warning " --msgbox "\nWARNING: This version of the installer is actively being recoded and debuged. It is recommended to use the STABLE branch. Otherwise, proceed at your own risk.\n" 0 0
 select_language
 check_requirements
 greeting
