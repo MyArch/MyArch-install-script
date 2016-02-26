@@ -1672,7 +1672,7 @@ bios_bootloader() {
 				check_for_error
 
 				# Amend configuration file. First remove all existing entries, then input new ones.	
-				sed -i '/#-*/q' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+				sed -i '/LABEL/q' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				echo -e "\n" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
 				
 				# First the "main" entries
