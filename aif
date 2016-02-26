@@ -921,46 +921,10 @@ mount_current_partition(){
 	# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
 	check_for_error
 	confirm_mount ${MOUNTPOINT}${MOUNT}
-	
-	# Deal with lvm and luks
-	# Identify if partition is LUKS, or LVM on LUKS (parent = partition = use UUID)
-	if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt\|lvm") != "" ]]; then
-		LUKS_NAME=$(echo ${PARTITION} | sed "s~/dev/mapper/~~g")
-	    [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]] && LUKS=1
-	    [[ $(lsblk -lno TYPE ${PARTITION} | grep "lvm") != "" ]] && LVM=1
-
-		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print "/dev/"$1}')
-		for i in ${cryptparts}; do
-			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_NAME) != "" ]]; then
-				LUKS_UUID=$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
-				
-				# Check if not already added (LVM on LUKS). If not, add.
-				if [[ $(echo $LUKS_DEV | grep $LUKS_UUID) == "" ]]; then
-					LUKS_DEV="$LUKS_DEV cryptdevice=UUID=$LUKS_UUID:$LUKS_NAME"
-					LUKS=1
-				fi
-				
-				break;
-			fi
-		done
-	fi
-	
-	# Identify if LUKS on LVM (parent = logical volume = use /dev/mapper/)
-	if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]]; then
-		
-		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print "/dev/mapper/"$1}')
-		for i in ${cryptparts}; do
-			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_NAME) != "" ]]; then
-				LUKS_DEV="$LUKS_DEV cryptdevice=${i}:$LUKS_NAME"
-				LVM=1
-				break;
-			fi
-		done
-	fi
-
 
 	# Deal with btrfs
 	[[ $BTRFS -eq 2 ]] && btrfs_subvols
+	
 }
 	####								####
 	#### MOUNTING FUNCTION BEGINS HERE  ####
@@ -997,6 +961,36 @@ mount_current_partition(){
 	
 	# Make the directory and mount. Also identify LUKS and/or LVM
 	mount_current_partition
+
+	# Identify if partition is LUKS, or LVM on LUKS (parent = partition = use UUID)#
+	if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt\|lvm") != "" ]]; then
+		LUKS_NAME=$(echo ${PARTITION} | sed "s~/dev/mapper/~~g")
+	    [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]] && LUKS=1
+	    [[ $(lsblk -lno TYPE ${PARTITION} | grep "lvm") != "" ]] && LVM=1
+
+		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print "/dev/"$1}')
+		for i in ${cryptparts}; do
+			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_NAME) != "" ]]; then
+				LUKS_DEV="$LUKS_DEV cryptdevice=UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')":$LUKS_NAME"
+				LUKS=1				
+				break;
+			fi
+		done
+	fi
+	
+	# Identify if LUKS on LVM (parent = logical volume = use /dev/mapper/)
+	if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]]; then
+		
+		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print "/dev/mapper/"$1}')
+		for i in ${cryptparts}; do
+			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_NAME) != "" ]]; then
+				LUKS_DEV="$LUKS_DEV cryptdevice=${i}:$LUKS_NAME"
+				LVM=1
+				break;
+			fi
+		done
+	fi
+
 
 	# Identify and create swap, if applicable
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepMntPart " --menu "$_SelSwpBody" 0 0 7 "$_SelSwpNone" $"-" "$_SelSwpFile" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu  
