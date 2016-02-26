@@ -928,12 +928,12 @@ mount_current_partition(){
 
         # cryptname for bootloader configuration either way
 		LUKS=1
-		LUKS_NAME=$(echo ${PARTITION} | sed "s~/dev/mapper/~~g")
+		LUKS_NAME=$(echo ${PARTITION} | sed "s~^/dev/mapper/~~g")
 
 		# Check if LUKS on LVM (parent = lvm /dev/mapper/...) 
 		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print "/dev/mapper/"$1}')
 		for i in ${cryptparts}; do
-			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_NAME) != "" ]]; then
+			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_NAME) != "" ]]; then
 				LUKS_DEV="$LUKS_DEV cryptdevice=${i}:$LUKS_NAME"
 				LVM=1
 				break;
@@ -955,9 +955,9 @@ mount_current_partition(){
 		LVM=1
 		
 		# First get crypt name (code above would get lv name)
-		cryptparts=$(lsblk -lno NAME,TYPE,FSTYPE | grep "part" | grep -i "lvm2_member" | uniq | awk '{print "/dev/mapper/"$1}')
+		cryptparts=$(lsblk -lno NAME,TYPE,FSTYPE | grep "crypt" | grep -i "lvm2_member" | uniq | awk '{print "/dev/mapper/"$1}')
 		for i in ${cryptparts}; do
-			if [[ $(lsblk -lno NAME ${i} | grep $(echo $PARTITION | sed s~/dev/mapper/~~g)) != "" ]]; then
+			if [[ $(lsblk -lno NAME ${i} | grep $(echo $PARTITION | sed "s~^/dev/mapper/~~g")) != "" ]]; then
 				LUKS_NAME=$(echo ${i} | sed s~/dev/mapper/~~g)
 				break;
 			fi
@@ -966,7 +966,7 @@ mount_current_partition(){
 		# Now get the device (/dev/...) for the crypt name
 		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print "/dev/"$1}')
 		for i in ${cryptparts}; do
-			if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_NAME) != "" ]]; then
+			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_NAME) != "" ]]; then
 				# Create UUID for comparison
 				LUKS_UUID=$(lsblk -lno UUID,TYPE,FSTYPE ${i} | grep "part" | grep -i "crypto_luks" | awk '{print $1}')
 				
