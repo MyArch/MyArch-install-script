@@ -2853,7 +2853,7 @@ main_menu_online() {
 ##																	##
 ######################################################################
 id_system
-dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Development Installer Warning " --msgbox "\nWARNING: This version of the installer is actively being recoded and debuged. It is recommended to use the STABLE branch. Otherwise, proceed at your own risk.\n" 0 0
+dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Development Installer Warning " --msgbox "\nWARNING: LVM ON LUKS IS BROKEN. LUKS alone and LUKS ON LVM are fine. This problem is currently being worked on!\n\nIt is recommended to use the STABLE branch. Otherwise, proceed at your own risk.\n" 0 0
 select_language
 check_requirements
 greeting
