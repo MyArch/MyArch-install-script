@@ -2753,7 +2753,7 @@ edit_configs() {
         "9") [[ -e ${MOUNTPOINT}/etc/default/grub ]] && FILE="${MOUNTPOINT}/etc/default/grub"
 			 [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]] && FILE="$FILE ${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
 			 if [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf ]]; then
-				files=$(ls ${MOUNTPOINT}${UEFI_MOUNT}/loader/*.conf)
+				files=$(ls ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/*.conf)
 				for i in ${files}; do
 					FILE="$FILE ${i}"
 				done
