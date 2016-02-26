@@ -58,8 +58,9 @@ LV_SIZE_INVALID=0       			# Is LVM LV size entered valid?
 VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 # LUKS
 LUKS=0                  			# Luks Detected?
-LUKS_ROOT_DEV=""				    	# If encrypted, root partition
-LUKS_ROOT_NAME=""					    # Name given to encrypted root partition
+LUKS_DEV=""							      # If encrypted, partition
+LUKS_NAME=""						      # Name given to encrypted partition
+LUKS_UUID=""						      # UUID used for comparison purposes
 LUKS_OPT=""                   # Default or user-defined ?
 # Installation
 MOUNTPOINT="/mnt"                 # Installation: Root mount
@@ -98,7 +99,7 @@ PACSTRAP() {
 
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
-  DIALOG --title "$_SelLang" --menu "$_Language" 0 0 4 \
+  DIALOG --title " $_SelLang " --menu "$_Language" 0 0 4 \
   "1" $"English (en)" 2>${ANSWER}
   #	"2" $"Italian 		(it)" \
   # 	"3" $"Russian 		(ru)" \
@@ -168,21 +169,21 @@ select_language() {
 # Check user is root, and that there is an active internet connection
 # Seperated the checks into seperate "if" statements for readability.
 check_requirements() {
-  DIALOG --title "$_ChkTitle" --infobox "$_ChkBody" 0 0
+  DIALOG --title " $_ChkTitle " --infobox "$_ChkBody" 0 0
   sleep 2
   if [[ `whoami` != "root" ]]; then
-    DIALOG --title "$_RtFailTitle" --infobox "$_RtFailBody" 0 0
+    DIALOG --title " $_Erritle " --infobox "$_RtFailBody" 0 0
     sleep 2
     exit 1
   fi
   if [[ ! $(ping -c 1 google.com) ]]; then
-    DIALOG --title "$_ConFailTitle" --infobox "$_ConFailBody" 0 0
+    DIALOG --title " $_Erritle " --infobox "$_ConFailBody" 0 0
     sleep 2
     exit 1
   fi
   # This will only be executed where neither of the above checks are true.
   # The error log is also cleared, just in case something is there from a previous use of the installer.
-  DIALOG --title "$_ReqMetTitle" --infobox "$_ReqMetBody" 0 0
+  DIALOG --title " $_ReqMetTitle " --infobox "$_ReqMetBody" 0 0
   sleep 2
   clear
   echo "" > /tmp/.errlog
@@ -218,7 +219,7 @@ arch_chroot() {
 # If there is an error, display it, clear the log and then go back to the main menu (no point in continuing).
 check_for_error() {
   if [[ $? -eq 1 ]] && [[ $(cat /tmp/.errlog | grep -i "error") != "" ]]; then
-    DIALOG --title "$_ErrTitle" --msgbox "$(cat /tmp/.errlog)" 0 0
+    DIALOG --title " $_ErrTitle " --msgbox "$(cat /tmp/.errlog)" 0 0
     echo "" > /tmp/.errlog
     main_menu_online
   fi
@@ -227,7 +228,7 @@ check_for_error() {
 # Ensure that a partition is mounted
 check_mount() {
   if [[ $(lsblk -o MOUNTPOINT | grep ${MOUNTPOINT}) == "" ]]; then
-    DIALOG --title "$_ErrTitle" --msgbox "$_ErrNoMount" 0 0
+    DIALOG --title " $_ErrTitle " --msgbox "$_ErrNoMount" 0 0
     main_menu_online
   fi
 }
@@ -235,7 +236,7 @@ check_mount() {
 # Ensure that Arch has been installed
 check_base() {
   if [[ ! -e ${MOUNTPOINT}/etc ]]; then
-    DIALOG --title "$_ErrTitle" --msgbox "$_ErrNoBase" 0 0
+    DIALOG --title " $_ErrTitle " --msgbox "$_ErrNoBase" 0 0
     main_menu_online
   fi
 }
@@ -243,7 +244,7 @@ check_base() {
 # Simple code to show devices / partitions.
 show_devices() {
   lsblk -o NAME,MODEL,TYPE,FSTYPE,SIZE,MOUNTPOINT | grep "disk\|part\|lvm\|crypt\|NAME\|MODEL\|TYPE\|FSTYPE\|SIZE\|MOUNTPOINT" > /tmp/.devlist
-  DIALOG --title "$_DevShowOpt" --textbox /tmp/.devlist 0 0
+  DIALOG --title " $_DevShowOpt " --textbox /tmp/.devlist 0 0
 }
 
 ################################################################################
@@ -262,37 +263,29 @@ configure_mirrorlist() {
     for i in ${countries_list}; do
       COUNTRY_LIST="${COUNTRY_LIST} ${i}"
     done
-    DIALOG --title "$_MirrorlistTitle" --menu "$_MirrorCntryBody" 0 0 0 \
+    DIALOG --title " $_MirrorlistTitle " --menu "$_MirrorCntryBody" 0 0 0 \
     $COUNTRY_LIST 2>${ANSWER} || install_base_menu
     URL="https://www.archlinux.org/mirrorlist/?country=$(cat ${ANSWER})&use_mirror_status=on"
     MIRROR_TEMP=$(mktemp --suffix=-mirrorlist)
     # Get latest mirror list and save to tmpfile
-    DIALOG --title "$_MirrorlistTitle" --infobox "$_PlsWaitBody" 0 0
+    DIALOG --title " $_MirrorlistTitle " --infobox "$_PlsWaitBody" 0 0
     curl -so ${MIRROR_TEMP} ${URL} 2>/tmp/.errlog
     check_for_error
     sed -i 's/^#Server/Server/g' ${MIRROR_TEMP}
     nano ${MIRROR_TEMP}
-    DIALOG --title "$_MirrorlistTitle" --yesno "$_MirrorGenQ" 0 0
+    DIALOG --title " $_MirrorlistTitle " --yesno "$_MirrorGenQ" 0 0
     if [[ $? -eq 0 ]];then
       mv -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.orig
       mv -f ${MIRROR_TEMP} /etc/pacman.d/mirrorlist
       chmod +r /etc/pacman.d/mirrorlist
-      DIALOG --title "$_MirrorlistTitle" --infobox "$_MirrorGenDone" 0 0
+      DIALOG --title " $_MirrorlistTitle " --infobox "\n$_Done!\n\n" 0 0
       sleep 2
     else
       configure_mirrorlist
     fi
   }
 
-  if [[ $SUB_MENU != "mirror_menu" ]]; then
-    SUB_MENU="mirror_menu"
-    HIGHLIGHT_SUB=1
-  else
-    if [[ $HIGHLIGHT_SUB != 5 ]]; then
-      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
-    fi
-  fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_MirrorlistTitle" \
+  DIALOG --title " $_MirrorlistTitle " \
   --menu "$_MirrorlistBody" 0 0 5 \
   "1" "$_MirrorbyCountry" \
   "2" "$_MirrorRankTitle" \
@@ -304,11 +297,11 @@ configure_mirrorlist() {
     mirror_by_country
     ;;
     "2")
-    DIALOG --title "$_MirrorlistTitle" --infobox "$_MirrorRankBody $_PlsWaitBody" 0 0
+    DIALOG --title " $_MirrorlistTitle " --infobox "$_MirrorRankBody $_PlsWaitBody" 0 0
     cp -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
     rankmirrors -n 10 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist 2>/tmp/.errlog
     check_for_error
-    DIALOG --title "$_MirrorlistTitle" --infobox "\n$_Done!\n\n" 0 0
+    DIALOG --title " $_MirrorlistTitle " --infobox "\n$_Done!\n\n" 0 0
     sleep 2
     ;;
     "3")
@@ -317,9 +310,9 @@ configure_mirrorlist() {
     "4")
     if [[ -e /etc/pacman.d/mirrorlist.orig ]]; then
       mv -f /etc/pacman.d/mirrorlist.orig /etc/pacman.d/mirrorlist
-      DIALOG --title "$_MirrorlistTitle" --msgbox "$_MirrorRestDone" 0 0
+      DIALOG --title " $_MirrorlistTitle " --msgbox "\n$_Done!\n\n" 0 0
     else
-      DIALOG --title "$_ErrTitle" --msgbox "$_MirrorNoneBody" 0 0
+      DIALOG --title " $_ErrTitle " --msgbox "$_MirrorNoneBody" 0 0
     fi
     ;;
     *)
@@ -335,7 +328,7 @@ set_keymap() {
   for i in $(ls -R /usr/share/kbd/keymaps | grep "map.gz" | sed 's/\.map\.gz//g' | sort); do
     KEYMAPS="${KEYMAPS} ${i} -"
   done
-  DIALOG --title "$_VCKeymapTitle" --menu "$_VCKeymapBody" 20 40 16 \
+  DIALOG --title " $_VCKeymapTitle " --menu "$_VCKeymapBody" 20 40 16 \
   ${KEYMAPS} 2>${ANSWER} || prep_menu
   KEYMAP=$(cat ${ANSWER})
   loadkeys $KEYMAP 2>/tmp/.errlog
@@ -350,11 +343,10 @@ set_xkbmap() {
   for i in ${keymaps_xkb}; do
     XKBMAP_LIST="${XKBMAP_LIST} ${i}"
   done
-  DIALOG --title "$_PrepKBLayout" --menu "$_XkbmapBody" 0 0 16 \
+  DIALOG --title " $_PrepKBLayout " --menu "$_XkbmapBody" 0 0 16 \
   ${XKBMAP_LIST} 2>${ANSWER} || install_graphics_menu
   XKBMAP=$(cat ${ANSWER} |sed 's/_.*//')
   echo -e "Section "\"InputClass"\"\nIdentifier "\"system-keyboard"\"\nMatchIsKeyboard "\"on"\"\nOption "\"XkbLayout"\" "\"${XKBMAP}"\"\nEndSection" > /tmp/00-keyboard.conf
-  install_graphics_menu
 }
 
 # locale array generation code adapted from the Manjaro 0.8 installer
@@ -363,7 +355,7 @@ set_locale() {
   for i in $(cat /etc/locale.gen | grep -v "#  " | sed 's/#//g' | sed 's/ UTF-8//g' | grep .UTF-8); do
     LOCALES="${LOCALES} ${i} -"
   done
-  DIALOG --title "$_ConfBseSysLoc" --menu "$_localeBody" 0 0 12 \
+  DIALOG --title " $_ConfBseSysLoc " --menu "$_localeBody" 0 0 12 \
   ${LOCALES} 2>${ANSWER} || config_base_menu
   LOCALE=$(cat ${ANSWER})
   echo "LANG=\"${LOCALE}\"" > ${MOUNTPOINT}/etc/locale.conf
@@ -378,17 +370,17 @@ set_timezone() {
   for i in $(cat /usr/share/zoneinfo/zone.tab | awk '{print $3}' | grep "/" | sed "s/\/.*//g" | sort -ud); do
     ZONE="$ZONE ${i} -"
   done
-  DIALOG --title "$_ConfBseTimeHC" --menu "$_TimeZBody" 0 0 10 \
+  DIALOG --title " $_ConfBseTimeHC " --menu "$_TimeZBody" 0 0 10 \
   ${ZONE} 2>${ANSWER} || config_base_menu
   ZONE=$(cat ${ANSWER})
   SUBZONE=""
   for i in $(cat /usr/share/zoneinfo/zone.tab | awk '{print $3}' | grep "${ZONE}/" | sed "s/${ZONE}\///g" | sort -ud); do
     SUBZONE="$SUBZONE ${i} -"
   done
-  DIALOG --title "$_ConfBseTimeHC" --menu "$_TimeSubZBody" 0 0 11 \
+  DIALOG --title " $_ConfBseTimeHC " --menu "$_TimeSubZBody" 0 0 11 \
   ${SUBZONE} 2>${ANSWER} || config_base_menu
   SUBZONE=$(cat ${ANSWER})
-  DIALOG --title "$_ConfBseTimeHC" --yesno "$_TimeZQ ${ZONE}/${SUBZONE}?" 0 0
+  DIALOG --title " $_ConfBseTimeHC " --yesno "$_TimeZQ ${ZONE}/${SUBZONE}?" 0 0
   if [[ $? -eq 0 ]]; then
     arch_chroot "ln -s /usr/share/zoneinfo/${ZONE}/${SUBZONE} /etc/localtime" 2>/tmp/.errlog
     check_for_error
@@ -398,7 +390,7 @@ set_timezone() {
 }
 
 set_hw_clock() {
-  DIALOG --title "$_ConfBseTimeHC" --menu "$_HwCBody" 0 0 2 \
+  DIALOG --title " $_ConfBseTimeHC " --menu "$_HwCBody" 0 0 2 \
   "utc" "-" \
   "localtime" "-" 2>${ANSWER}
   [[ $(cat ${ANSWER}) != "" ]] && arch_chroot "hwclock --systohc --$(cat ${ANSWER})" 2>/tmp/.errlog && check_for_error
@@ -406,7 +398,7 @@ set_hw_clock() {
 
 # Function will not allow incorrect UUID type for installed system.
 generate_fstab() {
-  DIALOG --title "$_ConfBseFstab" --menu "$_FstabBody" 0 0 4 \
+  DIALOG --title " $_ConfBseFstab " --menu "$_FstabBody" 0 0 4 \
   "genfstab -p" "$_FstabDevName" \
   "genfstab -L -p" "$_FstabDevLabel" \
   "genfstab -U -p" "$_FstabDevUUID" \
@@ -428,18 +420,18 @@ generate_fstab() {
 }
 
 set_hostname() {
-  DIALOG --title "$_ConfBseHost" --inputbox "$_HostNameBody" 0 0 \
+  DIALOG --title " $_ConfBseHost " --inputbox "$_HostNameBody" 0 0 \
   "arch" 2>${ANSWER} || config_base_menu
   echo "$(cat ${ANSWER})" > ${MOUNTPOINT}/etc/hostname 2>/tmp/.errlog
-  echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t$(cat ${ANSWER})\n::1\tlocalhost.localdomain\tlocalhost\t$(cat {ANSWER})" > ${MOUNTPOINT}/etc/hosts 2>>/tmp/.errlog
+  echo -e "#<ip-address>\t<hostname.domain.org>\t<hostname>\n127.0.0.1\tlocalhost.localdomain\tlocalhost\t$(cat ${ANSWER})\n::1\tlocalhost.localdomain\tlocalhost\t$(cat ${ANSWER})" > ${MOUNTPOINT}/etc/hosts 2>>/tmp/.errlog
   check_for_error
 }
 
 # Adapted and simplified from the Manjaro 0.8 and Antergos 2.0 installers
 set_root_password() {
-  DIALOG --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassRtBody" 0 0 2> ${ANSWER} || config_base_menu
+  DIALOG --title " $_ConfUsrRoot " --clear --insecure --passwordbox "$_PassRtBody" 0 0 2> ${ANSWER} || config_base_menu
   PASSWD=$(cat ${ANSWER})
-  DIALOG --title "$_ConfUsrRoot" --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
+  DIALOG --title " $_ConfUsrRoot " --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
   PASSWD2=$(cat ${ANSWER})
   if [[ $PASSWD == $PASSWD2 ]]; then
     echo -e "${PASSWD}\n${PASSWD}" > /tmp/.passwd
@@ -447,35 +439,35 @@ set_root_password() {
     rm /tmp/.passwd
     check_for_error
   else
-    DIALOG --title "$_ErrTitle" --msgbox "$_PassErrBody" 0 0
+    DIALOG --title " $_ErrTitle " --msgbox "$_PassErrBody" 0 0
     set_root_password
   fi
 }
 
 # Originally adapted from the Antergos 2.0 installer
 create_new_user() {
-  DIALOG --title "$_NUsrTitle" --inputbox "$_NUsrBody" 0 0 "" 2>${ANSWER} || config_base_menu
+  DIALOG --title " $_NUsrTitle " --inputbox "$_NUsrBody" 0 0 "" 2>${ANSWER} || config_base_menu
   USER=$(cat ${ANSWER})
   # Loop while user name is blank, has spaces, or has capital letters in it.
   while [[ ${#USER} -eq 0 ]] || [[ $USER =~ \ |\' ]] || [[ $USER =~ [^a-z0-9\ ] ]]; do
-    DIALOG --title "$_NUsrTitle" --inputbox "$_NUsrErrBody" 0 0 "" 2>${ANSWER} || config_base_menu
+    DIALOG --title " $_NUsrTitle " --inputbox "$_NUsrErrBody" 0 0 "" 2>${ANSWER} || config_base_menu
     USER=$(cat ${ANSWER})
   done
   # Enter password. This step will only be reached where the loop has been skipped or broken.
-  DIALOG --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
+  DIALOG --title " $_ConfUsrNew " --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
   PASSWD=$(cat ${ANSWER})
-  DIALOG --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
+  DIALOG --title " $_ConfUsrNew " --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
   PASSWD2=$(cat ${ANSWER})
   # loop while passwords entered do not match.
   while [[ $PASSWD != $PASSWD2 ]]; do
-    DIALOG --title "$_ErrTitle" --msgbox "$_PassErrBody" 0 0
-    DIALOG --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
+    DIALOG --title " $_ErrTitle " --msgbox "$_PassErrBody" 0 0
+    DIALOG --title " $_ConfUsrNew " --clear --insecure --passwordbox "$_PassNUsrBody $USER\n\n" 0 0 2> ${ANSWER} || config_base_menu
     PASSWD=$(cat ${ANSWER})
-    DIALOG --title "$_ConfUsrNew" --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
+    DIALOG --title " $_ConfUsrNew " --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || config_base_menu
     PASSWD2=$(cat ${ANSWER})
   done
   # create new user. This step will only be reached where the password loop has been skipped or broken.
-  DIALOG --title "$_ConfUsrNew" --infobox "$_NUsrSetBody" 0 0
+  DIALOG --title " $_ConfUsrNew " --infobox "$_NUsrSetBody" 0 0
   sleep 2
   # Create the user, set password, then remove temporary password file
   arch_chroot "useradd ${USER} -m -g users -G wheel,storage,power,network,video,audio,lp -s /bin/bash" 2>/tmp/.errlog
@@ -499,7 +491,7 @@ run_mkinitcpio() {
   ([[ $LVM -eq 0 ]] && [[ $LUKS -eq 1 ]]) && sed -i 's/block filesystems/block encrypt filesystems/g' ${MOUNTPOINT}/etc/mkinitcpio.conf 2>/tmp/.errlog
   check_for_error
   # Run Mkinitcpio command depending on kernel(s) installed
-  KERNEL=$(ls ${MOUNTPOINT}/boot/*.img | sed s~/mnt/boot/initramfs-~~g | sed "s~-fallback.img\|.img~~g" | uniq)
+  KERNEL=$(ls ${MOUNTPOINT}/boot/*.img | grep -v "fallback" | sed "s~${MOUNTPOINT}/boot/initramfs-~~g" | sed s/\.img//g | uniq)
   for i in ${KERNEL}; do
     arch_chroot "mkinitcpio -p ${i}" 2>>/tmp/.errlog
   done
@@ -526,12 +518,12 @@ umount_partitions(){
 # Revised to deal with partion sizes now being displayed to the user
 confirm_mount() {
   if [[ $(mount | grep $1) ]]; then
-    DIALOG --title "$_MntStatusTitle" --infobox "$_MntStatusSucc" 0 0
+    DIALOG --title " $_MntStatusTitle " --infobox "$_MntStatusSucc" 0 0
     sleep 2
     PARTITIONS=$(echo $PARTITIONS | sed "s~${PARTITION} [0-9]*[G-M]~~" | sed "s~${PARTITION} [0-9]*\.[0-9]*[G-M]~~" | sed s~${PARTITION}$' -'~~)
     NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS - 1 ))
   else
-    DIALOG --title "$_MntStatusTitle" --infobox "$_MntStatusFail" 0 0
+    DIALOG --title " $_MntStatusTitle " --infobox "$_MntStatusFail" 0 0
     sleep 2
     prep_menu
   fi
@@ -540,10 +532,10 @@ confirm_mount() {
 # btrfs specific for subvolumes
 confirm_mount_btrfs() {
   if [[ $(mount | grep $1) ]]; then
-    DIALOG --title "$_MntStatusTitle" --infobox "$_MntStatusSucc\n$(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL}\n\n" 0 0
+    DIALOG --title " $_MntStatusTitle " --infobox "$_MntStatusSucc\n$(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL}\n\n" 0 0
     sleep 2
   else
-    DIALOG --title "$_MntStatusTitle" --infobox "$_MntStatusFail" 0 0
+    DIALOG --title " $_MntStatusTitle " --infobox "$_MntStatusFail" 0 0
     sleep 2
     prep_menu
   fi
@@ -557,7 +549,7 @@ select_device() {
   for i in ${devices_list[@]}; do
     DEVICE="${DEVICE} ${i}"
   done
-  DIALOG --title "$_DevSelTitle" --menu "$_DevSelBody" 0 0 4 ${DEVICE} 2>${ANSWER} || prep_menu
+  DIALOG --title " $_DevSelTitle " --menu "$_DevSelBody" 0 0 4 ${DEVICE} 2>${ANSWER} || prep_menu
   DEVICE=$(cat ${ANSWER})
 }
 
@@ -577,19 +569,19 @@ find_partitions() {
   case $INCLUDE_PART in
     'part\|lvm\|crypt') # Deal with incorrect partitioning for main mounting function
     if ([[ $SYSTEM == "UEFI" ]] && [[ $NUMBER_PARTITIONS -lt 2 ]]) || ([[ $SYSTEM == "BIOS" ]] && [[ $NUMBER_PARTITIONS -eq 0 ]]); then
-      DIALOG --title "$_ErrTitle" --msgbox "$_PartErrBody" 0 0
+      DIALOG --title " $_ErrTitle " --msgbox "$_PartErrBody" 0 0
       create_partitions
     fi
     ;;
     'part\|crypt') # Ensure there is at least one partition for LVM
     if [[ $NUMBER_PARTITIONS -eq 0 ]]; then
-      DIALOG --title "$_ErrTitle" --msgbox "$_LvmPartErrBody" 0 0
+      DIALOG --title " $_ErrTitle " --msgbox "$_LvmPartErrBody" 0 0
       create_partitions
     fi
     ;;
     'part\|lvm') # Ensure there are at least two partitions for LUKS
     if [[ $NUMBER_PARTITIONS -lt 2 ]]; then
-      DIALOG --title "$_ErrTitle" --msgbox "$_LuksPartErrBody" 0 0
+      DIALOG --title " $_ErrTitle " --msgbox "$_LuksPartErrBody" 0 0
       create_partitions
     fi
     ;;
@@ -622,7 +614,7 @@ create_partitions(){
   # BIOS and UEFI
   auto_partition(){
     # Provide warning to user
-    DIALOG --title "$_PrepPartDisk" --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoPartBody3" 0 0
+    DIALOG --title " $_PrepPartDisk " --yesno "$_AutoPartBody1 $DEVICE $_AutoPartBody2 $_AutoPartBody3" 0 0
     if [[ $? -eq 0 ]]; then
       # Find existing partitions (if any) to remove
       parted -s ${DEVICE} print | awk '/^ / {print $1}' > /tmp/.del_parts
@@ -654,7 +646,7 @@ create_partitions(){
   }
 
   # Partitioning Menu
-  DIALOG --title "$_PrepPartDisk" --menu "$_PartToolBody" 0 0 7 \
+  DIALOG --title " $_PrepPartDisk " --menu "$_PartToolBody" 0 0 7 \
   "$_PartOptWipe" "BIOS & UEFI" \
   "$_PartOptAuto" "BIOS & UEFI" \
   "cfdisk" "BIOS" \
@@ -681,7 +673,7 @@ select_filesystem(){
   # Clear special FS type flags
   BTRFS=0
   F2FS=0
-  DIALOG --title "$_FSTitle" --menu "$_FSBody" 0 0 12 \
+  DIALOG --title " $_FSTitle " --menu "$_FSBody" 0 0 12 \
   "$_FSSkip" "-" \
   "mkfs.btrfs -f" "btrfs" \
   "mkfs.ext2 -q" "ext2" \
@@ -700,7 +692,7 @@ select_filesystem(){
   # If brtfs selected, modprobe, ask if subvolumes are needed, and flag btrfs for installation
   if [[ $FILESYSTEM == "mkfs.btrfs -f" ]]; then
     modprobe btrfs
-    DIALOG --title "$_btrfsSVTitle" --yesno "$_btrfsSVBody" 0 0
+    DIALOG --title " $_btrfsSVTitle " --yesno "$_btrfsSVBody" 0 0
     [[ $? -eq 0 ]] && BTRFS=2 || BTRFS=1
   fi
 }
@@ -716,13 +708,13 @@ mount_partitions() {
     echo "" > ${BTRFS_VOL_LIST}
     BTRFS_OSUB_NUM=1
     # Name initial subvolume from which other (optional) subvolumes may branch from
-    DIALOG --title "$_btrfsSVTitle" --inputbox "$_btrfsMSubBody1 ${MOUNTPOINT}${MOUNT} $_btrfsMSubBody2" 0 0 "" 2>${ANSWER} || select_filesystem
+    DIALOG --title " $_btrfsSVTitle " --inputbox "$_btrfsMSubBody1 ${MOUNTPOINT}${MOUNT} $_btrfsMSubBody2" 0 0 "" 2>${ANSWER} || select_filesystem
     BTRFS_MSUB_VOL=$(cat ${ANSWER})
     # if root, then create boot flag for syslinux, systemd-boot and rEFInd bootloaders
     [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
     # Loop while subvolume is blank or has spaces.
     while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
-      DIALOG --title "$_ErrTitle" --inputbox "$_btrfsSVErrBody" 0 0 "" 2>${ANSWER} || select_filesystem
+      DIALOG --title " $_ErrTitle " --inputbox "$_btrfsSVErrBody" 0 0 "" 2>${ANSWER} || select_filesystem
       BTRFS_MSUB_VOL=$(cat ${ANSWER})
       # if root, then create flag for syslinux, systemd-boot and rEFInd bootloaders
       [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
@@ -748,11 +740,11 @@ mount_partitions() {
     check_for_error
     # Loop while the termination character has not been entered
     while [[ $BTRFS_OSUB_VOL != "*" ]]; do
-      DIALOG --title "$_btrfsSVTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVBody1 $BTRFS_OSUB_NUM $_btrfsSVBody2 $BTRFS_MSUB_VOL.$_btrfsSVBody3 $(cat ${BTRFS_VOL_LIST})" 0 0 "" 2>${ANSWER} || select_filesystem
+      DIALOG --title " $_btrfsSVTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVBody1 $BTRFS_OSUB_NUM $_btrfsSVBody2 $BTRFS_MSUB_VOL.$_btrfsSVBody3 $(cat ${BTRFS_VOL_LIST})" 0 0 "" 2>${ANSWER} || select_filesystem
       BTRFS_OSUB_VOL=$(cat ${ANSWER})
       # Loop while subvolume is blank or has spaces.
       while [[ ${#BTRFS_OSUB_VOL} -eq 0 ]] || [[ $BTRFS_SUB_VOL =~ \ |\' ]]; do
-        DIALOG --title "$_ErrTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVErrBody ($BTRFS_OSUB_NUM)." 0 0 "" 2>${ANSWER} || select_filesystem
+        DIALOG --title " $_ErrTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVErrBody ($BTRFS_OSUB_NUM)." 0 0 "" 2>${ANSWER} || select_filesystem
         BTRFS_OSUB_VOL=$(cat ${ANSWER})
       done
       btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog
@@ -770,7 +762,7 @@ mount_partitions() {
   # This subfunction allows for btrfs-specific mounting options to be applied.
   btrfs_mount_opts() {
     echo "" > ${BTRFS_OPTS}
-    DIALOG --title "$_btrfsSVTitle" --checklist "$_btrfsMntBody" 0 0 16 \
+    DIALOG --title " $_btrfsSVTitle " --checklist "$_btrfsMntBody" 0 0 16 \
     "autodefrag" "-" off \
     "compress=zlib" "-" off \
     "compress=lzo" "-" off \
@@ -791,7 +783,7 @@ mount_partitions() {
     sed -i 's/ /,/g' ${BTRFS_OPTS}
     sed -i '$s/,$//' ${BTRFS_OPTS}
     if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-      DIALOG --title "$_btrfsSVTitle" --yesno "$_btrfsMntConfBody $(cat $BTRFS_OPTS)\n" 0 0
+      DIALOG --title " $_btrfsSVTitle " --yesno "$_btrfsMntConfBody $(cat $BTRFS_OPTS)\n" 0 0
       [[ $? -eq 1 ]] && btrfs_mount_opts
     fi
   }
@@ -811,20 +803,49 @@ mount_partitions() {
     # Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable
     check_for_error
     confirm_mount ${MOUNTPOINT}${MOUNT}
-    # Deal with lvm, luks, and btrfs
-    [[ $(lsblk -lno TYPE ${PARTITION} | grep "lvm") != "" ]] && LVM=1
-    [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]] && LUKS=1
+    # Deal with lvm and luks
+    # Identify if partition is LUKS, or LVM on LUKS (parent = partition = use UUID)
+    if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt\|lvm") != "" ]]; then
+      LUKS_NAME=$(echo ${PARTITION} | sed "s~/dev/mapper/~~g")
+      [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]] && LUKS=1
+      [[ $(lsblk -lno TYPE ${PARTITION} | grep "lvm") != "" ]] && LVM=1
+      cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print "/dev/"$1}')
+      for i in ${cryptparts}; do
+        if [[ $(lsblk -lno NAME ${i} | grep $LUKS_NAME) != "" ]]; then
+          LUKS_UUID=$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
+          # Check if not already added (LVM on LUKS). If not, add.
+          if [[ $(echo $LUKS_DEV | grep $LUKS_UUID) == "" ]]; then
+            LUKS_DEV="$LUKS_DEV cryptdevice=UUID=$LUKS_UUID:$LUKS_NAME"
+            LUKS=1
+          fi
+          break;
+        fi
+      done
+    fi
+    # Identify if LUKS on LVM (parent = logical volume = use /dev/mapper/)
+    if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]]; then
+      cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "lvm" | grep -i "crypto_luks" | uniq | awk '{print "/dev/mapper/"$1}')
+      for i in ${cryptparts}; do
+        if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_NAME) != "" ]]; then
+          LUKS_DEV="$LUKS_DEV cryptdevice=${i}:$LUKS_NAME"
+          LVM=1
+          break;
+        fi
+      done
+    fi
+    # Deal with btrfs
     [[ $BTRFS -eq 2 ]] && btrfs_subvols
   }
 
   # prep variables
   MOUNT=""
-  LUKS_ROOT_NAME=""
-  LUKS_ROOT_DEV=""
+  LUKS_NAME=""
+  LUKS_DEV=""
+  LUKS_UUID=""
   LUKS=0
   LVM=0
   # Warn users that they CAN mount partitions without formatting them!
-  DIALOG --title "$_PrepMntPart" --msgbox "$_WarnMount1 '$_FSSkip' $_WarnMount2" 0 0
+  DIALOG --title " $_PrepMntPart " --msgbox "$_WarnMount1 '$_FSSkip' $_WarnMount2" 0 0
   # LVM Detection. If detected, activate.
   lvm_detect
   # Ensure partitions are unmounted (i.e. where mounted previously), and then list available partitions
@@ -832,54 +853,17 @@ mount_partitions() {
   umount_partitions
   find_partitions
   # Identify and mount root
-  DIALOG --title "$_PrepMntPart" --menu "$_SelRootBody" 0 0 4 \
+  DIALOG --title " $_PrepMntPart " --menu "$_SelRootBody" 0 0 7 \
   ${PARTITIONS} 2>${ANSWER} || prep_menu
   PARTITION=$(cat ${ANSWER})
   ROOT_PART=${PARTITION}
   select_filesystem
   [[ $FILESYSTEM != $_FSSkip ]] && ${FILESYSTEM} ${PARTITION} >/dev/null 2>/tmp/.errlog
   check_for_error
-  # Make the directory and mount
+  # Make the directory and mount. Also identify LUKS and/or LVM
   mount_current_partition
-  # Identify if root is encrypted. First if lvm type.
-  if [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "lvm") != "" ]]; then
-    root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
-    parent_parts=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
-    for i in ${parent_parts}; do
-      if [[ $(lsblk -lno NAME,TYPE ${i} | grep $root_name) != "" ]]; then
-        if [[ $(lsblk -lno FSTYPE ${i} | grep -i "crypto_LUKS") != "" ]]; then
-          LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
-          LUKS_ROOT_NAME=$(lsblk -lno NAME,FSTYPE,TYPE ${i} | grep -i "lvm2_member" | grep crypt$ | awk '{print $1}')
-          break;
-        else
-          LVM=1
-        fi
-      fi
-    done
-    # crypt fs type specific.
-  elif [[ $(lsblk -lno TYPE ${ROOT_PART} | grep "crypt") != "" ]]; then
-    LUKS_ROOT_NAME=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
-    LUKS=1
-    # Identify "parent" partition and get UUID for it (for bootloaders)
-    LUKS_ROOT_DEV=$(lsblk -lno NAME,TYPE | grep "part" | awk '{print "/dev/" $1}')
-    for i in ${LUKS_ROOT_DEV}; do
-      if [[ $(lsblk -lno NAME,TYPE ${i} | grep $LUKS_ROOT_NAME) != "" ]]; then
-        LUKS_ROOT_DEV="UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
-        break;
-      fi
-    done
-    # Identify if LUKS on LVM for mkinitcpio
-    root_name=$(echo ${ROOT_PART} | sed "s~/dev/mapper/~~g")
-    parent_parts=$(lsblk -lno NAME,TYPE | grep "lvm" | awk '{print "/dev/mapper/" $1}')
-    for i in ${parent_parts}; do
-      if [[ $(lsblk -lno NAME,TYPE ${i} | grep $root_name) != "" ]]; then
-        LVM=1
-        break;
-      fi
-    done
-  fi
   # Identify and create swap, if applicable
-  DIALOG --title "$_PrepMntPart" --menu "$_SelSwpBody" 0 0 4 \
+  DIALOG --title " $_PrepMntPart " --menu "$_SelSwpBody" 0 0 7 \
   "$_SelSwpNone" $"-" \
   "$_SelSwpFile" $"-" \
   ${PARTITIONS} 2>${ANSWER} || prep_menu
@@ -904,18 +888,18 @@ mount_partitions() {
   fi
   # Extra Step for VFAT UEFI Partition. This cannot be in an LVM container.
   if [[ $SYSTEM == "UEFI" ]]; then
-    DIALOG --title "$_PrepMntPart" --menu "$_SelUefiBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+    DIALOG --title " $_PrepMntPart " --menu "$_SelUefiBody" 0 0 7 ${PARTITIONS} 2>${ANSWER} || prep_menu
     PARTITION=$(cat ${ANSWER})
     UEFI_PART=${PARTITION}
     # If it is already a fat/vfat partition...
     if [[ $(fsck -N $PARTITION | grep fat) ]]; then
-      DIALOG --title "$_PrepMntPart" --yesno "$_FormUefiBody $PARTITION $_FormUefiBody2" 0 0 && mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
+      DIALOG --title " $_PrepMntPart " --yesno "$_FormUefiBody $PARTITION $_FormUefiBody2" 0 0 && mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
     else
       mkfs.vfat -F32 ${PARTITION} >/dev/null 2>/tmp/.errlog
     fi
     check_for_error
     # Inform users of the mountpoint options and consequences
-    DIALOG --title "$_PrepMntPart" --menu "$_MntUefiBody"  0 0 2 \
+    DIALOG --title " $_PrepMntPart " --menu "$_MntUefiBody"  0 0 2 \
     "/boot" "systemd-boot"\
     "/boot/efi" "-" 2>${ANSWER}
     [[ $(cat ${ANSWER}) != "" ]] && UEFI_MOUNT=$(cat ${ANSWER}) || prep_menu
@@ -926,7 +910,7 @@ mount_partitions() {
   fi
   # All other partitions
   while [[ $NUMBER_PARTITIONS > 0 ]]; do
-    DIALOG --title "$_PrepMntPart" --menu "$_ExtPartBody" 0 0 4 \
+    DIALOG --title " $_PrepMntPart " --menu "$_ExtPartBody" 0 0 7 \
     "$_Done" $"-" ${PARTITIONS} 2>${ANSWER} || prep_menu
     PARTITION=$(cat ${ANSWER})
     if [[ $PARTITION == $_Done ]]; then
@@ -938,14 +922,14 @@ mount_partitions() {
       check_for_error
       # Ask user for mountpoint. Don't give /boot as an example for UEFI systems!
       [[ $SYSTEM == "UEFI" ]] && MNT_EXAMPLES="/home\n/var" || MNT_EXAMPLES="/boot\n/home\n/var"
-      DIALOG --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || prep_menu
+      DIALOG --title " $_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || prep_menu
       MOUNT=$(cat ${ANSWER})
       # loop while the mountpoint specified is incorrect (is only '/', is blank, or has spaces).
       while [[ ${MOUNT:0:1} != "/" ]] || [[ ${#MOUNT} -le 1 ]] || [[ $MOUNT =~ \ |\' ]]; do
         # Warn user about naming convention
-        DIALOG --title "$_ErrTitle" --msgbox "$_ExtErrBody" 0 0
+        DIALOG --title " $_ErrTitle " --msgbox "$_ExtErrBody" 0 0
         # Ask user for mountpoint again
-        DIALOG --title "$_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || prep_menu
+        DIALOG --title " $_PrepMntPart $PARTITON " --inputbox "$_ExtPartBody1$MNT_EXAMPLES\n" 0 0 "/" 2>${ANSWER} || prep_menu
         MOUNT=$(cat ${ANSWER})
       done
       # Create directory and mount.
@@ -965,14 +949,17 @@ mount_partitions() {
 ##
 ################################################################################
 
+# Had to write it in this way due to (bash?) bug(?), as if/then statements in a single
+# "create LUKS" function for default and "advanced" modes were interpreted as commands,
+# not mere string statements. Not happy with it, but it works...
 # Save repetition of code.
 luks_password(){
-  DIALOG --title "$_PrepLUKS" --clear --insecure --passwordbox "$_LuksPassBody" 0 0 2> ${ANSWER} || prep_menu
+  DIALOG --title " $_PrepLUKS " --clear --insecure --passwordbox "$_LuksPassBody" 0 0 2> ${ANSWER} || prep_menu
   PASSWD=$(cat ${ANSWER})
-  DIALOG --title "$_PrepLUKS" --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || prep_menu
+  DIALOG --title " $_PrepLUKS " --clear --insecure --passwordbox "$_PassReEntBody" 0 0 2> ${ANSWER} || prep_menu
   PASSWD2=$(cat ${ANSWER})
   if [[ $PASSWD != $PASSWD2 ]]; then
-    DIALOG --title "$_ErrTitle" --msgbox "$_PassErrBody" 0 0
+    DIALOG --title " $_ErrTitle " --msgbox "$_PassErrBody" 0 0
     luks_password
   fi
 }
@@ -983,7 +970,7 @@ luks_open(){
   umount_partitions
   find_partitions
   # Select encrypted partition to open
-  DIALOG --title " $_LuksOpen " --menu "$_LuksMenuBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || luks_menu
+  DIALOG --title " $_LuksOpen " --menu "$_LuksMenuBody" 0 0 7 ${PARTITIONS} 2>${ANSWER} || luks_menu
   PARTITION=$(cat ${ANSWER})
   # Enter name of the Luks partition and get password to open it
   DIALOG --title " $_LuksOpen " --inputbox "$_LuksOpenBody" 10 50 "cryptroot" 2>${ANSWER} || luks_menu
@@ -995,7 +982,7 @@ luks_open(){
   echo $PASSWD | cryptsetup open --type luks ${PARTITION} ${LUKS_ROOT_NAME} 2>/tmp/.errlog
   check_for_error
   lsblk -o NAME,TYPE,FSTYPE,SIZE,MOUNTPOINT ${PARTITION} | grep "crypt\|NAME\|MODEL\|TYPE\|FSTYPE\|SIZE" > /tmp/.devlist
-  DIALOG --title "$_DevShowOpt" --textbox /tmp/.devlist 0 0
+  DIALOG --title " $_DevShowOpt " --textbox /tmp/.devlist 0 0
   luks_menu
 }
 
@@ -1005,7 +992,7 @@ luks_setup(){
   umount_partitions
   find_partitions
   # Select partition to encrypt
-  DIALOG --title " $_LuksEncrypt " --menu "$_LuksCreateBody" 0 0 4 ${PARTITIONS} 2>${ANSWER} || luks_menu
+  DIALOG --title " $_LuksEncrypt " --menu "$_LuksCreateBody" 0 0 7 ${PARTITIONS} 2>${ANSWER} || luks_menu
   PARTITION=$(cat ${ANSWER})
   # Enter name of the Luks partition and get password to create it
   DIALOG --title " $_LuksEncrypt " --inputbox "$_LuksOpenBody" 10 50 "cryptroot" 2>${ANSWER} || luks_menu
@@ -1026,7 +1013,7 @@ luks_default() {
 luks_key_define() {
   DIALOG --title " $_PrepLUKS " --inputbox "$_LuksCipherKey" 0 0 "-s 512 -c aes-xts-plain64" 2>${ANSWER} || luks_menu
   # Encrypt selected partition or LV with credentials given
-  DIALOG --title " $_LuksEncrypt " --infobox "$_PlsWaitBody" 0 0
+  DIALOG --title " $_LuksEncryptAdv " --infobox "$_PlsWaitBody" 0 0
   sleep 2
   echo $PASSWD | cryptsetup -q $(cat ${ANSWER}) luksFormat ${PARTITION} 2>/tmp/.errlog
   check_for_error
@@ -1046,20 +1033,20 @@ luks_menu() {
   LUKS_OPT=""
   DIALOG --title " $_PrepLUKS " \
   --menu "$_LuksMenuBody$_LuksMenuBody2$_LuksMenuBody3" 0 0 4 \
-  "$_LuksOpen" "cryptsetup open --type luks" \
-  "$_LuksEncrypt" "cryptsetup -q luksFormat" \
-  "$_LuksEncryptAdv" "cryptsetup -q -s -c" \
+  "cryptsetup open --type luks" "$_LuksOpen" \
+  "cryptsetup -q luksFormat" "$_LuksEncrypt" \
+  "cryptsetup -q -s -c luksFormat" "$_LuksEncryptAdv" \
   "$_Back" "-" 2>${ANSWER}
   case $(cat ${ANSWER}) in
-    "$_LuksOpen")
+    "cryptsetup open --type luks")
     luks_open
     ;;
-    "$_LuksEncrypt")
+    "cryptsetup -q luksFormat")
     luks_setup
     luks_default
     luks_show
     ;;
-    "$_LuksEncryptAdv")
+    "cryptsetup -q -s -c luksFormat")
     luks_setup
     luks_key_define
     luks_show
@@ -1174,12 +1161,12 @@ lvm_create() {
   LVM_VG=$(cat ${ANSWER})
   # Loop while the Volume Group name starts with a "/", is blank, has spaces, or is already being used
   while [[ ${LVM_VG:0:1} == "/" ]] || [[ ${#LVM_VG} -eq 0 ]] || [[ $LVM_VG =~ \ |\' ]] || [[ $(lsblk | grep ${LVM_VG}) != "" ]]; do
-    DIALOG --title "$_ErrTitle" --msgbox "$_LvmNameVgErr" 0 0
+    DIALOG --title " $_ErrTitle " --msgbox "$_LvmNameVgErr" 0 0
     DIALOG --title " $_LvmCreateVG " --inputbox "$_LvmNameVgBody" 0 0 "" 2>${ANSWER} || prep_menu
     LVM_VG=$(cat ${ANSWER})
   done
   # Select the partition(s) for the Volume Group
-  DIALOG --title " $_LvmCreateVG " --checklist "$_LvmPvSelBody $_UseSpaceBar" 0 0 4 ${PARTITIONS} 2>${ANSWER} || prep_menu
+  DIALOG --title " $_LvmCreateVG " --checklist "$_LvmPvSelBody $_UseSpaceBar" 0 0 7 ${PARTITIONS} 2>${ANSWER} || prep_menu
   [[ $(cat ${ANSWER}) != "" ]] && VG_PARTS=$(cat ${ANSWER}) || prep_menu
   # Once all the partitions have been selected, show user. On confirmation, use it/them in 'vgcreate' command.
   # Also determine the size of the VG, to use for creating LVs for it.
@@ -1219,7 +1206,7 @@ lvm_create() {
     LVM_LV_NAME=$(cat ${ANSWER})
     # Loop if preceeded with a "/", if nothing is entered, if there is a space, or if that name already exists.
     while [[ ${LVM_LV_NAME:0:1} == "/" ]] || [[ ${#LVM_LV_NAME} -eq 0 ]] || [[ ${LVM_LV_NAME} =~ \ |\' ]] || [[ $(lsblk | grep ${LVM_LV_NAME}) != "" ]]; do
-      DIALOG --title "$_ErrTitle" --msgbox "$_LvmLvNameErrBody" 0 0
+      DIALOG --title " $_ErrTitle " --msgbox "$_LvmLvNameErrBody" 0 0
       DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --inputbox "$_LvmLvNameBody1" 0 0 "lvol" 2>${ANSWER} || prep_menu
       LVM_LV_NAME=$(cat ${ANSWER})
     done
@@ -1228,7 +1215,7 @@ lvm_create() {
     check_lv_size
     # Loop while an invalid value is entered.
     while [[ $LV_SIZE_INVALID -eq 1 ]]; do
-      DIALOG --title "$_ErrTitle" --msgbox "$_LvmLvSizeErrBody" 0 0
+      DIALOG --title " $_ErrTitle " --msgbox "$_LvmLvSizeErrBody" 0 0
       DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --inputbox "\n${LVM_VG}: ${VG_SIZE}${VG_SIZE_TYPE} (${LVM_VG_MB}MB $_LvmLvSizeBody1).$_LvmLvSizeBody2" 0 0 "" 2>${ANSWER} || prep_menu
       LVM_LV_SIZE=$(cat ${ANSWER})
       check_lv_size
@@ -1244,7 +1231,7 @@ lvm_create() {
   LVM_LV_NAME=$(cat ${ANSWER})
   # Loop if preceeded with a "/", if nothing is entered, if there is a space, or if that name already exists.
   while [[ ${LVM_LV_NAME:0:1} == "/" ]] || [[ ${#LVM_LV_NAME} -eq 0 ]] || [[ ${LVM_LV_NAME} =~ \ |\' ]] || [[ $(lsblk | grep ${LVM_LV_NAME}) != "" ]]; do
-    DIALOG --title "$_ErrTitle" --msgbox "$_LvmLvNameErrBody" 0 0
+    DIALOG --title " $_ErrTitle " --msgbox "$_LvmLvNameErrBody" 0 0
     DIALOG --title " $_LvmCreateLV (LV:$NUMBER_LOGICAL_VOLUMES) " --inputbox "$_LvmLvNameBody1 $_LvmLvNameBody2 (${LVM_VG_MB}MB)." 0 0 "lvol" 2>${ANSWER} || prep_menu
     LVM_LV_NAME=$(cat ${ANSWER})
   done
@@ -1333,19 +1320,19 @@ install_base() {
   KERNEL="n"
   kernels="linux-lts linux-grsec linux-zen"
   # User to select "standard" or "advanced" installation Method
-  DIALOG --title "$_InstBseTitle" --menu "$_InstBseBody" 0 0 2 \
+  DIALOG --title " $_InstBseTitle " --menu "$_InstBseBody" 0 0 2 \
   "1" "$_InstStandBase" \
   "2" "$_InstAdvBase" 2>${ANSWER}
   # "Standard" installation method
   if [[ $(cat ${ANSWER}) -eq 1 ]]; then
-    DIALOG --title "$_InstBseTitle" --checklist "$_InstStandBseBody$_UseSpaceBar" 0 0 3 \
+    DIALOG --title " $_InstBseTitle " --checklist "$_InstStandBseBody$_UseSpaceBar" 0 0 3 \
     "linux" $(pacman -Si linux | grep -i version | sed s/.*://g | sed "s/^ //") on \
     "linux-lts" $(pacman -Si linux-lts | grep -i version | sed s/.*://g | sed "s/^ //") off \
     "base-devel" "-" on 2>${PACKAGES}
     # "Advanced" installation method
   elif [[ $(cat ${ANSWER}) -eq 2 ]]; then
     # Ask user to wait while package descriptions are gathered (because it takes ages)
-    DIALOG --title "$_InstAdvBase" --infobox "$_InstAdvWait $_PlsWaitBody" 0 0
+    DIALOG --title " $_InstAdvBase " --infobox "$_InstAdvWait $_PlsWaitBody" 0 0
     # Generate a package list with descriptions.
     PKG_LIST=""
     pkg_list=$(pacman -Sqg base base-devel | sed s/linux// | sed s/util-/util-linux/ | uniq | sort -u)
@@ -1358,7 +1345,7 @@ install_base() {
     for i in ${pkg_list}; do
       PKG_LIST="${PKG_LIST} ${i} $(pacman -Si ${i} | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") on"
     done
-    DIALOG --title "$_InstBseTitle" --checklist "$_InstAdvBseBody $_UseSpaceBar" 0 0 20 \
+    DIALOG --title " $_InstBseTitle " --checklist "$_InstAdvBseBody $_UseSpaceBar" 0 0 20 \
     "linux" $(pacman -Si linux | grep -i version | sed s/.*://g | sed "s/^ //") on \
     "linux-lts" $(pacman -Si linux-lts | grep -i version | sed s/.*://g | sed "s/^ //") off \
     "linux-grsec" $(pacman -Si linux-grsec | grep -i version | sed s/.*://g | sed "s/^ //") off \
@@ -1382,7 +1369,7 @@ install_base() {
     fi
     # If no kernel selected, warn and restart
     if [[ $KERNEL == "n" ]]; then
-      DIALOG --title "$_ErrTitle" --msgbox "$_ErrNoKernel" 0 0
+      DIALOG --title " $_ErrTitle " --msgbox "$_ErrNoKernel" 0 0
       install_base
       # If at least one kernel selected, proceed with installation.
     elif [[ $KERNEL == "y" ]]; then
@@ -1401,7 +1388,8 @@ install_bootloader() {
 
   # Grub auto-detects installed kernels, etc. Syslinux does not, hence the extra code for it.
   bios_bootloader() {
-    DIALOG --title "$_InstBiosBtTitle" --menu "$_InstBiosBtBody" 0 0 3 \
+    DIALOG --title " $_InstBiosBtTitle " \
+    --menu "$_InstBiosBtBody" 0 0 3 \
     "grub" "-" \
     "grub + os-prober" "-" \
     "syslinux" "-" 2>${PACKAGES}
@@ -1423,13 +1411,13 @@ install_bootloader() {
             sed -i "s/GRUB_PRELOAD_MODULES=\"\"/GRUB_PRELOAD_MODULES=\"lvm\"/g" ${MOUNTPOINT}/etc/default/grub
           fi
           # If encryption used amend grub
-          [[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=\"\"~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
+          [[ $LUKS_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=.*~GRUB_CMDLINE_LINUX=\"$LUKS_DEV\"~g" ${MOUNTPOINT}/etc/default/grub
           arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
           check_for_error
         fi
       else
         # Syslinux
-        DIALOG --title "$_InstSysTitle" --menu "$_InstSysBody" 0 0 2 \
+        DIALOG --title " $_InstSysTitle " --menu "$_InstSysBody" 0 0 2 \
         "syslinux-install_update -iam" "[MBR]" \
         "syslinux-install_update -i" "[/]" 2>${PACKAGES}
         # If an installation method has been chosen, run it
@@ -1438,24 +1426,24 @@ install_bootloader() {
           check_for_error
           # Amend configuration file. First remove all existing entries, then input new ones.
           sed -i '/#-*/q' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          echo -e "\n" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          #echo -e "\n" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
           # First the "main" entries
-          [[ -e ${MOUNTPOINT}/boot/initramfs-linux.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux\n\tLINUX ../vmlinuz-linux\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-lts.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux LTS\n\tLINUX ../vmlinuz-linux-lts\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-lts.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-grsec.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Grsec\n\tLINUX ../vmlinuz-linux-grsec\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-grsec.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-zen.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Zen\n\tLINUX ../vmlinuz-linux-zen\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-zen.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          [[ -e ${MOUNTPOINT}/boot/initramfs-linux.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux\n\tLINUX ../vmlinuz-linux\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux.img" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-lts.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux LTS\n\tLINUX ../vmlinuz-linux-lts\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-lts.img" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-grsec.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Grsec\n\tLINUX ../vmlinuz-linux-grsec\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-grsec.img" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-zen.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Zen\n\tLINUX ../vmlinuz-linux-zen\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-zen.img" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
           # Second the "fallback" entries
-          [[ -e ${MOUNTPOINT}/boot/initramfs-linux.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Fallback\n\tLINUX ../vmlinuz-linux\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-fallback.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-lts.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Fallback LTS\n\tLINUX ../vmlinuz-linux-lts\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-lts-fallback.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-grsec.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Fallback Grsec\n\tLINUX ../vmlinuz-linux-grsec\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-grsec-fallback.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-zen.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Fallbacl Zen\n\tLINUX ../vmlinuz-linux-zen\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-zen-fallback.img" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          [[ -e ${MOUNTPOINT}/boot/initramfs-linux.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Fallback\n\tLINUX ../vmlinuz-linux\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-fallback.img" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-lts.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Fallback LTS\n\tLINUX ../vmlinuz-linux-lts\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-lts-fallback.img" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-grsec.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Fallback Grsec\n\tLINUX ../vmlinuz-linux-grsec\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-grsec-fallback.img" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          [[ -e ${MOUNTPOINT}/boot/initramfs-linux-zen.img ]] && echo -e "\n\nLABEL arch\n\tMENU LABEL Arch Linux Fallbacl Zen\n\tLINUX ../vmlinuz-linux-zen\n\tAPPEND root=${ROOT_PART} rw\n\tINITRD ../initramfs-linux-zen-fallback.img" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
           # Third, amend for LUKS and BTRFS
-          [[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~rw~cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          [[ $LUKS_DEV != "" ]] && sed -i "s~rw~$LUKS_DEV rw~g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
           [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
           # Finally, re-add the "default" entries
-          echo -e "\n\nLABEL hdt\n\tMENU LABEL HDT (Hardware Detection Tool)\n\tCOM32 hdt.c32" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          echo -e "\n\nLABEL reboot\n\tMENU LABEL Reboot\n\tCOM32 reboot.c32" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-          echo -e "\n\n#LABEL windows\n\t#MENU LABEL Windows\n\t#COM32 chain.c32\n\t#APPEND root=/dev/sda2 rw" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          echo -e "\n\nLABEL hdt\n\tMENU LABEL HDT (Hardware Detection Tool)\n\tCOM32 hdt.c32" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          echo -e "\n\nLABEL reboot\n\tMENU LABEL Reboot\n\tCOM32 reboot.c32" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+          echo -e "\n\n#LABEL windows\n\t#MENU LABEL Windows\n\t#COM32 chain.c32\n\t#APPEND root=/dev/sda2 rw" >> ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
           echo -e "\n\nLABEL poweroff\n\tMENU LABEL Poweroff\n\tCOM32 poweroff.c32" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
         fi
       fi
@@ -1465,7 +1453,7 @@ install_bootloader() {
   uefi_bootloader() {
     #Ensure again that efivarfs is mounted
     [[ -z $(mount | grep /sys/firmware/efi/efivars) ]] && mount -t efivarfs efivarfs /sys/firmware/efi/efivars
-    DIALOG --title "$_InstUefiBtTitle" --menu "$_InstUefiBtBody" 0 0 2 \
+    DIALOG --title " $_InstUefiBtTitle " --menu "$_InstUefiBtBody" 0 0 2 \
     "grub" "-" \
     "systemd-boot" "/boot" 2>${PACKAGES}
     if [[ $(cat ${PACKAGES}) != "" ]]; then
@@ -1477,17 +1465,17 @@ install_bootloader() {
         DIALOG --title " Grub-install " --infobox "$_PlsWaitBody" 0 0
         arch_chroot "grub-install --target=x86_64-efi --efi-directory=${UEFI_MOUNT} --bootloader-id=arch_grub --recheck" 2>/tmp/.errlog
         # If encryption used amend grub
-        [[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=\"\"~GRUB_CMDLINE_LINUX=\"cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME\"~g" ${MOUNTPOINT}/etc/default/grub
+        [[ $LUKS_DEV != "" ]] && sed -i "s~GRUB_CMDLINE_LINUX=.*~GRUB_CMDLINE_LINUX=\"$LUKS_DEV\"~g" ${MOUNTPOINT}/etc/default/grub
         # Generate config file
         arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
         check_for_error
         # Ask if user wishes to set Grub as the default bootloader and act accordingly
-        DIALOG --title "$_InstUefiBtTitle" --yesno "$_SetBootDefBody ${UEFI_MOUNT}/EFI/boot $_SetBootDefBody2" 0 0
+        DIALOG --title " $_InstUefiBtTitle " --yesno "$_SetBootDefBody ${UEFI_MOUNT}/EFI/boot $_SetBootDefBody2" 0 0
         if [[ $? -eq 0 ]]; then
           arch_chroot "mkdir ${UEFI_MOUNT}/EFI/boot" 2>/tmp/.errlog
           arch_chroot "cp -r ${UEFI_MOUNT}/EFI/arch_grub/grubx64.efi ${UEFI_MOUNT}/EFI/boot/bootx64.efi" 2>>/tmp/.errlog
           check_for_error
-          DIALOG --title "$_InstUefiBtTitle" --infobox "\nGrub $_SetDefDoneBody" 0 0
+          DIALOG --title " $_InstUefiBtTitle " --infobox "\nGrub $_SetDefDoneBody" 0 0
           sleep 2
         fi
         ;;
@@ -1507,7 +1495,7 @@ install_bootloader() {
         # Finally, amend kernel conf files for LUKS and BTRFS
         sysdconf=$(ls ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch*.conf)
         for i in ${sysdconf}; do
-          [[ $LUKS_ROOT_DEV != "" ]] && sed -i "s~options~options cryptdevice=$LUKS_ROOT_DEV:$LUKS_ROOT_NAME~g" ${i}
+          [[ $LUKS_DEV != "" ]] && sed -i "s~rw~$LUKS_DEV rw~g" ${i}
           [[ $BTRFS_MNT != "" ]] && sed -i "s/rw/rw $BTRFS_MNT/g" ${i}
         done
         ;;
@@ -1556,7 +1544,6 @@ install_network_menu() {
       PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
     fi
-    install_network_menu
   }
 
   install_cups(){
@@ -1575,12 +1562,11 @@ install_network_menu() {
         if [[ $? -eq 0 ]]; then
           arch_chroot "systemctl enable org.cups.cupsd.service" 2>/tmp/.errlog
           check_for_error
-          DIALOG --infobox "$_Done!" 0 0
+          DIALOG --title " $_InstNMMenuCups " --infobox "\n$_Done!\n\n" 0 0
           sleep 2
         fi
       fi
     fi
-    install_network_menu
   }
 
   if [[ $SUB_MENU != "install_network_packages" ]]; then
@@ -1602,9 +1588,9 @@ install_network_menu() {
     # Identify the Wireless Device
     lspci -k | grep -i -A 2 "network controller" > /tmp/.wireless
     if [[ $(cat /tmp/.wireless) != "" ]]; then
-      DIALOG --title "$_WirelessShowTitle" --textbox /tmp/.wireless 0 0
+      DIALOG --title " $_WirelessShowTitle " --textbox /tmp/.wireless 0 0
     else
-      DIALOG --title "$_WirelessShowTitle" --msgbox "$_WirelessErrBody" 7 30
+      DIALOG --title " $_WirelessShowTitle " --msgbox "$_WirelessErrBody" 7 30
     fi
     ;;
     "2")
@@ -1620,12 +1606,13 @@ install_network_menu() {
     main_menu_online
     ;;
   esac
+  install_network_menu
 }
 
 # Install xorg and input drivers. Also copy the xkbmap configuration file created earlier to the installed system
 install_xorg_input() {
   echo "" > ${PACKAGES}
-  DIALOG --title "$_InstGrMenuDS" --checklist "$_InstGrMenuDSBody\n\n$_UseSpaceBar" 0 0 11 \
+  DIALOG --title " $_InstGrMenuDS " --checklist "$_InstGrMenuDSBody\n\n$_UseSpaceBar" 0 0 11 \
   "wayland" "-" off \
   "xorg-server" "-" on \
   "xorg-server-common" "-" off \
@@ -1637,6 +1624,7 @@ install_xorg_input() {
   "xf86-input-keyboard" "-" on \
   "xf86-input-mouse" "-" on \
   "xf86-input-synaptics" "-" on 2>${PACKAGES}
+  clear
   # If at least one package, install.
   if [[ $(cat ${PACKAGES}) != "" ]]; then
     PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
@@ -1716,7 +1704,7 @@ setup_graphics_card() {
   else
     HIGHLIGHT_SUB_GC=10
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB_GC} --title "$_GCtitle" \
+  DIALOG --default-item ${HIGHLIGHT_SUB_GC} --title " $_GCtitle " \
   --menu "$GRAPHIC_CARD\n" 0 0 10 \
   "1" $"xf86-video-ati" \
   "2" $"xf86-video-intel" \
@@ -1785,7 +1773,7 @@ setup_graphics_card() {
     # Set VB modules to install depending on installed kernel(s)
     ([[ -e ${MOUNTPOINT}/boot/initramfs-linux.img ]] || [[ -e ${MOUNTPOINT}/boot/initramfs-linux-grsec.img ]] || [[ -e ${MOUNTPOINT}/boot/initramfs-linux-zen.img ]]) && VB_MOD="virtualbox-guest-modules"
     [[ -e ${MOUNTPOINT}/boot/initramfs-linux-lts.img ]] && VB_MOD="$VB_MOD virtualbox-guest-modules-lts"
-    DIALOG --title "$_VBoxInstTitle" --msgbox "$_VBoxInstBody" 0 0
+    DIALOG --title " $_VBoxInstTitle " --msgbox "$_VBoxInstBody" 0 0
     clear
     PACSTRAP virtualbox-guest-utils ${VB_MOD} 2>/tmp/.errlog
     # Load modules and enable vboxservice.
@@ -1821,7 +1809,7 @@ setup_graphics_card() {
   fi
   # Where NVIDIA has been installed allow user to check and amend the file
   if [[ $NVIDIA_INST == 1 ]]; then
-    DIALOG --title "$_NvidiaConfTitle" --msgbox "$_NvidiaConfBody" 0 0
+    DIALOG --title " $_NvidiaConfTitle " --msgbox "$_NvidiaConfBody" 0 0
     nano ${MOUNTPOINT}/etc/X11/xorg.conf.d/20-nvidia.conf
   fi
   install_graphics_menu
@@ -1830,11 +1818,11 @@ setup_graphics_card() {
 install_de_wm() {
   # Only show this information box once
   if [[ $SHOW_ONCE -eq 0 ]]; then
-    DIALOG --title "$_InstDETitle" --msgbox "$_DEInfoBody" 0 0
+    DIALOG --title " $_InstDETitle " --msgbox "$_DEInfoBody" 0 0
     SHOW_ONCE=1
   fi
   # DE/WM Menu
-  DIALOG --title "$_InstDETitle" --checklist "$_InstDEBody $_UseSpaceBar" 0 0 12 \
+  DIALOG --title " $_InstDETitle " --checklist "$_InstDEBody $_UseSpaceBar" 0 0 12 \
   "cinnamon" "-" off \
   "deepin" "-" off \
   "deepin-extra" "-" off \
@@ -1869,7 +1857,7 @@ install_de_wm() {
     # Clear the packages file for installation of "common" packages
     echo "" > ${PACKAGES}
     # Offer to install various "common" packages.
-    DIALOG --title "$_InstComTitle" --checklist "$_InstComBody $_UseSpaceBar" 0 50 14 \
+    DIALOG --title " $_InstComTitle " --checklist "$_InstComBody $_UseSpaceBar" 0 50 14 \
     "bash-completion" "-" on \
     "gamin" "-" on \
     "gksu" "-" on \
@@ -1893,7 +1881,6 @@ install_de_wm() {
       check_for_error
     fi
   fi
-  install_graphics_menu
 }
 
 # Display Manager
@@ -1918,7 +1905,7 @@ install_dm() {
       [[ -e ${MOUNTPOINT}/usr/bin/${i} ]] && DM_INST="${DM_INST} ${i}"
       DM_LIST="${DM_LIST} ${i} -"
     done
-    DIALOG --title "$_DmChTitle" --menu "$_AlreadyInst$DM_INST\n\n$_DmChBody" 0 0 5 \
+    DIALOG --title " $_DmChTitle " --menu "$_AlreadyInst$DM_INST\n\n$_DmChBody" 0 0 4 \
     ${DM_LIST} 2>${PACKAGES}
     clear
     # If a selection has been made, act
@@ -1942,8 +1929,7 @@ install_dm() {
     fi
   fi
   # Show after successfully installing or where attempting to repeat when already completed.
-  [[ $DM_ENABLED -eq 1 ]] && DIALOG --title "$_DmChTitle" --msgbox "$_DmDoneBody" 0 0
-  install_graphics_menu
+  [[ $DM_ENABLED -eq 1 ]] && DIALOG --title " $_DmChTitle " --msgbox "$_DmDoneBody" 0 0
 }
 
 # Network Manager
@@ -1973,7 +1959,7 @@ install_nm() {
     done
     # Remove netctl from selectable list as it is a PITA to configure via arch_chroot
     NM_LIST=$(echo $NM_LIST | sed "s/netctl CLI//")
-    DIALOG --title "$_InstNMTitle" --menu "$_AlreadyInst $NM_INST\n$_InstNMBody" 0 0 4 \
+    DIALOG --title " $_InstNMTitle " --menu "$_AlreadyInst $NM_INST\n$_InstNMBody" 0 0 4 \
     ${NM_LIST} 2> ${PACKAGES}
     clear
     # If a selection has been made, act
@@ -1994,8 +1980,7 @@ install_nm() {
     fi
   fi
   # Show after successfully installing or where attempting to repeat when already completed.
-  [[ $NM_ENABLED -eq 1 ]] && DIALOG --title "$_InstNMTitle" --msgbox "$_InstNMErrBody" 0 0
-  install_network_menu
+  [[ $NM_ENABLED -eq 1 ]] && DIALOG --title " $_InstNMTitle " --msgbox "$_InstNMErrBody" 0 0
 }
 
 install_multimedia_menu(){
@@ -2014,19 +1999,19 @@ install_multimedia_menu(){
     for i in ${pulse_extra}; do
       PULSE_EXTRA="${PULSE_EXTRA} ${i} - off"
     done
-    DIALOG --title "$_InstMulSnd" --checklist "$_InstMulSndBody\n\n$_UseSpaceBar" 0 0 14 \
+    DIALOG --title " $_InstMulSnd " --checklist "$_InstMulSndBody\n\n$_UseSpaceBar" 0 0 14 \
     $ALSA "pulseaudio" "-" off $PULSE_EXTRA \
     "paprefs" "pulseaudio GUI" off \
     "pavucontrol" "pulseaudio GUI" off \
     "ponymix" "pulseaudio CLI" off \
     "volumeicon" "ALSA GUI" off \
     "volwheel" "ASLA GUI" off 2>${PACKAGES}
+    clear
     # If at least one package, install.
     if [[ $(cat ${PACKAGES}) != "" ]]; then
       PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
     fi
-    install_multimedia_menu
   }
 
   install_codecs(){
@@ -2045,12 +2030,12 @@ install_multimedia_menu(){
       PACSTRAP $(cat ${PACKAGES}) 2>/tmp/.errlog
       check_for_error
     fi
-    install_multimedia_menu
   }
 
   install_cust_pkgs(){
     echo "" > ${PACKAGES}
     DIALOG --title " $_InstMulCust " --inputbox "$_InstMulCustBody" 0 0 "" 2>${PACKAGES} || install_multimedia_menu
+    clear
     # If at least one package, install.
     if [[ $(cat ${PACKAGES}) != "" ]]; then
       if [[ $(cat ${PACKAGES}) == "hen poem" ]]; then
@@ -2060,7 +2045,6 @@ install_multimedia_menu(){
         check_for_error
       fi
     fi
-    install_multimedia_menu
   }
 
   if [[ $SUB_MENU != "install_multimedia_menu" ]]; then
@@ -2071,7 +2055,8 @@ install_multimedia_menu(){
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstMultMenuTitle" --menu "$_InstMultMenuBody" 0 0 5 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_InstMultMenuTitle " \
+  --menu "$_InstMultMenuBody" 0 0 5 \
   "1" "$_InstMulSnd" \
   "2" "$_InstMulCodec" \
   "3" "$_InstMulAcc" \
@@ -2095,6 +2080,7 @@ install_multimedia_menu(){
     main_menu_online
     ;;
   esac
+  install_multimedia_menu
 }
 
 security_menu(){
@@ -2197,7 +2183,7 @@ security_menu(){
 
 # Greet the user when first starting the installer
 greeting() {
-  DIALOG --title "$_WelTitle $VERSION " --msgbox "$_WelBody" 0 0
+  DIALOG --title " $_WelTitle $VERSION " --msgbox "$_WelBody" 0 0
 }
 
 # Preparation
@@ -2210,7 +2196,8 @@ prep_menu() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_PrepMenuTitle" --menu "$_PrepMenuBody" 0 0 7 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_PrepMenuTitle " \
+  --menu "$_PrepMenuBody" 0 0 7 \
   "1" "$_VCKeymapTitle" \
   "2" "$_DevShowOpt" \
   "3" "$_PrepPartDisk" \
@@ -2257,7 +2244,8 @@ install_base_menu() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_InstBsMenuTitle" --menu "$_InstBseMenuBody" 0 0 5 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_InstBsMenuTitle " \
+  --menu "$_InstBseMenuBody" 0 0 5 \
   "1"	"$_PrepMirror" \
   "2" "$_PrepPacKey" \
   "3" "$_InstBse" \
@@ -2300,7 +2288,8 @@ config_base_menu() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_ConfBseTitle" --menu "$_ConfBseBody" 0 0 8 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_ConfBseTitle " \
+  --menu "$_ConfBseBody" 0 0 8 \
   "1" "$_ConfBseFstab" \
   "2" "$_ConfBseHost" \
   "3" "$_ConfBseSysLoc" \
@@ -2349,7 +2338,8 @@ install_graphics_menu() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_InstGrMenuTitle " --menu "$_InstGrMenuBody" 0 0 6 \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_InstGrMenuTitle " \
+  --menu "$_InstGrMenuBody" 0 0 6 \
   "1" "$_InstGrMenuDS" \
   "2" "$_InstGrMenuDD" \
   "3" "$_InstGrMenuGE" \
@@ -2377,12 +2367,13 @@ install_graphics_menu() {
     main_menu_online
     ;;
   esac
+  install_graphics_menu
 }
 
 # Install Accessibility Applications
 install_acc_menu() {
   echo "" > ${PACKAGES}
-  DIALOG --title "$_InstAccTitle" --checklist "$_InstAccBody" 0 0 15 \
+  DIALOG --title "$_InstAccTitle" --checklist " $_InstAccBody " 0 0 15 \
   "accerciser" "-" off \
   "at-spi2-atk" "-" off \
   "at-spi2-core" "-" off \
@@ -2419,7 +2410,7 @@ edit_configs() {
       HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
     fi
   fi
-  DIALOG --default-item ${HIGHLIGHT_SUB} --title "$_SeeConfOptTitle" \
+  DIALOG --default-item ${HIGHLIGHT_SUB} --title " $_SeeConfOptTitle " \
   --menu "$_SeeConfOptBody" 0 0 11 \
   "1" "/etc/vconsole.conf" \
   "2" "/etc/locale.conf" \
@@ -2462,7 +2453,7 @@ edit_configs() {
     [[ -e ${MOUNTPOINT}/etc/default/grub ]] && FILE="${MOUNTPOINT}/etc/default/grub"
     [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]] && FILE="$FILE ${MOUNTPOINT}/boot/syslinux/syslinux.cfg"
     if [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf ]]; then
-      files=$(ls ${MOUNTPOINT}${UEFI_MOUNT}/loader/*.conf)
+      files=$(ls ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/*.conf)
       for i in ${files}; do
         FILE="$FILE ${i}"
       done
@@ -2478,7 +2469,7 @@ edit_configs() {
     ;;
   esac
   [[ $FILE != "" ]] && nano $FILE \
-  || DIALOG --title "$_SeeConfErrTitle" --msgbox "$_SeeConfErrBody1" 0 0
+  || DIALOG --title " $_Erritle " --msgbox "$_SeeConfErrBody1" 0 0
   edit_configs
 }
 
@@ -2486,7 +2477,7 @@ main_menu_online() {
   if [[ $HIGHLIGHT != 9 ]]; then
     HIGHLIGHT=$(( HIGHLIGHT + 1 ))
   fi
-  DIALOG --default-item ${HIGHLIGHT} --title "$_MMTitle" \
+  DIALOG --default-item ${HIGHLIGHT} --title " $_MMTitle " \
   --menu "$_MMBody" 0 0 9 \
   "1" "$_PrepMenuTitle" \
   "2" "$_InstBsMenuTitle" \
@@ -2552,7 +2543,6 @@ main_menu_online() {
 ################################################################################
 
 id_system
-DIALOG --title " Development Installer Warning " --msgbox "\nWARNING: This Development branch of the Architect installer is currently being re-coded. During this process functions may not work properly or even at all.\n\nPlease use the STABLE branch by closing the installer and rebooting, or by selecting the 'Virtual Console' option, and then entering /initialise at the command prompt to start again.\n\nOtherwise, proceed at your own risk.\n" 0 0
 select_language
 check_requirements
 greeting

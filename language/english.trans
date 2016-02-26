@@ -63,13 +63,13 @@ _SeeConfErrBody="\nFile does not exist.\n\n"
 _PrepPacKey="Refresh Pacman Keys"
 
 # LUKS / DM-Crypt / Encryption
-_PrepLUKS="Block Device Encryption (optional)"
-_LuksMenuBody="\nBlock devices encrypted using dm_crypt cannot be accessed or even seen without being unlocked via a key or password."
+_PrepLUKS="LUKS Encryption (optional)"
+_LuksMenuBody="\nDevices and volumes encrypted using dm_crypt cannot be accessed or even seen without being unlocked via a key or password."
 _LuksMenuBody2="\n\nA seperate boot partition without encryption or logical volume management (LVM - unless using BIOS Grub) is required."
-_LuksMenuBody3="\n\nThe Automatic option uses default encryption settings, and is recommended for beginners. Otherwise, it is possible to specify cipher and key size parameters manually."
+_LuksMenuBody3="\n\nThe Automatic option uses default encryption settings, and is recommended for beginners. Otherwise, it is possible to specify cypher and key size parameters manually."
 _LuksOpen="Open Encrypted Partition"
 _LuksOpenBody="\nSpecify a name for the encrypted block device. It is not necessary to prefix it with /dev/mapper/. An example has been provided."
-_LuksEncrypt="Automatic Encryption"
+_LuksEncrypt="Automatic LUKS Encryption"
 _LuksEncryptAdv="Define Key-Size and Cypher"
 _LuksEncryptBody="\nSelect a partition to encrypt."
 _LuksEncruptSucc="\nDone! Opened and ready for LVM (recommended) or direct mounting.\n"
@@ -77,7 +77,7 @@ _LuksPartErrBody="\nA minimum of two partitions are required for encryption:\n\n
 _SelLuksRootBody="\nSelect the ROOT (/) partition to encrypt. This is where Arch will be installed.\n\n"
 _LuksPassBody="\nEnter a password to un/encrypt the partition. This should not be the same as the Root account or user account passwords.\n"
 _LuksWaitBody="\nCreating encrypted Root partition:"
-_LuksWaitBody2="Block Device used:"
+_LuksWaitBody2="Device or volume used:"
 _LuksCipherKey="\nOnce the specified flags have been amended, they will automatically be used with the 'cryptsetup -q luksFormat /dev/...' command.\n\nNOTE: Key files are not supported; they can be added manually post-installation. Do not specify any additional flags such as -v (--verbose) or -y (--verify-passphrase).\n"
 
 # Logical Volume Management
@@ -114,29 +114,25 @@ _LvmVGErr="\nNo Volume Groups found.\n\n"
 _DevShowOpt="List Devices (optional)"
 
 # Check Requirements
-_ChkTitle=" Rechecking Requirements "
+_ChkTitle="Rechecking Requirements"
 _ChkBody="\nRechecking installer has been run as root and that there is an active internet connection. Please wait...\n\n"
-_RtFailTitle=" Root Failure "
 _RtFailBody="\nThe installer must be run as root. Exiting.\n\n"
-_ConFailTitle=" Connection Failure "
 _ConFailBody="\nInternet connection test failed. Exiting.\n\n"
-_ReqMetTitle=" Requirements Met "
+_ReqMetTitle="Requirements Met"
 _ReqMetBody="\nAll checks passed!\n\n"
 
 
 # Installer Mirrorlist
-_MirrorlistTitle=" Mirrorlist "
+_MirrorlistTitle="Mirrorlist"
 _MirrorlistBody="\nThe mirrorlist contains server addresses used by pacman to install packages.\n\nTo find the fastest servers, generate a mirrorlist by country before running RankMirrors, otherwise the process will take a long time.\n\nNOTE: Close text files with '[CTRL] + [x]'. If edited, then press [y] to save or [n] to discard changes.\n"
 _MirrorbyCountry="Generate list by Country"
 _MirrorEdit="Manually edit mirrorlist"
 _MirrorRankTitle="Run RankMirrors"
 _MirrorRestTitle="Restore original mirrorlist"
 _MirrorRankBody="\nFinding the fastest servers from the mirrorlist."
-_MirrorRestDone="\nThe original mirrorlist has been restored.\n\n"
 _MirrorNoneBody="\nA copy of the original mirrorlist was not found.\n\n"
 _MirrorCntryBody="\nA list of mirrors by the selected country will be generated.\n"
 _MirrorGenQ="Use generated mirrorlist for installer?"
-_MirrorGenDone="\nOriginal Mirrorlist has been saved as:\n\n/etc/pacman.d/mirrorlist.orig\n\n"
 
 # Set Keymap (vconsole)
 _VCKeymapTitle="Set Virtual Console"
@@ -207,7 +203,7 @@ _AutoPartWipeBody2="will be destroyed using the command 'wipe -Ifre'. This proce
 _PartErrBody="\nBIOS systems require a minmum of one partition (ROOT).\n\nUEFI systems require a minimum of two partitions (ROOT and UEFI).\n\n"
 
 # File System
-_FSTitle=" Choose Filesystem "
+_FSTitle="Choose Filesystem"
 _FSBody="\nExt4 is recommended. Not all filesystems are viable for Root or Boot partitions. All have different features and limitations."
 _FSSkip="Skip / None"
 
@@ -226,7 +222,7 @@ _SelUefiBody="\nSelect UEFI Partition. This is a special partition for booting U
 _FormUefiBody="The UEFI partition"
 _FormUefiBody2="has already been formatted.\n\nReformat? Doing so will erase ALL data already on that partition.\n\n"
 
-# UEFI Mountpoint - Translate
+# UEFI Mountpoint
 _MntUefiBody="\nSelect UEFI Mountpoint.\n\nsystemd-boot requires /boot. Grub will work with either mountpoint."
 
 # Extra Partitions
@@ -239,8 +235,8 @@ _ExtPartBody1="\nSpecify partition mountpoint. Ensure the name begins with a for
 _ExtErrBody="\nPartition cannot be mounted due to a problem with the mountpoint name. A name must be given after a forward slash.\n\n"
 
 # Install Base
-_InstBseTitle=" Install Base "
-_InstBseBody="\nTwo installation methods are available:\n\nStandard: Recommended for beginners. Choose up to two kernels (latest and Long Term Support) and optionally the base-devel package group. The sudo, btrfs-progs, and f2fs-tools packages will also be installed.\n\nAdvanced: Choose up to four kernels (latest, lts, grsec, and zen) and control individual packages from the base and base-devel package groups. Additional configuration for the grsec and zen kernels may be required for Virtualbox and NVIDIA.\n\nNOTE: It will be necessary to select at least one kernel for installation, unless a kernel has already been installed."
+_InstBseTitle="Install Base"
+_InstBseBody="\nStandard: Recommended for beginners. Choose up to two kernels (linux and linux-lts) and optionally the base-devel package group. sudo, btrfs-progs, f2fs-tools will also be installed.\n\nAdvanced: Choose up to four kernels (linux, lts, grsec, zen) and control individual base and base-devel packages. Additional configuration for grsec and zen may be required for Virtualbox and NVIDIA.\n\nNOTE: Unless already installed, at least one kernel must be selected."
 _InstStandBseBody="\nThe base package group will be installed automatically. The base-devel package group is required to use the Arch User Repository (AUR).\n\n"
 _InstStandBase="Standard Installation"
 _InstAdvBase="Advanced Installation"
@@ -248,13 +244,13 @@ _InstAdvBseBody="\nWARNING: This is for experienced users only. Newer users shou
 _InstAdvWait="\nGathering package descriptions."
 
 # Install BIOS Bootloader
-_InstBiosBtTitle=" Install BIOS Bootloader "
+_InstBiosBtTitle="Install BIOS Bootloader"
 _InstBiosBtBody="\nGrub2 is recommended for beginners. The installation device can also be selected.\n\nSyslinux is a lighter and simpler alternative that will only work with ext/btrfs filesystems."
-_InstSysTitle=" Install Syslinux "
+_InstSysTitle="Install Syslinux"
 _InstSysBody="\nInstall syslinux to Master Boot Record (MBR) or to Root (/)?\n\n"
 
 # Install UEFI Bootloader
-_InstUefiBtTitle=" Install UEFI Bootloader "
+_InstUefiBtTitle="Install UEFI Bootloader"
 _InstUefiBtBody="\nsystemd-boot requires /boot. Grub will work with either mountpoint."
 _SetBootDefBody="\nSome UEFI firmware may not detect the bootloader unless it is set as default by copying its efi stub to"
 _SetBootDefBody2="and renaming it to bootx64.efi.\n\nIt is recommended to do so unless already using a default bootloader, or where intending to use multiple bootloaders.\n\nSet bootloader as default?\n\n"
@@ -263,32 +259,32 @@ _SetBootDefBody2="and renaming it to bootx64.efi.\n\nIt is recommended to do so 
 _SetDefDoneBody="has been set as the default bootloader.\n\n"
 
 # Graphics Card Menu
-_GCtitle=" Graphics Card Menu "
+_GCtitle="Graphics Card Menu"
 _GCBody="Pick Nouveau for older NVIDIA cards. If your card is not listed, pick 'Unknown / Generic'.\n"
 _GCUnknOpt="Unknown / Generic"
 
 # NVIDIA Configruation Check
-_NvidiaConfTitle=" NVIDIA Configuration Check "
+_NvidiaConfTitle="NVIDIA Configuration Check"
 _NvidiaConfBody="\nA basic NVIDIA configuration file has been created. Please check it before closing to continue.\n"
 
 #  Install DE Info
 _DEInfoBody="\nMultiple environments can be installed.\n\nGnome and LXDE come with a display manager.\n\nCinnamon, Gnome and KDE come with a Network Manager.\n\n"
 
 # Install DE Menu
-_InstDETitle=" Install Desktop Environments "
+_InstDETitle="Install Desktop Environments"
 _InstDEBody="Desktop Environments and their related package groups are listed first."
 
 # Install Common Packages
-_InstComTitle=" Install Common Packages? "
+_InstComTitle="Install Common Packages"
 _InstComBody="Some environments require additional packages to function better."
 
 # Display Manager
-_DmChTitle=" Install Display Manager "
+_DmChTitle="Install Display Manager"
 _DmChBody="gdm lists Gnome-shell as a dependency. sddm is recommended for plasma. lightdm will incude lightdm-gtk-greeter. slim is no longer maintained."
 _DmDoneBody="\nDisplay manager has been installed and enabled.\n\n"
 
 # Network Manager
-_InstNMTitle=" Install Network Manager "
+_InstNMTitle="Install Network Manager"
 _InstNMBody="\nNetwork Manager is recommended, especially for wireless and PPPoE/DSL connections.\n"
 _InstNMErrBody="\nNetwork connection manager has been installed and enabled.\n\n"
 
@@ -313,7 +309,7 @@ _InstBrowserTitle=" Choose a browser "
 _InstBrowserBody="\nChoose a browser to install."
 
 # Welcome
-_WelTitle=" Welcome to"
+_WelTitle="Welcome to"
 _WelBody="\nThis installer will download the latest packages from the Arch repositories. Only the minimal necessary configuration is undertaken.\n\nMENU OPTIONS: Select by pressing the option number or by using the up/down arrow keys before pressing [enter] to confirm. Switch between buttons by using [Tab] or the left/right arrow keys before pressing [enter] to confirm. Long lists can be navigated using the [pg up] and [pg down] keys, and/or by pressing the first letter of the desired option.\n\nCONFIGURATION & PACKAGE OPTIONS: Default packages in checklists will be pre-checked. Use the [Spacebar] to de/select."
 
 # Preparation Menu
@@ -368,14 +364,14 @@ _InstNMMenuNM="Install Network Connection Manager"
 _InstNMMenuCups="Install CUPS / Printer Packages"
 _InstNMMenuPkgBody="Key wifi packages will be pre-checked if a wireless device was detected. If unsure about additional firmware, all packages can be installed."
 _SeeWirelessDev="Display Wireless Device (optional)"
-_WirelessShowTitle=" Wireless Device "
+_WirelessShowTitle="Wireless Device"
 _WirelessErrBody="\nNone Detected.\n"
 _InstCupsBody="CUPS (Common Unix Printing System) is the standards-based, open source printing system developed by Apple Inc. for OS X and other UNIX-like operating systems. Samba allows file and printer sharing between Linux and Windows systems."
 _InstCupsQ="\nEnable org.cups.cupsd.service on installed system?\n\n"
 
 # Install Multimedia Support Menu
 _InstMultMenuTitle="Install Multimedia Support"
-_InstMultMenuBody="la la la"
+_InstMultMenuBody="\nAccessibility packages aid those with sight and/or hearing impairments. The Custom Packages option allows for user-defined packages to be installed.\n"
 _InstMulSnd="Install Sound Driver(s)"
 _InstMulSndBody="\nALSA provides kernel driven sound card drivers. PulseAudio serves as a proxy to ALSA."
 _InstMulCodec="Install Codecs"
