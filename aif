@@ -74,6 +74,7 @@ VG_SIZE_TYPE=""         			# Is VG in Gigabytes or Megabytes?
 LUKS=0                  			# Luks Detected?
 LUKS_DEV=""							# If encrypted, partition
 LUKS_NAME=""						# Name given to encrypted partition
+LUKS_UUID=""						# UUID used for comparison purposes
 LUKS_OPT=""							# Default or user-defined?
 
 MOUNTPOINT="/mnt"       			# Installation: Root mount
@@ -931,8 +932,14 @@ mount_current_partition(){
 		cryptparts=$(lsblk -lno NAME,FSTYPE,TYPE | grep "part" | grep -i "crypto_luks" | uniq | awk '{print "/dev/"$1}')
 		for i in ${cryptparts}; do
 			if [[ $(lsblk -lno NAME ${i} | grep $LUKS_NAME) != "" ]]; then
-				LUKS_DEV="$LUKS_DEV cryptdevice=UUID="$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')":$LUKS_NAME"
-				LUKS=1
+				LUKS_UUID=$(lsblk -lno UUID,TYPE ${i} | grep "part" | awk '{print $1}')
+				
+				# Check if not already added (LVM on LUKS). If not, add.
+				if [[ $(echo $LUKS_DEV | grep $LUKS_UUID) == "" ]]; then
+					LUKS_DEV="$LUKS_DEV cryptdevice=UUID=$LUKS_UUID:$LUKS_NAME"
+					LUKS=1
+				fi
+				
 				break;
 			fi
 		done
@@ -963,6 +970,7 @@ mount_current_partition(){
 	MOUNT=""
 	LUKS_NAME=""
 	LUKS_DEV=""
+	LUKS_UUID=""
 	LUKS=0
 	LVM=0
 	
