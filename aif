@@ -310,17 +310,7 @@ mirror_by_country() {
 }
 
 
-
-	if [[ $SUB_MENU != "mirror_menu" ]]; then
-	   SUB_MENU="mirror_menu"
-	   HIGHLIGHT_SUB=1
-	else
-	   if [[ $HIGHLIGHT_SUB != 5 ]]; then
-	      HIGHLIGHT_SUB=$(( HIGHLIGHT_SUB + 1 ))
-	   fi
-	fi
-
-dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_MirrorlistTitle " \
+dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_MirrorlistTitle " \
     --menu "$_MirrorlistBody" 0 0 5 \
 	"1" "$_MirrorbyCountry" \
 	"2" "$_MirrorRankTitle" \
