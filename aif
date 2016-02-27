@@ -1963,17 +1963,18 @@ install_intel(){
 		sleep 1
 		arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg" 2>>/tmp/.errlog
 	fi
-			   
-	if [[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]]; then
-		sed -i 's/..\/initramfs-linux.img/..\/intel-ucode.img,..\/initramfs-linux.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-		sed -i 's/..\/initramfs-linux-lts.img/..\/intel-ucode.img,..\/initramfs-linux-lts.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-		sed -i 's/..\/initramfs-linux-fallback.img/..\/intel-ucode.img,..\/initramfs-linux-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-		sed -i 's/..\/initramfs-linux-lts-fallback.img/..\/intel-ucode.img,..\/initramfs-linux-lts-fallback.img/g' ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
-	fi
-			   
-	[[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf ]] && sed -i '/linux \//a initrd \/intel-ucode.img' ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch.conf
-	[[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf ]] && sed -i '/linux \//a initrd \/intel-ucode.img' ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/arch-lts.conf
 
+	# Syslinux
+	[[ -e ${MOUNTPOINT}/boot/syslinux/syslinux.cfg ]] && sed -i "s/INITRD /&..\/intel-ucode.img,/g" ${MOUNTPOINT}/boot/syslinux/syslinux.cfg
+		
+	# Systemd-boot
+	if [[ -e ${MOUNTPOINT}${UEFI_MOUNT}/loader/loader.conf ]]; then
+			update=$(ls ${MOUNTPOINT}${UEFI_MOUNT}/loader/entries/*.conf)
+			for i in ${upgate}; do
+				sed -i '/linux \//a initrd \/intel-ucode.img' ${i}
+			done
+	fi
+			 
 }
 
 # Save repetition
