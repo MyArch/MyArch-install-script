@@ -1157,7 +1157,19 @@ luks_open(){
 	LUKS_ROOT_NAME=""
 	INCLUDE_PART='part\|crypt\|lvm'
     umount_partitions
-	find_partitions
+    
+    # Seperate partition list
+	PARTITIONS=""
+	NUMBER_PARTITIONS=0
+	partition_list=$(lsblk -lno NAME,SIZE,FSTYPE,TYPE | grep 'part\|crypt\|lvm' | sed 's/part$/\/dev\//g' | sed 's/lvm$\|crypt$/\/dev\/mapper\//g' | awk '{print $4$1 " " $2}' | sort -u)
+
+    for i in ${partition_list}; do
+        PARTITIONS="${PARTITIONS} ${i}"
+        NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
+    done
+    
+    # Double-partitions will be counted due to counting sizes, so fix    
+    NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS / 2 ))
 	
 	# Select encrypted partition to open 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "$_LuksMenuBody" 0 0 7 ${PARTITIONS} 2>${ANSWER} || luks_menu
