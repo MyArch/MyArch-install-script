@@ -49,6 +49,8 @@ BTRFS_MNT=""                		# used for syslinux where /mnt is a btrfs subvolum
 F2FS=0								# F2FS used? "1" = yes.
 INCLUDE_PART='part\|lvm\|crypt'		# Partition types to include for display and selection.
 COPY_PACCONF=0						# Copy over installer /etc/pacman.conf to installed system?
+FIND=0								# Hide / Show lvm2_member and crypto_luks FSSTYPE
+
 
 # Architecture
 ARCHI=`uname -m`     				# Display whether 32 or 64 bit system
@@ -633,7 +635,13 @@ find_partitions() {
 
 	PARTITIONS=""
 	NUMBER_PARTITIONS=0
-	partition_list=$(lsblk -lno NAME,SIZE,FSTYPE,TYPE  | grep -vi "crypto_luks\|lvm2_member" | grep $INCLUDE_PART | sed 's/part$/\/dev\//g' | sed 's/lvm$\|crypt$/\/dev\/mapper\//g' | awk '{print $4$1 " " $2}' | sort -u)
+	
+	# Hide crypto_luks and lvm2_member fstypes for mounting menu
+	if [[ $FIND -eq 0 ]]; then
+		partition_list=$(lsblk -lno NAME,SIZE,FSTYPE,TYPE  | grep -vi "crypto_luks\|lvm2_member" | grep $INCLUDE_PART | sed 's/part$/\/dev\//g' | sed 's/lvm$\|crypt$/\/dev\/mapper\//g' | awk '{print $4$1 " " $2}' | sort -u)
+	else
+		partition_list=$(lsblk -lno NAME,SIZE,TYPE | grep $INCLUDE_PART | sed 's/part$/\/dev\//g' | sed 's/lvm$\|crypt$/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
+	fi
 
     for i in ${partition_list}; do
         PARTITIONS="${PARTITIONS} ${i}"
@@ -1001,6 +1009,7 @@ mount_current_partition(){
 	LUKS_UUID=""
 	LUKS=0
 	LVM=0
+	FIND=0
 	
 	
 	# Warn users that they CAN mount partitions without formatting them!
@@ -1156,20 +1165,9 @@ luks_open(){
 
 	LUKS_ROOT_NAME=""
 	INCLUDE_PART='part\|crypt\|lvm'
+	FIND=1
     umount_partitions
-    
-    # Seperate partition list
-	PARTITIONS=""
-	NUMBER_PARTITIONS=0
-	partition_list=$(lsblk -lno NAME,SIZE,FSTYPE,TYPE | grep 'part\|crypt\|lvm' | sed 's/part$/\/dev\//g' | sed 's/lvm$\|crypt$/\/dev\/mapper\//g' | awk '{print $4$1 " " $2}' | sort -u)
-
-    for i in ${partition_list}; do
-        PARTITIONS="${PARTITIONS} ${i}"
-        NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS + 1 ))
-    done
-    
-    # Double-partitions will be counted due to counting sizes, so fix    
-    NUMBER_PARTITIONS=$(( NUMBER_PARTITIONS / 2 ))
+    find_partitions
 	
 	# Select encrypted partition to open 
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_LuksOpen " --menu "$_LuksMenuBody" 0 0 7 ${PARTITIONS} 2>${ANSWER} || luks_menu
@@ -1390,6 +1388,8 @@ check_lv_size() {
 
 	# Find LVM appropriate partitions.
 	INCLUDE_PART='part\|crypt'
+	FIND=1
+	umount_partitions
 	find_partitions
     # Amend partition(s) found for use in check list
     PARTITIONS=$(echo $PARTITIONS | sed 's/M\|G\|T/& off/g')
