@@ -633,7 +633,7 @@ find_partitions() {
 
 	PARTITIONS=""
 	NUMBER_PARTITIONS=0
-	partition_list=$(lsblk -lno NAME,SIZE,TYPE,FSTYPE  | grep -vi "crypto_luks\|lvm2_member" | grep $INCLUDE_PART | sed 's/part$/\/dev\//g' | sed 's/lvm$\|crypt$/\/dev\/mapper\//g' | awk '{print $3$1 " " $2}' | sort -u)
+	partition_list=$(lsblk -lno NAME,SIZE,FSTYPE,TYPE  | grep -vi "crypto_luks\|lvm2_member" | grep $INCLUDE_PART | sed 's/part$/\/dev\//g' | sed 's/lvm$\|crypt$/\/dev\/mapper\//g' | awk '{print $4$1 " " $2}' | sort -u)
 
     for i in ${partition_list}; do
         PARTITIONS="${PARTITIONS} ${i}"
