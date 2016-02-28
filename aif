@@ -1599,8 +1599,8 @@ install_base() {
 		# Add btrfs and f2fs packages to list and check if used
 		BTRF_CHECK=$(echo "btrfs-progs" $(pacman -Si btrfs-progs | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off)
 		F2FS_CHECK=$(echo "f2fs-tools" $(pacman -Si f2fs-tools | grep -i description | sed s/.*://g | sed "s/^ //" | sed "s/ /_/g") off)
-		[[ $BTRFS -eq 1 ]] && BTRF_CHECK=$(echo $BTRFS_CHECK | sed "s/ off/ on/g")
-		[[ $F2FS -eq 1 ]] && F2FS_CHECK=$(echo $F2FS_CHECK | sed "s/ off/ on/g")
+		[[ $(lsblk -lno FSTYPE | grep btrfs) != "" ]] && BTRF_CHECK=$(echo $BTRFS_CHECK | sed "s/ off/ on/g")
+		[[ $(lsblk -lno FSTYPE | grep f2fs) != "" ]] && F2FS_CHECK=$(echo $F2FS_CHECK | sed "s/ off/ on/g")
 
 		# Gather package descriptions for base group
 		for i in ${pkg_list}; do
