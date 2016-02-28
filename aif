@@ -834,9 +834,9 @@ btrfs_subvols() {
 	# Get any mount options and mount
 	btrfs_mount_opts
 	if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-		mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+		[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	else
-		mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+		[[ ${MOUNT} == "" ]] && mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	fi
  
 	# Check for error and confirm successful mount
