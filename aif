@@ -844,7 +844,7 @@ btrfs_subvols() {
 	[[ ${MOUNT} == "" ]] && confirm_mount_btrfs ${MOUNTPOINT} || confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
  
 	# Now change dir and create the subvolumes   
-	[[ ${MOUNT} == "" ]] &&  cd ${MOUNTPOINT} 2>/tmp/.errlog || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	[[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} 2>/tmp/.errlog || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	check_for_error
  
 	# Loop while the termination character has not been entered
@@ -923,12 +923,10 @@ mount_current_partition(){
 		[[ ${MOUNT} == "" ]] && mount ${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog || mount ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
 	fi
 	
-	# If BTRFS subvolume option, act on mounted partition
-	[[ $BTRFS -eq 2 ]] && btrfs_subvols
-	
-	# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
 	check_for_error
 	[[ ${MOUNT} == "" ]] && confirm_mount ${MOUNTPOINT} || confirm_mount ${MOUNTPOINT}${MOUNT}
+	# If BTRFS subvolume option, act on mounted partition
+	[[ $BTRFS -eq 2 ]] && btrfs_subvols
 
 	# Identify if mounted partition is type "crypt" (LUKS on LVM, or LUKS alone)
 	if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]]; then
