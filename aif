@@ -825,7 +825,7 @@ btrfs_subvols() {
 	[[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
 	
 	# change dir
-	[[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} 2>/tmp/.errlog || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	btrfs subvolume create ${BTRFS_MSUB_VOL} 2>>/tmp/.errlog
 	cd
 	umount ${PARTITION} 2>>/tmp/.errlog
@@ -834,17 +834,17 @@ btrfs_subvols() {
 	# Get any mount options and mount
 	btrfs_mount_opts
 	if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-		[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+		mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	else
-		[[ ${MOUNT} == "" ]] && mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT} 2>/tmp/.errlog || mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+		mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	fi
  
 	# Check for error and confirm successful mount
 	check_for_error  
-	[[ ${MOUNT} == "" ]] && confirm_mount_btrfs ${MOUNTPOINT} || confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
+	confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
  
 	# Now change dir and create the subvolumes   
-	[[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} 2>/tmp/.errlog || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	check_for_error
  
 	# Loop while the termination character has not been entered
@@ -911,20 +911,21 @@ btrfs_mount_opts() {
 mount_current_partition(){
 	
 	# Make the mount directory
-	[[ ${MOUNT} == "" ]] && mkdir -p ${MOUNTPOINT} 2>/tmp/.errlog || mkdir -p ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	mkdir -p ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	
 	# If btrfs without subvolumes has been selected, get subvolume opts
     [[ $BTRFS -eq 1 ]] && btrfs_mount_opts
 		
 	# If BTRFS with options (not subvols), else standard mount
 	if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-		[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+		mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
 	else
-		[[ ${MOUNT} == "" ]] && mount ${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog || mount ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+		mount ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
 	fi
 	
 	check_for_error
-	[[ ${MOUNT} == "" ]] && confirm_mount ${MOUNTPOINT} || confirm_mount ${MOUNTPOINT}${MOUNT}
+	confirm_mount ${MOUNTPOINT}${MOUNT}
+	
 	# If BTRFS subvolume option, act on mounted partition
 	[[ $BTRFS -eq 2 ]] && btrfs_subvols
 
