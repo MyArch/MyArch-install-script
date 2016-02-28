@@ -342,6 +342,7 @@ dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_MirrorlistTitle " \
              ;;
          "5") nano /etc/pacman.conf
 			  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_MirrorPacman " --yesno "$_MIrrorPacQ" 0 0 && COPY_PACCONF=1 || COPY_PACCONF=0
+			  pacman -Syy
 			;;
 		*) install_base_menu
              ;;
