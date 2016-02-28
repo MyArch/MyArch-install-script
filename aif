@@ -825,7 +825,7 @@ btrfs_subvols() {
 	[[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
 	
 	# change dir
-	cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	[[ ${MOUNT} == "" ]] && cd ${MOUNTPOINT} 2>/tmp/.errlog || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	btrfs subvolume create ${BTRFS_MSUB_VOL} 2>>/tmp/.errlog
 	cd
 	umount ${PARTITION} 2>>/tmp/.errlog
@@ -841,10 +841,10 @@ btrfs_subvols() {
  
 	# Check for error and confirm successful mount
 	check_for_error  
-	confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
+	[[ ${MOUNT} == "" ]] && confirm_mount_btrfs ${MOUNTPOINT} || confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
  
 	# Now change dir and create the subvolumes   
-	cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	[[ ${MOUNT} == "" ]] &&  cd ${MOUNTPOINT} 2>/tmp/.errlog || cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	check_for_error
  
 	# Loop while the termination character has not been entered
@@ -859,7 +859,6 @@ btrfs_subvols() {
 		done
  
 		btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog
-		#chmod 750 /${BTRFS_OSUB_VOL}
 		check_for_error
 		BTRFS_OSUB_NUM=$(( BTRFS_OSUB_NUM + 1 ))
 		echo $BTRFS_OSUB_VOL" " >> ${BTRFS_VOL_LIST}
@@ -912,23 +911,25 @@ btrfs_mount_opts() {
 mount_current_partition(){
 	
 	# Make the mount directory
-	mkdir -p ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	[[ ${MOUNT} == "" ]] && mkdir -p ${MOUNTPOINT} 2>/tmp/.errlog || mkdir -p ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	
-	# If btrfs without subvolumes has been selected
+	# If btrfs without subvolumes has been selected, get subvolume opts
     [[ $BTRFS -eq 1 ]] && btrfs_mount_opts
 		
-	# If btrfs & btrfs mount options. Otherwise, standard mount
+	# If BTRFS with options (not subvols), else standard mount
 	if [[ $BTRFS -eq 1 ]] && [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-		mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+		[[ ${MOUNT} == "" ]] && mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog || mount -o $(cat ${BTRFS_OPTS}) ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
 	else
-		mount ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
+		[[ ${MOUNT} == "" ]] && mount ${PARTITION} ${MOUNTPOINT} 2>>/tmp/.errlog || mount ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>>/tmp/.errlog
 	fi
+	
+	# If BTRFS subvolume option, act on mounted partition
+	[[ $BTRFS -eq 2 ]] && btrfs_subvols
 	
 	# Check for error, confirm mount, and deal with BTRFS with subvolumes if applicable  
 	check_for_error
-	confirm_mount ${MOUNTPOINT}${MOUNT}
-	# Deal with lvm and luks
-	
+	[[ ${MOUNT} == "" ]] && confirm_mount ${MOUNTPOINT} || confirm_mount ${MOUNTPOINT}${MOUNT}
+
 	# Identify if mounted partition is type "crypt" (LUKS on LVM, or LUKS alone)
 	if [[ $(lsblk -lno TYPE ${PARTITION} | grep "crypt") != "" ]]; then
 
@@ -987,8 +988,6 @@ mount_current_partition(){
 		done
 	fi
 
-	# Deal with btrfs
-	[[ $BTRFS -eq 2 ]] && btrfs_subvols
 	
 }
 	####								####
@@ -1002,6 +1001,7 @@ mount_current_partition(){
 	LUKS_UUID=""
 	LUKS=0
 	LVM=0
+	BTRFS=0
 	
 	# Warn users that they CAN mount partitions without formatting them!
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_PrepMntPart " --msgbox "$_WarnMount1 '$_FSSkip' $_WarnMount2" 0 0
