@@ -813,63 +813,69 @@ btrfs_subvols() {
  
  # Name initial subvolume from which other (optional) subvolumes may branch from
  dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_btrfsSVTitle " --inputbox "$_btrfsMSubBody1 ${MOUNTPOINT}${MOUNT} $_btrfsMSubBody2" 0 0 "" 2>${ANSWER} || select_filesystem
- BTRFS_MSUB_VOL=$(cat ${ANSWER})
- # if root, then create boot flag for syslinux, systemd-boot and rEFInd bootloaders	
- [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
 
- # Loop while subvolume is blank or has spaces.
- while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
+ #If something entered
+ if [[ $(cat ${ANSWER}) != "" ]]; then
+	BTRFS_MSUB_VOL=$(cat ${ANSWER})
+	# if root, then create boot flag for syslinux, systemd-boot and rEFInd bootloaders	
+	[[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
+
+	# Loop while subvolume is blank or has spaces.
+	while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ErrTitle " --inputbox "$_btrfsSVErrBody" 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_MSUB_VOL=$(cat ${ANSWER})
        # if root, then create flag for syslinux, systemd-boot and rEFInd bootloaders
        [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
- done
+	done
  
- # change dir
- cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
- btrfs subvolume create ${BTRFS_MSUB_VOL} 2>>/tmp/.errlog
- cd
- umount ${PARTITION} 2>>/tmp/.errlog
- check_for_error
+	# change dir
+	cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	btrfs subvolume create ${BTRFS_MSUB_VOL} 2>>/tmp/.errlog
+	cd
+	umount ${PARTITION} 2>>/tmp/.errlog
+	check_for_error
  
- # Get any mount options and mount
- btrfs_mount_opts
- if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
-	mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
- else
-    mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
- fi
+	# Get any mount options and mount
+	btrfs_mount_opts
+	if [[ $(cat ${BTRFS_OPTS}) != "" ]]; then
+		mount -o $(cat ${BTRFS_OPTS})",subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	else
+		mount -o "subvol="${BTRFS_MSUB_VOL} ${PARTITION} ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	fi
  
- # Check for error and confirm successful mount
- check_for_error  
- confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
+	# Check for error and confirm successful mount
+	check_for_error  
+	confirm_mount_btrfs ${MOUNTPOINT}${MOUNT}
  
- # Now change dir and create the subvolumes   
- cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
- check_for_error
+	# Now change dir and create the subvolumes   
+	cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
+	check_for_error
  
- # Loop while the termination character has not been entered
- while [[ $BTRFS_OSUB_VOL != "*" ]]; do
-	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_btrfsSVTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVBody1 $BTRFS_OSUB_NUM $_btrfsSVBody2 $BTRFS_MSUB_VOL.$_btrfsSVBody3 $(cat ${BTRFS_VOL_LIST})" 0 0 "" 2>${ANSWER} || select_filesystem
-	BTRFS_OSUB_VOL=$(cat ${ANSWER})	
+	# Loop while the termination character has not been entered
+	while [[ $BTRFS_OSUB_VOL != "*" ]]; do
+		dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_btrfsSVTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVBody1 $BTRFS_OSUB_NUM $_btrfsSVBody2 $BTRFS_MSUB_VOL.$_btrfsSVBody3 $(cat ${BTRFS_VOL_LIST})" 0 0 "" 2>${ANSWER} || select_filesystem
+		BTRFS_OSUB_VOL=$(cat ${ANSWER})	
 
-    # Loop while subvolume is blank or has spaces.
-    while [[ ${#BTRFS_OSUB_VOL} -eq 0 ]] || [[ $BTRFS_SUB_VOL =~ \ |\' ]]; do
-       dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ErrTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVErrBody ($BTRFS_OSUB_NUM)." 0 0 "" 2>${ANSWER} || select_filesystem
-       BTRFS_OSUB_VOL=$(cat ${ANSWER})
-    done
+		# Loop while subvolume is blank or has spaces.
+		while [[ ${#BTRFS_OSUB_VOL} -eq 0 ]] || [[ $BTRFS_SUB_VOL =~ \ |\' ]]; do
+			dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ErrTitle ($BTRFS_MSUB_VOL) " --inputbox "$_btrfsSVErrBody ($BTRFS_OSUB_NUM)." 0 0 "" 2>${ANSWER} || select_filesystem
+			BTRFS_OSUB_VOL=$(cat ${ANSWER})
+		done
  
-    btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog 
-    check_for_error
-    BTRFS_OSUB_NUM=$(( BTRFS_OSUB_NUM + 1 ))
-    echo $BTRFS_OSUB_VOL" " >> ${BTRFS_VOL_LIST}
- done
+		btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog 
+		check_for_error
+		BTRFS_OSUB_NUM=$(( BTRFS_OSUB_NUM + 1 ))
+		echo $BTRFS_OSUB_VOL" " >> ${BTRFS_VOL_LIST}
+	done
  
- # Show the subvolumes created
- echo -e "btrfs subvols:\n" > /tmp/.subvols
- ls  >> /tmp/.subvols
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --textbox /tmp/.subvols 0 0
- cd
+	# Show the subvolumes created
+	echo -e "btrfs subvols:\n" > /tmp/.subvols
+	ls  >> /tmp/.subvols
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --textbox /tmp/.subvols 0 0
+	cd
+ else
+	select_filesystem
+ fi
 }
 
 # This subfunction allows for btrfs-specific mounting options to be applied.
