@@ -2048,7 +2048,7 @@ install_ati(){
 			[[ -e ${MOUNTPOINT}/boot/initramfs-linux-lts.img ]] && NVIDIA="$NVIDIA nvidia-lts"
 
 			clear
-			pacstrap ${MOUNTPOINT} ${NVIDIA} nvidia-libgl nvidia-utils pangox-compat 2>/tmp/.errlog
+			pacstrap ${MOUNTPOINT} ${NVIDIA} nvidia-libgl nvidia-utils pangox-compat nvidia-settings 2>/tmp/.errlog
             NVIDIA_INST=1
              ;;
         "5") # NVIDIA-340
@@ -2061,7 +2061,7 @@ install_ati(){
 			[[ -e ${MOUNTPOINT}/boot/initramfs-linux-lts.img ]] && NVIDIA="$NVIDIA nvidia-340xx-lts"
 
 			clear
-            pacstrap ${MOUNTPOINT} ${NVIDIA} nvidia-340xx-libgl nvidia-340xx-utils 2>/tmp/.errlog 
+            pacstrap ${MOUNTPOINT} ${NVIDIA} nvidia-340xx-libgl nvidia-340xx-utils nvidia-settings 2>/tmp/.errlog 
             NVIDIA_INST=1
              ;;
         "6") # NVIDIA-304
@@ -2073,7 +2073,7 @@ install_ati(){
 			[[ -e ${MOUNTPOINT}/boot/initramfs-linux-lts.img ]] && NVIDIA="$NVIDIA nvidia-304xx-lts"
 
 			clear
-            pacstrap ${MOUNTPOINT} ${NVIDIA} nvidia-304xx-libgl nvidia-304xx-utils 2>/tmp/.errlog
+            pacstrap ${MOUNTPOINT} ${NVIDIA} nvidia-304xx-libgl nvidia-304xx-utils nvidia-settings 2>/tmp/.errlog
             NVIDIA_INST=1
              ;;              
         "7") # Via
