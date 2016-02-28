@@ -859,7 +859,7 @@ btrfs_subvols() {
 		done
  
 		btrfs subvolume create ${BTRFS_OSUB_VOL} 2>/tmp/.errlog
-		chmod 750 /.${BTRFS_OSUB_VOL}
+		chmod 750 /${BTRFS_OSUB_VOL}
 		check_for_error
 		BTRFS_OSUB_NUM=$(( BTRFS_OSUB_NUM + 1 ))
 		echo $BTRFS_OSUB_VOL" " >> ${BTRFS_VOL_LIST}
