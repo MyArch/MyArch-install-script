@@ -804,30 +804,26 @@ mount_partitions() {
 # subfunction for btrfs
 btrfs_subvols() {
 
- BTRFS_MSUB_VOL=""
- BTRFS_OSUB_VOL=""
- BTRFS_MNT=""
- BTRFS_VOL_LIST="/tmp/.vols"
- echo "" > ${BTRFS_VOL_LIST}
- BTRFS_OSUB_NUM=1
+	BTRFS_MSUB_VOL=""
+	BTRFS_OSUB_VOL=""
+	BTRFS_MNT=""
+	BTRFS_VOL_LIST="/tmp/.vols"
+	echo "" > ${BTRFS_VOL_LIST}
+	BTRFS_OSUB_NUM=1
  
- # Name initial subvolume from which other (optional) subvolumes may branch from
- dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_btrfsSVTitle " --inputbox "$_btrfsMSubBody1 ${MOUNTPOINT}${MOUNT} $_btrfsMSubBody2" 0 0 "" 2>${ANSWER} || select_filesystem
-
- #If something entered
- if [[ $(cat ${ANSWER}) != "" ]]; then
+	# Name initial subvolume from which other (optional) subvolumes may branch from
+	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_btrfsSVTitle " --inputbox "$_btrfsMSubBody1 ${MOUNTPOINT}${MOUNT} $_btrfsMSubBody2" 0 0 "" 2>${ANSWER} || select_filesystem
 	BTRFS_MSUB_VOL=$(cat ${ANSWER})
-	# if root, then create boot flag for syslinux, systemd-boot and rEFInd bootloaders	
-	[[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
-
+ 
 	# Loop while subvolume is blank or has spaces.
 	while [[ ${#BTRFS_MSUB_VOL} -eq 0 ]] || [[ $BTRFS_MSUB_VOL =~ \ |\' ]]; do
        dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ErrTitle " --inputbox "$_btrfsSVErrBody" 0 0 "" 2>${ANSWER} || select_filesystem
        BTRFS_MSUB_VOL=$(cat ${ANSWER})
-       # if root, then create flag for syslinux, systemd-boot and rEFInd bootloaders
-       [[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
-	done
- 
+    done
+	
+	# if root, then create flag for syslinux, systemd-boot and rEFInd bootloaders
+	[[ ${MOUNT} == "" ]] && BTRFS_MNT="rootflags=subvol="$BTRFS_MSUB_VOL
+	
 	# change dir
 	cd ${MOUNTPOINT}${MOUNT} 2>/tmp/.errlog
 	btrfs subvolume create ${BTRFS_MSUB_VOL} 2>>/tmp/.errlog
@@ -873,9 +869,7 @@ btrfs_subvols() {
 	ls  >> /tmp/.subvols
 	dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --textbox /tmp/.subvols 0 0
 	cd
- else
-	select_filesystem
- fi
+
 }
 
 # This subfunction allows for btrfs-specific mounting options to be applied.
