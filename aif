@@ -2487,18 +2487,14 @@ security_menu(){
 			;;
 		"2") # core dump
 			 dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_SecCoreTitle " --menu "$_SecCoreBody" 0 0 2 \
-			"$_Disable" "Storage=none" "$_Edit" "/etc/systemd/coredump.conf.d/custom.conf" 2>${ANSWER}
+			"$_Disable" "Storage=none" "$_Edit" "/etc/systemd/coredump.conf" 2>${ANSWER}
 			
 			if [[ $(cat ${ANSWER}) == "$_Disable" ]]; then
-				echo -e "[Coredump]\nStorage=none" > ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf
+				sed -i "s/#Storage.*\|Storage.*/Storage=none/g" ${MOUNTPOINT}/etc/systemd/coredump.conf
 				dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_SecCoreTitle " --infobox "\n$_Done!\n\n" 0 0
 				sleep 2
 			elif [[ $(cat ${ANSWER}) == "$_Edit" ]]; then
-					if [[ -e ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf ]]; then
-						nano ${MOUNTPOINT}/etc/systemd/coredump.conf.d/custom.conf
-					else
-						dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_SeeConfErrTitle " --msgbox "$_SeeConfErrBody1" 0 0
-					fi
+				nano ${MOUNTPOINT}/etc/systemd/coredump.conf
 			fi
           ;;
         "3") # Kernel log access 
