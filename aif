@@ -2634,7 +2634,7 @@ config_base_menu() {
 	   fi
 	fi
 
-    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ConfBseTitle " --menu "$_ConfBseBody" 0 0 8 \
+    dialog --default-item ${HIGHLIGHT_SUB} --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " $_ConfBseMenuTitle " --menu "$_ConfBseBody" 0 0 8 \
  	"1" "$_ConfBseFstab" \
 	"2" "$_ConfBseHost" \
 	"3" "$_ConfBseSysLoc" \
