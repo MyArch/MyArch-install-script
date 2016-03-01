@@ -101,8 +101,9 @@ FILE=""                     		# File(s) to be reviewed
 select_language() {
     
     dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 4 \
- 	"1" $"English (en)" \
-	"2" $"Español (es)" 2>${ANSWER}
+ 	"1" $"English            (en_**)" \
+	"2" $"Español            (es_ES)" \
+	"3" $"Português [Brasil] (pt_BR)" 2>${ANSWER}
 # 	"3" $"Russian 		(ru)" \
 # 	"4" $"Turkish 		(tr)" \
 # 	"5" $"Dutch 		(nl)" \
@@ -121,6 +122,9 @@ select_language() {
         "2") source /aif-dev-master/spanish.trans
              CURR_LOCALE="es_ES.UTF-8"
              ;; 
+        "3") source /aif-dev-master/portuguese_brasil.trans
+			 CURR_LOCALE="pt_BR.UTF-8"
+			 ;;
 #        "3") source /aif-dev-master/russian.trans
 #             CURR_LOCALE="ru_RU.UTF-8"
 #             FONT="LatKaCyrHeb-14.psfu"
