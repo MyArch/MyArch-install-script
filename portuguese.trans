@@ -32,7 +32,7 @@ _SecCoreBody="\nUm despejo de memória é uma gravação da memória do computad
 _btrfsSVTitle="Sub-volumes btrfs"
 _btrfsSVBody="Criar sub-volumes btrfs?\n\nUm sub-volume inicial será criado e em seguida montado. Outras ramificações do sub-volume podem então ser criadas.\n\nCaso contrário, você pode pular directamente para as opções de montagem.\n"
 _btrfsMSubBody1="Digite o nome do sub-volume inicial para montar (ex. ROOT). Opções de montagem podem então ser seleccionadas. Uma vez montado, todos os outros sub-volumes criado para "
-_btrfsMSubBody2 = "irá ramificar dele."
+_btrfsMSubBody2="irá ramificar dele."
 _btrfsSVErrBody="Espaços em brancos não são permitidos. Por favor tente novamente.\n"
 _btrfsSVBody1="Digite o nome do sub-volume"
 _btrfsSVBody2="para criar dentro"
@@ -88,7 +88,7 @@ _LvmCreateVG="Criar VG e LV(s)"
 _LvmDelVG="Apagar Grupos de Volume (VG)"
 _LvMDelAll="Apagar *TUDO* VGs, LVs, PVs"
 _LvmDetBody="\nUma LVM existente foi detectada. Activando. Por favor, aguarde...\n\n"
-_LvmPartErrBody= "\nNão há nenhuma partição disponível para Gestão de Volume Lógico. No mínimo um é necessário. \n\n se LVM já está em uso, desactivá-lo permitirá que a partição usada para seus volumes físicos, possa ser usada novamente. \n\n"
+_LvmPartErrBody="\nNão há nenhuma partição disponível para Gestão de Volume Lógico. No mínimo um é necessário. \n\n se LVM já está em uso, desactivá-lo permitirá que a partição usada para seus volumes físicos, possa ser usada novamente. \n\n"
 _LvmNameVgBody="\nInsira o nome do Grupo de Volume (VG) para criar.\n\nO VG é o novo 'dispositivo virtual / disco rígido' para criar a partir da partição(ções) seleccionada(as) em seguida.\n"
 _LvmNameVgErr="\nNome inserido inválido. O nome do Grupo de Volume pode ser alfa numérico, mas não pode conter espaços ou começar com '/', ou já estar em uso.\n\n"
 _LvmPvSelBody="\nSeleccionar a(s) partição(ões) a ser(em) usada(s) para o Volume Físico (PV).\n\n"
@@ -266,7 +266,7 @@ _GCUnknOpt="Desconhecida / Genérica"
 
 # Verifique a configuração NVIDIA
 _NvidiaConfTitle="Verifique a configuração NVIDIA"
-_NvidiaConfBody = "\nFoi criado um arquivo básico de configuração NVIDIA. Por favor, verifique isso antes de fechar e continuar. \n"
+_NvidiaConfBody="\nFoi criado um arquivo básico de configuração NVIDIA. Por favor, verifique isso antes de fechar e continuar. \n"
 
 # Detecção de Placa Gráfica
 _GCDetTitle="Detectada"
@@ -291,7 +291,7 @@ _DmDoneBody="\nGerenciador de exibição foi instalado e activado.\n\n"
 
 # Gerenciador de Rede
 _InstNMTitle="Instalar o Gerenciador de Rede"
-_InstNMBody = "\nGerenciador de Rede é recomendado, especialmente para conexões sem fio e PPPoE/DSL.\n"
+_InstNMBody="\nGerenciador de Rede é recomendado, especialmente para conexões sem fio e PPPoE/DSL.\n"
 _InstNMErrBody="\nO gerenciador de conexões de rede foi instalado e habilitado.\n\n"
 
 # Bem-vindo(a)
