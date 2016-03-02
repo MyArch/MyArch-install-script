@@ -1,6 +1,6 @@
 # !/bin/bash
 #
-# Architect Installation Framework (version 2.0.2 - 27-Feb-2016)
+# Architect Installation Framework (version 2.0.3 - 03-Mar-2016)
 #
 # Written by Carl Duff for Architect Linux
 #
@@ -23,7 +23,7 @@ PACKAGES="/tmp/.pkgs"			# Packages to install
 BTRFS_OPTS="/tmp/.btrfs_opts"	# BTRFS mount options
 
 # Save retyping
-VERSION="Architect Installation Framework 2.0.2"
+VERSION="Architect Installation Framework 2.0.3"
 
 # Installation
 DM_INST=""							# Which DMs have been installed?
@@ -100,20 +100,13 @@ FILE=""                     		# File(s) to be reviewed
 # Add locale on-the-fly and sets source translation file for installer
 select_language() {
     
-    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 4 \
+    dialog --backtitle "$VERSION - $SYSTEM ($ARCHI)" --title " Select Language " --menu "\nLanguage / sprache / taal / språk / lingua / idioma / nyelv / língua" 0 0 6 \
  	"1" $"English            (en_**)" \
 	"2" $"Español            (es_ES)" \
-	"3" $"Português [Brasil] (pt_BR)" 2>${ANSWER}
-# 	"3" $"Russian 		(ru)" \
-# 	"4" $"Turkish 		(tr)" \
-# 	"5" $"Dutch 		(nl)" \
-# 	"6" $"Greek 		(el)" \
-# 	"7" $"Danish 		(da)" \
-# 	"8" $"Hungarian 	(hu)" \
-# 	"9" $"Portuguese 	(pt)" \
-#   "10" $"German	 	(de)" \
-#   "11" $"French		(fr)" \
-#   "12" $"Polish		(pl)" 2>${ANSWER}
+	"3" $"Português [Brasil] (pt_BR)" \
+	"4" $"Português          (pt_PT)" \
+	"5" $"Français           (fr_FR)" \
+	"6" $"Russkiy            (ru_RU)" 2>${ANSWER}
 
 	case $(cat ${ANSWER}) in
         "1") source /aif-dev-master/english.trans
@@ -125,10 +118,16 @@ select_language() {
         "3") source /aif-dev-master/portuguese_brasil.trans
 			 CURR_LOCALE="pt_BR.UTF-8"
 			 ;;
-#        "3") source /aif-dev-master/russian.trans
-#             CURR_LOCALE="ru_RU.UTF-8"
-#             FONT="LatKaCyrHeb-14.psfu"
-#             ;;
+        "4") source /aif-dev-master/portuguese.trans
+			 CURR_LOCALE="pt_PT.UTF-8"
+			 ;;		
+		"5") source /aif-dev-master/french.trans
+             CURR_LOCALE="fr_FR.UTF-8"
+             ;;	 
+        "6") source /aif-dev-master/russian.trans
+             CURR_LOCALE="ru_RU.UTF-8"
+             FONT="LatKaCyrHeb-14.psfu"
+             ;;
 #        "4") source /aif-dev-master/turkish.trans
 #             CURR_LOCALE="tr_TR.UTF-8"
 #             FONT="LatKaCyrHeb-14.psfu"
@@ -147,14 +146,8 @@ select_language() {
 #             CURR_LOCALE="hu_HU.UTF-8"
 #             FONT="lat2-16.psfu"
 #             ;;
-#        "9") source /aif-dev-master/portuguese.trans
-#             CURR_LOCALE="pt_BR.UTF-8"    
-#             ;;      
 #       "10") source /aif-dev-master/german.trans
 #             CURR_LOCALE="de_DE.UTF-8"
-#             ;;
-#       "11") source /aif-dev-master/french.trans
-#             CURR_LOCALE="fr_FR.UTF-8"
 #             ;;
 #       "12") source /aif-dev-master/polish.trans
 #             CURR_LOCALE="pl_PL.UTF-8"
