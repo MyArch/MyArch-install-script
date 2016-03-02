@@ -124,8 +124,8 @@ _ReqMetBody="\nAll checks passed!\n\n"
 
 # Installer Mirrorlist
 _MirrorlistTitle="Mirrorlist"
-_MirrorlistBody="\nThe mirrorlist contains server addresses used by pacman to install packages.\n\nTo find the fastest servers, generate a mirrorlist by country before running RankMirrors, otherwise the process will take a long time.\n\nNOTE: Close text files with '[CTRL] + [x]'. If edited, then press [y] to save or [n] to discard changes.\n"
-_MirrorbyCountry="Generate list by Country"
+_MirrorlistBody="\nThe mirrorlist contains server addresses used by pacman to install packages. To find the fastest servers, FIRST generate a mirrorlist by country BEFORE running RankMirrors, otherwise the process will take a LONG TIME.\n\nThe pacman configuration file can be edited to enable multilib and other repositories.\n\nNOTE: Close text files with '[CTRL] + [x]'. If edited, then press [y] to save or [n] to discard changes.\n"
+_MirrorbyCountry="Generate mirrorlist by Country"
 _MirrorEdit="Manually edit mirrorlist"
 _MirrorRankTitle="Run RankMirrors"
 _MirrorRestTitle="Restore original mirrorlist"
@@ -133,6 +133,8 @@ _MirrorRankBody="\nFinding the fastest servers from the mirrorlist."
 _MirrorNoneBody="\nA copy of the original mirrorlist was not found.\n\n"
 _MirrorCntryBody="\nA list of mirrors by the selected country will be generated.\n"
 _MirrorGenQ="Use generated mirrorlist for installer?"
+_MirrorPacman="Edit pacman configuration"
+_MIrrorPacQ="\nUse edited pacman configuration for installed system? If Yes, the file will be copied over after installing the base.\n\n"
 
 # Set Keymap (vconsole)
 _VCKeymapTitle="Set Virtual Console"
