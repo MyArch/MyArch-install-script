@@ -1,13 +1,6 @@
 ##
-<<<<<<< HEAD:language/french.trans
 ##
 ## French Translation File
-##
-=======
-## 							
-## French Translation File (Architect 2.0)		
-##								
->>>>>>> upstream/master:french.trans
 ##
 ## Écrit par Carl Duff (27-02-2016)
 ##
@@ -42,14 +35,8 @@ _btrfsMSubBody2="seront raccordés à partir de celui-ci."
 _btrfsSVErrBody="Les blancs ou espaces ne sont pas permis. Veuillez réessayer.\n"
 _btrfsSVBody1="Entrer le nom du sous-volume"
 _btrfsSVBody2="à créer dans"
-<<<<<<< HEAD:language/french.trans
-_btrfsSVBody3="\n\nCe processus sera répété jusqu'à ce qu'un astérisque (*) soit entré comme nom de sous-volume.\n\nSous-volumes Créés :"
-_btrfsMntTitle=" Options de montage btrfs "
-_btrfsMntBody="Utiliser [Espace] pour dé/sélectionner les options de montage désirées. Veuillez ne pas sélectionner plusieurs versions de la même option."
-=======
 _btrfsSVBody3="\n\nCe processus sera répété jusqu'à ce qu'un astérisque (*) soit entré comme nom de sous-volume.\n\nSous-volumes Créés :" 
 _btrfsMntBody="Utiliser [Espace] pour sélectionner/désélectionner les options de montage désirées. Veuillez ne pas sélectionner plusieurs versions de la même option."
->>>>>>> upstream/master:french.trans
 _btrfsMntConfBody="Confirmer les options de montage suivantes :\n\n"
 
 # Partition auto
@@ -109,45 +96,18 @@ _LvmPvConfBody2="avec les partitions suivantes :\n\n"
 _LvmPvActBody1="\nCréation et activation du groupe de volume"
 _LvmPvDoneBody1="\nLe groupe de volume"
 LvmPvDoneBody2="a été créé"
-<<<<<<< HEAD:language/french.trans
-
-_LvmLvNumTitle=" LVM - Créer des volumes logiques "
-_LvmLvNumBody1="\nEntrer le nombre de volumes logiques (LVs) à créer dans "
-_LvmLvNumBody2="Le minimum est de 1, le maximum est de 9.\n\n Les LVs sont essentiellement des partitions. Le dernier (ou le seul) LV utilisera 100% de l'espace restant dans le groupe de volumes."
-
-_LvmLvNumErrTitle=" LVM - Erreur de nombre LV "
-_LvmLvNumErrBody="\nLe chiffre entré est incorrect. Le minimum est de 1, le maximum est de 9.\n\n"
-
-_LvmLvNameTitle=" LVM - Nom de LV "
-_LvmLvNameBody1="\nEntrer le nom du volume logique (LV) à créer.\n\nCeci ressemble à une configuration de nom / d'étiquette pour une partition.\n"
-LvmLvNameBody2="\nNOTE : Ce LV utilisera automatiquement tout l'espace restant dans le groupe de volumes"
-
-_LvmLvNameErrTitle=" LVM - Erreur de nom du LV "
-_LvmLvNameErrBody="\nNom entré incorrect. Le nom du volume logique (LV) peut contenir des caractères alphanumériques, mais ne peut pas contenir d'espaces ou être précédé par un « / ».\n\n"
-
-_LvmLvSizeTitle=" LVM - Configurer la taille du LV "
-=======
 _LvmLvNumBody1="\nUtiliser [barre espace] pour sélectionner le nombre de volumes logiques (LVs) à créer dans"
 _LvmLvNumBody2="\n\nLe dernier (ou seul) LV utilisera automatiquement 100% de l'espace restant dans le groupe de volume."
 _LvmLvNameBody1="\nEntrer le nom du volume logique (LV) à créer.\n\nCeci ressemble à une configuration de nom / d'étiquette pour une partition.\n"
 LvmLvNameBody2="\nNOTE : Ce LV utilisera automatiquement tout l'espace restant dans le groupe de volume"
 _LvmLvNameErrBody="\nNom entré incorrect. Le nom du volume logique (LV) peut contenir des caractères alphanumériques, mais ne peut pas contenir d'espaces ou être précédé par un « / ».\n\n" 
->>>>>>> upstream/master:french.trans
 _LvmLvSizeBody1="restant"
 _LvmLvSizeBody2="\n\nEntrer la taille du volume logique (LV) en Mégaoctets (M) ou en Gigaoctets (G). Par exemple, 100M créera un VL de 100 Mégaoctets. 10G créera un VL de 10 Gigaoctets.\n"
 _LvmLvSizeErrBody="\nValeur entrée incorrecte. Une valeur numérique doit être entrée avec un « M » (Mégaoctets) ou un « G » (Gigaoctets) à la fin.\n\nLes exemples incluent, 100M, 10G, ou 250M. De plus, la valeur ne doit pas être égale ou supérieure à la taille restante du VG.\n\n"
-<<<<<<< HEAD:language/french.trans
-
-_LvmLvDoneTitle=" LVM - Volume logique créé "
-
-_LvmCompTitle=" LVM - Processus achevé "
-_LvmCompBody="\nTerminé ! Tous les volumes logiques ont été créés pour le groupe de volumes.\n\nSouhaitez-vous voir le nouveau schéma du LVM ?\n\n"
-=======
 _LvmCompBody="\nTerminé ! Tous les volumes logiques ont été créés pour le groupe de volume.\n\nSouhaitez-vous voir le nouveau schéma du LVM ?\n\n"
 _LvmDelQ="\nConfirmer la suppression des volumes logiques et des groupes de volume.\n\nSi vous supprimez un groupe de volume, tous les volumes logiques contenus à l'intérieur seront également supprimés.\n\n" 
 _LvmSelVGBody="\nSélectionner un groupe de volume à supprimer. Tous les volumes logiques contenus à l'intérieur seront également supprimés.\n"
 _LvmVGErr="\nAucuns groupes de volume trouvés.\n\n"
->>>>>>> upstream/master:french.trans
 
 # Afficher les périphériques et partitions
 _DevShowOpt="Liste des périphériques (optionnel)"
@@ -192,17 +152,6 @@ _TimeZQ="\nDéfinir le fuseau horaire sous"
 
 # Définir l'horloge matérielle
 _HwCBody="\nUTC est le temps universel standard, et il est recommandé (sauf si vous utilisez un dual-boot avec Windows.)"
-<<<<<<< HEAD:language/french.trans
-_HwCUTC="UTC"
-_HwLocal="Heure locale"
-
-# Générer FSTAB
-_FstabTitle=" Générer FSTAB "
-_FstabBody="\nLe fichier FSTAB (File System TABle) définit les périphériques de stockage qui vont être montés, et comment ils vont être utilisés.\n\nUUID/PARTUUID (Universally Unique IDentifier) est recommandé.\n\nSi aucune étiquette n'a été définie pour les partitions auparavant, les noms de périphérique seront utilisés pour l'option d'étiquette."
-_FstabDev="Dev (code de partition)"
-_FstabLabel="Étiquette (défini par l'utilisateur)"
-_FstabUUID="UUID/PARTUUID (code unique)"
-=======
 
 # Générer FSTAB
 _FstabBody="\nLe fichier FSTAB (File System TABle) définit les périphériques de stockage (et partitions) qui vont être montés, et comment ils vont être utilisés.\n\nUUID (Universally Unique IDentifier) est recommandé.\n\nSi aucune étiquette n'a été définie auparavant pour les partitions, les noms de périphérique seront utilisés pour l'option d'étiquette."
@@ -211,7 +160,6 @@ _FstabDevName="Nom du périphérique"
 _FstabDevLabel="Étiquette du périphérique"
 _FstabDevUUID="UUID du périphérique"
 _FstabDevPtUUID="UUID de la section UEFI" 
->>>>>>> upstream/master:french.trans
 
 # Définir le nom d'hôte
 _HostNameBody="\nLe nom d'hôte est utilisé pour identifier le système sur un réseau.\n\nIl est limité aux caractères alphanumériques, peut contenir un trait d'union (-) - mais pas au début ni à la fin - et ne doit pas être plus long que 63 caractères.\n"
@@ -228,24 +176,9 @@ _NUsrBody="\nEntrer le nom de l'utilisateur. Les lettres DOIVENT être entrées 
 _NUsrErrTitle="Erreur de nom utilisateur"
 _NUsrErrBody="\nNom d'utilisateur incorrect. Veuillez réessayer.\n\n"
 
-<<<<<<< HEAD:language/french.trans
-# Définir le mot de passe utilisateur
-_PassNUsrTitle=" Définir le mot de passe utilisateur "
-_PassNUsrBody="\nEntrer le mot de passe pour"
-_PassNUsrBody2="\nEntrer à nouveau le mot de passe pour"
-
-# Créer un nouvel utilisateur
-_NUsrSetTitle=" Paramètres utilisateur "
-_NUsrSetBody="\nCréation de l'utilisateur et des paramètres de groupes...\n\n"
-
-# Erreur de mot de passe utilisateur
-_PassNUsrErrTitle=" Erreur de mot de passe utilisateur "
-_PassNUsrErrBody="\nLes mots de passe utilisateur entrés ne correspondent pas. Veuillez réessayer.\n\n"
-=======
 # Définir l'utilisateur
 _PassNUsrBody="\nEntrer le mot de passe pour" 
 _NUsrSetBody="\nCréation de l'utilisateur et des paramétrage des groupes...\n\n"
->>>>>>> upstream/master:french.trans
 
 # Montage (Partitions)
 _MntStatusTitle="État de montage"
@@ -255,16 +188,8 @@ _WarnMount1="\nIMPORTANT : Les partitions peuvent être montées sans les format
 _WarnMount2="option référencée tout en haut du menu du système de fichiers.\n\nAssurez-vous de faire les bons choix concernant le montage et le formatage car aucun avertissement n'est prévu, à l'exception de la partition de démarrage UEFI.\n\n"
 
 # Sélectionner un périphérique (installation)
-<<<<<<< HEAD:language/french.trans
-_DevSelTitle=" Sélectionner un périphérique "
-_DevSelBody="\nLes périphériques (/dev) sont des disques durs et des clés USB disponibles pour une installation. Le premier se nomme /sda, le second /sdb, etc... \n\nSi vous utilisez une clé USB pour exécuter Arch, vérifiez qu'elle se trouve bien dans la liste !"
-
-# Sélectionner le périphérique (Grub) - séparer le corps de texte n'est pas requis (utilise la sélection de texte standard de périphérique)
-_DevSelGrubTitle=" Sélectionner le périphérique Grub "
-=======
 _DevSelTitle="Sélectionner un périphérique"
 _DevSelBody="\nLes périphériques (/dev) sont des disques durs et des clés USB disponibles pour une installation. Le premier se nomme /sda, le second /sdb, etc....\n\nSi vous utilisez une clé USB pour démarrer Architect, soyez prudent car elle sera également référencée !"
->>>>>>> upstream/master:french.trans
 
 # Outil de partitionnement
 _PartToolTitle="Outil de partitionnement"
@@ -274,20 +199,6 @@ _PartOptWipe="Effacement sécurisé du périphérique (optionnel)"
 _AutoPartWipeBody1="\nAVERTISSEMENT : TOUTES les données sur"
 _AutoPartWipeBody2="vont être détruites en utilisant la commande 'wipe -Ifre'. Cette opération peut prendre un certain temps, en fonction de la taille du périphérique.\n\nSouhaitez-vous continuer ?\n"
 
-<<<<<<< HEAD:language/french.trans
-# Erreur de partitionnement UEFI
-_UefiPartErrTitle=" Erreur de partitionnement UEFI "
-_UefiPartErrBody="\n Les systèmes UEFI ont besoin de 2 partitions minimum pour l'installation (ROOT et UEFI).\n\nVeuillez configurer vos partitions.\n\n"
-
-# Erreur de partitionnement BIOS
-_BiosPartErrTitle=" Erreur de partitionnement BIOS "
-_BiosPartErrBody="\nLes systèmes BIOS ont besoin d'1 partition minimum pour l'installation (ROOT).\n\nVeuillez configurer vos partitions."
-
-# Système de fichiers
-_FSTitle=" Choisir un système de fichiers "
-_FSBody="\nExt4 est recommandé. Tous les systèmes de fichiers ne sont pas exploitables pour Root ou pour les partitions de démarrage. Tous ont des caractéristiques différentes et des restrictions."
-_FSSkip="Passer / Aucun"
-=======
 # Erreur de partitionnement
 _PartErrBody="\nLes systèmes BIOS requièrent une partition minimum (ROOT).\n\nLes systèmes UEFI requièrent 2 partitions minimum (ROOT et UEFI).\n\n"
 
@@ -295,7 +206,6 @@ _PartErrBody="\nLes systèmes BIOS requièrent une partition minimum (ROOT).\n\n
 _FSTitle="Choisir un système de fichiers"
 _FSBody="\nExt4 est recommandé. Tous les systèmes de fichiers ne sont pas exploitables pour les partitions racine ou pour les partitions de démarrage. Tous ont des caractéristiques différentes et des restrictions."
 _FSSkip="Passer / Aucun" 
->>>>>>> upstream/master:french.trans
 
 # Sélectionner Root
 _SelRootBody="\nSélectionner la partition racine (ROOT) où Arch sera installé."
@@ -306,12 +216,7 @@ _SelSwpNone="Aucun"
 _SelSwpFile="Fichier d'échange"
 
 # Sélectionner UEFI
-<<<<<<< HEAD:language/french.trans
-_SelUefiTitle=" Sélectionner la partition UEFI "
-_SelUefiBody="\nCeci est une partition spéciale pour le démarrage des systèmes UEFI."
-=======
 _SelUefiBody="\nSélectionner une partition UEFI. C'est une partition spéciale permettant le démarrage sur des systèmes UEFI."
->>>>>>> upstream/master:french.trans
 
 # Formater UEFI
 _FormUefiBody="La partition UEFI"
@@ -344,48 +249,18 @@ _InstBiosBtBody="\nGrub2 est recommandé pour les débutants. Le périphérique 
 _InstSysTitle="Installer Syslinux"
 _InstSysBody="\nInstaller syslinux dans le Master Boot Record (MBR) ou à la racine (/) ?\n\n"
 
-<<<<<<< HEAD:language/french.trans
-# Installation de Grub
-_InstGrubDevTitle=" Sélectionner le périphérique Grub "
-_InstGrubDevBody="\nInstaller Grub sur le même périphérique / disque dur que Root "
-_InstGrubDevBody2="\n\nCliquer sur « Oui » pour installer sur un seul périphérique."
-
-# Installer le gestionnaire de démarrage UEFI
-_InstUefiBtTitle=" Installer le gestionnaire de démarrage UEFI "
-_InstUefiBtBody="\nrEFInd requiert /boot/efi. systemd-boot requiert /boot. Grub fonctionne avec l'un ou l'autre point de montage.\n\nNOTE : rEFInd avec LVM n'est pas pris en charge."
-
-# Définir Grub UEFI par défaut
-_SetGrubDefTitle=" Définir Grub en tant que gestionnaire de démarrage par défaut ? "
-SetGrubDefBody="\nCertains microcodes UEFI peuvent ne pas détecter Grub (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer Grub comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner « Oui », spécialement pour les débutants. Ceci copiera le module grubx64.efi amorçable dans"
-_SetGrubDefBody2="et le renommera bootx64.efi, comme requis.\n\nAutrement, sélectionner « Non », particulièrement si un gestionnaire de démarrage par défaut existe déjà, et/ou si vous avez l'intention d'utiliser plusieurs gestionnaires de démarrage."
-
-# Définir rEFInd par défaut
-_SetRefiDefTitle=" Définir rEFInd en tant que gestionnaire de démarrage par défaut ? "
-SetRefiDefBody="\nCertains microcodes UEFI peuvent ne pas détecter rEFInd (à moins qu'il soit le gestionnaire de démarrage par défaut). Il en résulte un système inutilisable dans de tels cas.\n\nSouhaitez-vous configurer rEFInd comme gestionnaire de démarrage par défaut ?\n\nIl est recommandé de sélectionner « Oui », spécialement pour les débutants. Ceci installera rEFInd dans"
-_SetRefiDefBody2="avec le module bootx64.efi requis.\n\nAutrement, sélectionner « Non », particulièrement si un gestionnaire de démarrage par défaut existe déjà, et/ou si vous avez l'intention d'utiliser plusieurs gestionnaires de démarrage."
-
-# fichier efi défini pour Grub ou Refind
-_SetDefDoneTitle=" Fichier UEFI copié "
-_SetDefDoneBody="a été défini comme le gestionnaire de démarrage par défaut.\n\n"
-=======
 # Installer le chargeur d'amorçage UEFI
 _InstUefiBtTitle="Installer le chargeur d'amorçage UEFI"
 _InstUefiBtBody="\nsystemd-boot requiert /boot. Grub fonctionne avec n'importe quel point de montage."
 _SetBootDefBody="\nCertains microcodes UEFI peuvent ne pas détecter le chargeur d'amorçage, à moins de le définir par défaut en copiant son module efi dans"
 _SetBootDefBody2="et le renommer bootx64.efi.\n\nIl est recommandé de le faire à moins que vous utilisiez déjà un chargeur d'amorçage par défaut, ou si vous avez l'intention d'utiliser plusieurs chargeurs d'amorçage.\n\nDéfinir le chargeur d'amorçage par défaut ?\n\n"
->>>>>>> upstream/master:french.trans
 
 # fichier efi défini pour Grub
 _SetDefDoneBody="a été défini comme le chargeur d'amorçage par défaut.\n\n"
 
 # Menu des cartes graphiques
-<<<<<<< HEAD:language/french.trans
-_GCtitle=" Menu des cartes graphiques "
-_GCBody="Prenez le driver Nouveau pour les anciennes cartes NVIDIA. Si votre carte n'est pas dans la liste, choisissez 'Inconnue / Générique'.\n"
-=======
 _GCtitle="Menu des cartes graphiques"
 _GCBody="Choisir « Nouveau » pour les anciennes cartes NVIDIA. Si votre carte n'est pas référencée, choisir « Inconnue / Générique ».\n"
->>>>>>> upstream/master:french.trans
 _GCUnknOpt="Inconnue / Générique"
 
 # Vérification de la configuration NVIDIA
@@ -442,15 +317,9 @@ _InstBrowserBody="\nChoisissez un navigateur à installer."
 _WelTitle="Bienvenue dans"
 _WelBody="\nCet installateur va télécharger les derniers paquets provenant des dépôts Arch. Seule la configuration minimale nécessaire sera téléchargée.\n\nOPTIONS du MENU : Sélectionner en appuyant sur le numéro de l'option, ou en utilisant les flèches haut/bas avant d'appuyer sur [entrée] pour confirmer. Basculer entre les boutons en utilisant [Tab] ou les flèches gauche/droite avant d'appuyer sur [entrée] pour confirmer.\n\nNaviguer dans la liste en utilisant les touches [page suivante] et [page précédente], et/ou en appuyant sur la première lettre de l'option souhaitée.\n\nOPTIONS & CONFIGURATION DES PAQUETS : Les paquets par défaut dans les listes de vérification vont être pré-vérifiés. Utiliser la [barre espace] pour sélectionner/désélectionner."
 
-<<<<<<< HEAD:language/french.trans
-# Menu de Préparation
-_PrepTitle=" Préparer l'installation "
-_PrepBody="\nL'agencement du clavier va être utilisé pour l'installateur et pour le système installé.\n"
-=======
 # Menu de Préparation 
 _PrepMenuTitle="Préparer l'installation"
 _PrepMenuBody="\nL'agencement du clavier sera utilisé pour l'installateur et pour le système installé.\n"
->>>>>>> upstream/master:french.trans
 _PrepKBLayout="Configurer l'agencement du clavier"
 _PrepMirror="Configurer la liste des miroirs"
 _PrepPartDisk="Partitionner le(s) disque(s)"
@@ -458,18 +327,10 @@ _PrepMntPart="Monter les partitions"
 _Back="Retour"
 
 # Menu d'installation de Base
-<<<<<<< HEAD:language/french.trans
-_InstAskPac="Voulez-vous que l'installateur vous demande avant d'installer les paquets ? (pacstrap n'installera pas de paquets sans votre accord)"
-_InstBsMenuTitle=" Installer Base "
-_InstBseMenuBody="\nIl n'est pas nécessaire d'installer un gestionnaire de démarrage à côté d'une distribution Linux existante qui utilise Grub ; Mettez seulement à jour le Grub déjà présent."
-_InstBse="Installer Base"
-_InstBootldr="Installer le gestionnaire de démarrage"
-=======
 _InstBsMenuTitle="Installer Base"
 _InstBseMenuBody="\nLes paquets à installer doivent être téléchargés à partir des serveurs miroirs. Le script pacstrap installe le système de base. Pour construire des paquets à partir d'AUR ou avec ABS, le groupe base-devel est également nécessaire."
 _InstBse="Installer les paquets de Base"
 _InstBootldr="Installer le chargeur d'amorçage"
->>>>>>> upstream/master:french.trans
 
 # Configurer le menu de Base
 _ConfBseMenuTitle="Configurer Base"
@@ -534,21 +395,8 @@ _InstAddMenuTitle=" Installer d'autres logiciels "
 _InstAddMenuBody="\nIci, vous pouvez choisir d'installer des logiciels suplémentaires. Choississez votre shell, votre navigateur ou encore votre éditeur de texte !"
 
 # Menu principal
-<<<<<<< HEAD:language/french.trans
-_MMTitle=" Menu principal "
-_MMBody="\nChaque étape doit être suivie DANS L'ORDRE. Une fois effectué, sélectionner « Terminé » pour finaliser correctement l'installation.\n"
-_MMPrep="Préparer l'installation"
-_MMInstBse="Installer Base"
-_MMConfBse="Configurer Base"
-_MMConfUsr="Configurer le(s) compte(s) utilisateur(s)"
-_MMInstDE="Installer le ou les environnements de bureau"
-_MMAddSoft="Installer d'autres programmes"
-_MMRunMkinit="Exécuter Mkinitcpio"
-_Done="Terminé"
-=======
 _MMTitle="Menu principal"
 _MMBody="\nChaque étape doit être suivie DANS L'ORDRE. Les étapes 4-8 sont toutes optionnelles. Une fois effectué, sélectionner « Terminé » pour finaliser correctement l'installation.\n"
->>>>>>> upstream/master:french.trans
 
 # Fermer l'installateur
 _CloseInstBody="Fermer l'installateur ?"
